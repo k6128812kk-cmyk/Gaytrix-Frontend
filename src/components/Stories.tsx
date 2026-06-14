@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Plus, X, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Plus, X } from 'lucide-react';
 import { storyService } from '@/api/services';
 import { assetUrl } from '@/api/client';
 import { useSessionStore } from '@/context/sessionStore';

@@ -36,6 +36,7 @@ export function DiscoverPage() {
     new: [], verified: [], recent: [],
   });
   const [storyKey, setStoryKey] = useState(0);
+  const [loading, setLoading] = useState(true);
 
   // Refresh stories when a new one is created from the TabBar
   useEffect(() => {

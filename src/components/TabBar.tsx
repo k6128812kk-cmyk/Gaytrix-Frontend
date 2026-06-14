@@ -65,7 +65,7 @@ export function TabBar() {
       <div className={styles.createWrap}>
         <button
           className={styles.createBtn}
-          onClick={() => { haptic.impact('medium'); fileRef.current?.click(); }}
+          onClick={() => { haptic.selection(); fileRef.current?.click(); }}
           aria-label="Create story"
         >
           <Plus size={24} strokeWidth={2.5} />
