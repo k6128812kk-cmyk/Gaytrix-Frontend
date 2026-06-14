@@ -29,6 +29,11 @@
   width: 100%;
   padding: var(--space-3) var(--space-4);
   text-align: left;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--color-border-subtle, rgba(255,255,255,0.05));
+  cursor: pointer;
+  color: var(--color-text);
 }
 
 .row:active {

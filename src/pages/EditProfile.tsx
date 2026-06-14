@@ -10,6 +10,11 @@ import { profileService } from '@/api/services';
 import type { LookingFor, GenderIdentity, InterestedIn, Orientation } from '@/types';
 import styles from './EditProfile.module.css';
 
+const LANGUAGE_SUGGESTIONS = [
+  'English', 'Turkish', 'German', 'French', 'Spanish', 'Arabic',
+  'Italian', 'Portuguese', 'Russian', 'Japanese', 'Korean',
+];
+
 const LOOKING_FOR_OPTIONS: { value: LookingFor; label: string }[] = [
   { value: 'friends', label: 'Friends' },
   { value: 'dating', label: 'Dating' },
@@ -58,6 +63,7 @@ export function EditProfilePage() {
   const [occupation, setOccupation] = useState(profile?.occupation ?? '');
   const [interests, setInterests] = useState<string[]>(profile?.interests ?? []);
   const [lookingFor, setLookingFor] = useState<LookingFor[]>(profile?.lookingFor ?? []);
+  const [languages, setLanguages] = useState<string[]>(profile?.languages ?? []);
   const [genderIdentity, setGenderIdentity] = useState<GenderIdentity>(profile?.genderIdentity ?? '');
   const [interestedIn, setInterestedIn] = useState<InterestedIn>(profile?.interestedIn ?? 'everyone');
   const [orientation, setOrientation] = useState<Orientation>(profile?.orientation ?? '');
@@ -99,6 +105,7 @@ export function EditProfilePage() {
         occupation: occupation.trim() || undefined,
         interests,
         lookingFor,
+        languages,
         genderIdentity: genderIdentity || undefined,
         interestedIn: interestedIn || undefined,
         orientation: orientation || undefined,
@@ -188,6 +195,22 @@ export function EditProfilePage() {
               <Chip key={opt.value} selected={orientation === opt.value}
                 onClick={() => setOrientation(orientation === opt.value ? '' : opt.value)}>
                 {opt.label}
+              </Chip>
+            ))}
+          </div>
+        </section>
+
+        {/* Languages */}
+        <section className={styles.section}>
+          <label className={styles.label}>Languages spoken</label>
+          <div className={styles.chipWrap}>
+            {LANGUAGE_SUGGESTIONS.map(lang => (
+              <Chip key={lang}
+                selected={languages.includes(lang)}
+                onClick={() => setLanguages(prev =>
+                  prev.includes(lang) ? prev.filter(l => l !== lang) : [...prev, lang]
+                )}>
+                {lang}
               </Chip>
             ))}
           </div>

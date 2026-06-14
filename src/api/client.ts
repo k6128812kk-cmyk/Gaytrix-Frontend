@@ -31,3 +31,11 @@ api.interceptors.response.use(
     return Promise.reject(error);
   }
 );
+
+// Helper to build absolute URL for backend-served files (photos, selfies)
+const BACKEND_BASE = BASE_URL.replace('/v1', '').replace(/\/+$/, '');
+export function assetUrl(path: string): string {
+  if (!path) return '';
+  if (path.startsWith('http')) return path;
+  return `${BACKEND_BASE}${path.startsWith('/') ? '' : '/'}${path}`;
+}

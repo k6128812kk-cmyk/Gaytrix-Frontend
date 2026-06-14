@@ -7,7 +7,7 @@ import styles from './AppLayout.module.css';
 // (anything beyond the four top-level tab roots) for a focused view.
 // ==========================================================================
 
-const TAB_ROOTS = ['/discover', '/map', '/chat', '/profile'];
+const TAB_ROOTS = ['/discover', '/groups', '/chat', '/profile'];
 
 export function AppLayout() {
   const location = useLocation();

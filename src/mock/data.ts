@@ -1,5 +1,5 @@
 import type {
-  UserProfile, MapLocation, Conversation, CommunityEvent,
+  UserProfile, MapLocation, Conversation,
   ChatMessage, VerificationRequest, UserReport, PlatformStats, AdminAction,
 } from '@/types';
 
@@ -222,20 +222,6 @@ export const mockLocations: MapLocation[] = [
     reportsCount: 0,
     createdBy: 'u1',
     createdAt: new Date(Date.now() - 86400000 * 90).toISOString(),
-  },
-];
-
-export const mockEvents: CommunityEvent[] = [
-  {
-    id: 'ev1',
-    title: 'Friday Social Mixer',
-    description: 'Casual meetup for newcomers and regulars alike. All welcome.',
-    coverImage: 'https://picsum.photos/seed/mixer/800/400',
-    startsAt: new Date(Date.now() + 86400000 * 2).toISOString(),
-    location: { name: 'Kadikoy Pride Bar', lat: 40.9908, lng: 29.0277 },
-    hostId: 'u4',
-    attendeeCount: 38,
-    rsvpStatus: 'interested',
   },
 ];
 

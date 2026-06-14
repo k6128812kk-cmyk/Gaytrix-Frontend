@@ -175,49 +175,58 @@ export function AdminUsers() {
 
               {canModerate(user) && (
                 <div className={styles.userActions}>
+                  {/* Tooltip is via aria-label; visible on desktop hover via CSS */}
                   {user.accountStatus === 'suspended' ? (
-                    <button className={`${styles.actionBtn} ${styles.actionBtnSuccess}`}
-                      onClick={() => { setConfirm({ type: 'unsuspend', user }); setReason('Admin review completed'); }}>
-                      <RotateCcw size={12} /> Unsuspend
-                    </button>
+                    <button
+                      className={`${styles.iconBtn} ${styles.iconBtnSuccess}`}
+                      onClick={() => { setConfirm({ type: 'unsuspend', user }); setReason('Admin review completed'); }}
+                      aria-label="Unsuspend user" title="Unsuspend"
+                    ><RotateCcw size={16} /></button>
                   ) : user.accountStatus === 'active' ? (
-                    <button className={`${styles.actionBtn}`}
-                      onClick={() => setConfirm({ type: 'suspend', user })}>
-                      <Clock size={12} /> Suspend (7d)
-                    </button>
+                    <button
+                      className={styles.iconBtn}
+                      onClick={() => setConfirm({ type: 'suspend', user })}
+                      aria-label="Suspend 7 days" title="Suspend 7d"
+                    ><Clock size={16} /></button>
                   ) : null}
                   {user.membership === 'premium' ? (
-                    <button className={`${styles.actionBtn}`}
-                      onClick={() => setConfirm({ type: 'revoke_premium', user })}>
-                      <Crown size={12} /> Revoke Premium
-                    </button>
+                    <button
+                      className={styles.iconBtn}
+                      onClick={() => setConfirm({ type: 'revoke_premium', user })}
+                      aria-label="Revoke Premium" title="Revoke Premium"
+                    ><Crown size={16} /></button>
                   ) : (
-                    <button className={`${styles.actionBtn} ${styles.actionBtnSuccess}`}
-                      onClick={() => setConfirm({ type: 'grant_premium', user })}>
-                      <Crown size={12} /> Grant Premium
-                    </button>
+                    <button
+                      className={`${styles.iconBtn} ${styles.iconBtnGold}`}
+                      onClick={() => setConfirm({ type: 'grant_premium', user })}
+                      aria-label="Grant Premium" title="Grant Premium"
+                    ><Crown size={16} /></button>
                   )}
                   {user.verification === 'verified' ? (
-                    <button className={`${styles.actionBtn}`}
-                      onClick={() => setConfirm({ type: 'remove_verification', user })}>
-                      <ShieldOff size={12} /> Remove Badge
-                    </button>
+                    <button
+                      className={styles.iconBtn}
+                      onClick={() => setConfirm({ type: 'remove_verification', user })}
+                      aria-label="Remove verified badge" title="Remove badge"
+                    ><ShieldOff size={16} /></button>
                   ) : (
-                    <button className={`${styles.actionBtn} ${styles.actionBtnSuccess}`}
-                      onClick={() => setConfirm({ type: 'grant_verification', user })}>
-                      <ShieldCheck size={12} /> Grant Badge
-                    </button>
+                    <button
+                      className={`${styles.iconBtn} ${styles.iconBtnSuccess}`}
+                      onClick={() => setConfirm({ type: 'grant_verification', user })}
+                      aria-label="Grant verified badge" title="Grant badge"
+                    ><ShieldCheck size={16} /></button>
                   )}
                   {user.accountStatus !== 'banned' && (
-                    <button className={`${styles.actionBtn} ${styles.actionBtnDanger}`}
-                      onClick={() => setConfirm({ type: 'ban', user })}>
-                      <Ban size={12} /> Ban
-                    </button>
+                    <button
+                      className={`${styles.iconBtn} ${styles.iconBtnDanger}`}
+                      onClick={() => setConfirm({ type: 'ban', user })}
+                      aria-label="Ban user" title="Ban"
+                    ><Ban size={16} /></button>
                   )}
-                  <button className={`${styles.actionBtn} ${styles.actionBtnDanger}`}
-                    onClick={() => setConfirm({ type: 'remove', user })}>
-                    <UserX size={12} /> Remove
-                  </button>
+                  <button
+                    className={`${styles.iconBtn} ${styles.iconBtnDanger}`}
+                    onClick={() => setConfirm({ type: 'remove', user })}
+                    aria-label="Remove account" title="Remove"
+                  ><UserX size={16} /></button>
                 </div>
               )}
             </div>

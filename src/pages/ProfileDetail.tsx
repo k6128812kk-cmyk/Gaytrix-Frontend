@@ -170,8 +170,8 @@ export function ProfileDetailPage() {
         </div>
 
         <div className={styles.badgeRow}>
-          {profile.adminRole === 'super_admin' && <Badge variant="gold">👑 Super Admin</Badge>}
-          {profile.adminRole === 'admin' && <Badge variant="gold">⭐ Moderator</Badge>}
+          {(profile.adminRole === 'super_admin' || profile.adminRole === 'admin') && <Badge variant="gold">👑 Admin</Badge>}
+          {profile.adminRole === 'moderator' && <Badge variant="gold">🛡 Moderator</Badge>}
           {profile.verification === 'verified' && profile.adminRole === 'none' && <Badge variant="neutral">✓ Verified</Badge>}
           {profile.membership === 'premium' && <Badge variant="premium">Premium</Badge>}
           {profile.isOnline && <Badge variant="online">Online now</Badge>}
@@ -223,6 +223,22 @@ export function ProfileDetailPage() {
               <div className={styles.detailRow}>
                 <span className={styles.detailLabel}><Globe2 size={13} /> Languages</span>
                 <span className={styles.detailValue}>{profile.languages.join(', ')}</span>
+              </div>
+            )}
+            {profile.orientation && (
+              <div className={styles.detailRow}>
+                <span className={styles.detailLabel}>🏳️‍🌈 Orientation</span>
+                <span className={styles.detailValue} style={{ textTransform: 'capitalize' }}>
+                  {profile.orientation.replace('_', ' ')}
+                </span>
+              </div>
+            )}
+            {profile.genderIdentity && (
+              <div className={styles.detailRow}>
+                <span className={styles.detailLabel}>⚧ Gender</span>
+                <span className={styles.detailValue} style={{ textTransform: 'capitalize' }}>
+                  {profile.genderIdentity.replace('_', ' ')}
+                </span>
               </div>
             )}
           </div>

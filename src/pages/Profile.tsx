@@ -73,8 +73,8 @@ export function ProfilePage() {
           <MenuItem icon={Settings} label="Edit profile" onClick={() => navigate('/profile/edit')} />
           <MenuItem icon={Eye} label="Privacy settings" onClick={() => navigate('/profile/privacy')} />
           <MenuItem icon={Bell} label="Notifications" onClick={() => navigate('/profile/notifications')} />
-          {/* Admin panel — only shown when server assigns admin/super_admin role */}
-          {isAdmin() && (
+          {/* Admin panel — only shown when server assigns admin/moderator role */}
+          {isModerator() && (
             <MenuItem
               icon={ShieldAlert}
               label={isAdmin() ? '👑 Admin Panel' : '🛡 Moderator Panel'}

@@ -172,6 +172,52 @@ export interface GroupMessage {
   sentAt: string;
 }
 
+export interface Story {
+  id: string;
+  userId: string;
+  photoUrl: string;
+  createdAt: string;
+  displayName: string;
+  avatar?: string;
+  verification: VerificationStatus;
+  membership: MembershipTier;
+  adminRole: AdminRole;
+  viewed: boolean;
+}
+
+export interface MyStory {
+  id: string;
+  photoUrl: string;
+  createdAt: string;
+}
+
+export interface CommunityGroup {
+  id: string;
+  name: string;
+  description: string;
+  photoUrl?: string;
+  createdBy: string;
+  creatorName: string;
+  creatorPhoto?: string;
+  memberCount: number;
+  isMember: boolean;
+  lastMessageAt: string;
+  createdAt: string;
+  status: 'active' | 'deleted';
+}
+
+export interface CommunityGroupMessage {
+  id: string;
+  groupId: string;
+  senderId: string;
+  senderName: string;
+  senderPhoto?: string;
+  text: string;
+  sentAt: string;
+}
+
+export type GroupSortOption = 'members_desc' | 'members_asc' | 'recent' | 'last_message';
+
 export interface Conversation {
   id: string;
   participant: Pick<UserProfile, 'id' | 'displayName' | 'photos' | 'isOnline' | 'verification' | 'membership' | 'adminRole'>;

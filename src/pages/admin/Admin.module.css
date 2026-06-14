@@ -510,3 +510,32 @@
   text-align: center;
   padding: 16px 0;
 }
+
+/* Icon-only action buttons — larger touch targets, cleaner on mobile */
+.iconBtn {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-sm);
+  border: none;
+  background: var(--color-surface-hover, #2a2638);
+  color: var(--color-text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  flex-shrink: 0;
+  position: relative;
+}
+
+.iconBtn:hover { background: var(--color-border); color: var(--color-text); }
+.iconBtn:active { transform: scale(0.92); }
+
+.iconBtnDanger { color: var(--color-danger); }
+.iconBtnDanger:hover { background: rgba(255, 92, 92, 0.15); color: var(--color-danger); }
+
+.iconBtnSuccess { color: var(--color-success); }
+.iconBtnSuccess:hover { background: rgba(94, 230, 168, 0.15); color: var(--color-success); }
+
+.iconBtnGold { color: var(--color-gold); }
+.iconBtnGold:hover { background: rgba(255, 200, 87, 0.15); color: var(--color-gold); }

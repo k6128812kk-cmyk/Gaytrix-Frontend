@@ -4,6 +4,7 @@ import type {
   Conversation, ChatMessage,
   DiscoveryFilters, VerificationRequest,
   UserReport, AdminAction, PlatformStats,
+  Story, MyStory, CommunityGroup, CommunityGroupMessage, GroupSortOption,
 } from '@/types';
 import {
   currentUser, mockProfiles, mockLocations, mockConversations,
@@ -372,5 +373,77 @@ export const adminService = {
     if (USE_MOCKS) { await delay(250); return mockAdminActions; }
     const { data } = await api.get<AdminAction[]>('/admin/audit-log');
     return data;
+  },
+};
+
+// ==========================================================================
+// Group Chat service
+// ==========================================================================
+export const groupService = {
+  async getGroups(sort?: GroupSortOption, search?: string): Promise<CommunityGroup[]> {
+    if (USE_MOCKS) { await delay(250); return []; }
+    const { data } = await api.get<CommunityGroup[]>('/groups', { params: { sort, search } });
+    return data;
+  },
+  async createGroup(name: string, description: string, photo?: File): Promise<CommunityGroup> {
+    if (USE_MOCKS) {
+      await delay(300);
+      return { id: `g_${Date.now()}`, name, description, createdBy: currentUser.id,
+        creatorName: currentUser.displayName, memberCount: 1, isMember: true,
+        lastMessageAt: new Date().toISOString(), createdAt: new Date().toISOString(), status: 'active' };
+    }
+    const form = new FormData();
+    form.append('name', name);
+    form.append('description', description);
+    if (photo) form.append('photo', photo);
+    const { data } = await api.post<CommunityGroup>('/groups', form, { headers: { 'Content-Type': 'multipart/form-data' } });
+    return data;
+  },
+  async joinGroup(groupId: string): Promise<{ ok: boolean; memberCount: number }> {
+    if (USE_MOCKS) { await delay(150); return { ok: true, memberCount: 1 }; }
+    const { data } = await api.post(`/groups/${groupId}/join`);
+    return data;
+  },
+  async leaveGroup(groupId: string): Promise<{ ok: boolean; memberCount: number }> {
+    if (USE_MOCKS) { await delay(150); return { ok: true, memberCount: 0 }; }
+    const { data } = await api.post(`/groups/${groupId}/leave`);
+    return data;
+  },
+  async deleteGroup(groupId: string): Promise<{ ok: boolean }> {
+    if (USE_MOCKS) { await delay(200); return { ok: true }; }
+    const { data } = await api.delete(`/groups/${groupId}`);
+    return data;
+  },
+  async getMessages(groupId: string): Promise<CommunityGroupMessage[]> {
+    if (USE_MOCKS) { await delay(150); return []; }
+    const { data } = await api.get<CommunityGroupMessage[]>(`/groups/${groupId}/messages`);
+    return data;
+  },
+  async sendMessage(groupId: string, text: string): Promise<CommunityGroupMessage> {
+    if (USE_MOCKS) { await delay(150); return {} as CommunityGroupMessage; }
+    const { data } = await api.post<CommunityGroupMessage>(`/groups/${groupId}/messages`, { text });
+    return data;
+  },
+};
+
+// ==========================================================================
+// Stories service
+// ==========================================================================
+export const storyService = {
+  async getStories(): Promise<{ myStory: MyStory | null; stories: Story[] }> {
+    if (USE_MOCKS) { await delay(200); return { myStory: null, stories: [] }; }
+    const { data } = await api.get<{ myStory: MyStory | null; stories: Story[] }>('/stories');
+    return data;
+  },
+  async createStory(photo: File): Promise<MyStory> {
+    if (USE_MOCKS) { await delay(300); return { id: `s_${Date.now()}`, photoUrl: URL.createObjectURL(photo), createdAt: new Date().toISOString() }; }
+    const form = new FormData();
+    form.append('photo', photo);
+    const { data } = await api.post<MyStory>('/stories', form, { headers: { 'Content-Type': 'multipart/form-data' } });
+    return data;
+  },
+  async markViewed(storyId: string): Promise<void> {
+    if (USE_MOCKS) { return; }
+    await api.post(`/stories/${storyId}/view`);
   },
 };

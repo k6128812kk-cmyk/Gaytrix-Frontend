@@ -3,6 +3,7 @@ import { CheckCircle2, XCircle, Lock } from 'lucide-react';
 import { PageHeader } from '@/components/PageHeader';
 import { Button } from '@/components/Button';
 import { adminService } from '@/api/services';
+import { assetUrl } from '@/api/client';
 import type { VerificationRequest } from '@/types';
 import { formatDistanceToNowStrict } from 'date-fns';
 import styles from './Admin.module.css';
@@ -75,9 +76,10 @@ export function AdminVerification() {
               {/* Selfie — admin-only view */}
               <div style={{ position: 'relative' }}>
                 <img
-                  src={req.selfieUrl}
+                  src={assetUrl(req.selfieUrl)}
                   alt="Verification selfie"
                   className={styles.selfieImage}
+                  onError={(e) => { (e.target as HTMLImageElement).src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><rect fill="%23333" width="100" height="100"/><text fill="%23999" font-size="14" x="50%" y="50%" text-anchor="middle" dy=".3em">No image</text></svg>'; }}
                 />
                 <div style={{
                   position: 'absolute', top: 8, left: 8,
