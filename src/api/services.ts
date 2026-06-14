@@ -31,9 +31,7 @@ export const profileService = {
     }
     const form = new FormData();
     form.append('photo', file);
-    const { data } = await api.post<{ url: string }>('/profile/photos', form, {
-      headers: { 'Content-Type': 'multipart/form-data' },
-    });
+    const { data } = await api.post<{ url: string }>('/profile/photos', form);
     // Backend now returns an absolute URL directly
     return data.url;
   },
@@ -46,9 +44,7 @@ export const profileService = {
     if (USE_MOCKS) { await delay(400); return { status: 'pending' }; }
     const form = new FormData();
     form.append('selfie', selfieFile);
-    const { data } = await api.post('/verification/request', form, {
-      headers: { 'Content-Type': 'multipart/form-data' },
-    });
+    const { data } = await api.post('/verification/request', form);
     return data;
   },
   async reportUser(userId: string, reason: string, details?: string): Promise<{ ok: true }> {
@@ -183,8 +179,7 @@ export const chatService = {
     const form = new FormData();
     form.append('photo', file);
     const { data } = await api.post<ChatMessage>(
-      `/messages/conversations/${conversationId}/photo`, form,
-      { headers: { 'Content-Type': 'multipart/form-data' } }
+      `/messages/conversations/${conversationId}/photo`, form
     );
     return data;
   },
@@ -396,7 +391,8 @@ export const groupService = {
     form.append('name', name);
     form.append('description', description);
     if (photo) form.append('photo', photo);
-    const { data } = await api.post<CommunityGroup>('/groups', form, { headers: { 'Content-Type': 'multipart/form-data' } });
+    // Do NOT set Content-Type manually — axios/browser must set it with the multipart boundary
+    const { data } = await api.post<CommunityGroup>('/groups', form);
     return data;
   },
   async joinGroup(groupId: string): Promise<{ ok: boolean; memberCount: number }> {
@@ -439,7 +435,7 @@ export const storyService = {
     if (USE_MOCKS) { await delay(300); return { id: `s_${Date.now()}`, photoUrl: URL.createObjectURL(photo), createdAt: new Date().toISOString() }; }
     const form = new FormData();
     form.append('photo', photo);
-    const { data } = await api.post<MyStory>('/stories', form, { headers: { 'Content-Type': 'multipart/form-data' } });
+    const { data } = await api.post<MyStory>('/stories', form);
     return data;
   },
   async markViewed(storyId: string): Promise<void> {

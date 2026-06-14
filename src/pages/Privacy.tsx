@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { EyeOff, MapPin, Lock, Ghost, Users, UserX } from 'lucide-react';
+import { EyeOff, MapPin, Ghost, Users, UserX } from 'lucide-react';
 import { PageHeader } from '@/components/PageHeader';
 import { useSessionStore } from '@/context/sessionStore';
 import { profileService } from '@/api/services';
@@ -7,16 +7,36 @@ import { api } from '@/api/client';
 import type { PrivacySettings } from '@/types';
 import styles from './Privacy.module.css';
 
+// ==========================================================================
+// Privacy — toggle privacy settings and manage blocked users.
+// Private Profile has been removed — only Invisible Mode remains for
+// controlling discovery visibility.
+// ==========================================================================
+
 const TOGGLES: {
   key: keyof PrivacySettings;
   icon: typeof EyeOff;
   label: string;
   description: string;
 }[] = [
-  { key: 'hideExactLocation', icon: MapPin, label: 'Approximate location only', description: 'Show your general area instead of your precise location.' },
-  { key: 'invisibleMode', icon: Ghost, label: 'Invisible mode', description: "Browse without appearing in other people's discovery feeds." },
-  { key: 'hideOnlineStatus', icon: EyeOff, label: 'Hide online status', description: 'Stop showing the green online indicator and "last active" time.' },
-  { key: 'privateProfile', icon: Lock, label: 'Private profile', description: 'Only people you message first can view your full profile.' },
+  {
+    key: 'invisibleMode',
+    icon: Ghost,
+    label: 'Invisible mode',
+    description: 'Immediately hides your profile from Discover, search, and all member lists. You can still browse normally.',
+  },
+  {
+    key: 'hideOnlineStatus',
+    icon: EyeOff,
+    label: 'Hide online status',
+    description: 'Stop showing the green online indicator and "last active" time to other users.',
+  },
+  {
+    key: 'hideExactLocation',
+    icon: MapPin,
+    label: 'Approximate location only',
+    description: 'Show your general area instead of your precise location.',
+  },
 ];
 
 interface BlockedUser {
@@ -56,7 +76,7 @@ export function PrivacyPage() {
     setUnblocking(userId);
     try {
       await api.delete(`/users/${userId}/block`);
-      setBlockedUsers((prev) => prev.filter((u) => u.id !== userId));
+      setBlockedUsers(prev => prev.filter(u => u.id !== userId));
     } finally {
       setUnblocking(null);
     }
@@ -109,7 +129,7 @@ export function PrivacyPage() {
             </div>
           )}
 
-          {blockedUsers.map((user) => (
+          {blockedUsers.map(user => (
             <div key={user.id} style={{
               display: 'flex', alignItems: 'center', gap: 12,
               padding: '10px 16px', borderTop: '1px solid var(--color-border)',
@@ -120,12 +140,8 @@ export function PrivacyPage() {
                 style={{ width: 38, height: 38, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }}
               />
               <div style={{ flex: 1, minWidth: 0 }}>
-                <p style={{ fontWeight: 600, fontSize: 14, margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                  {user.displayName}
-                </p>
-                <p style={{ fontSize: 12, color: 'var(--color-text-faint)', margin: 0 }}>
-                  @{user.telegramUsername}
-                </p>
+                <p style={{ fontWeight: 600, fontSize: 14, margin: 0 }}>{user.displayName}</p>
+                <p style={{ fontSize: 12, color: 'var(--color-text-faint)', margin: 0 }}>@{user.telegramUsername}</p>
               </div>
               <button
                 onClick={() => handleUnblock(user.id)}
@@ -133,9 +149,8 @@ export function PrivacyPage() {
                 style={{
                   display: 'flex', alignItems: 'center', gap: 4,
                   padding: '6px 12px', borderRadius: 'var(--radius-pill)',
-                  border: '1px solid var(--color-border)',
-                  background: 'transparent', color: 'var(--color-text-muted)',
-                  fontSize: 12, cursor: 'pointer', flexShrink: 0,
+                  border: '1px solid var(--color-border)', background: 'transparent',
+                  color: 'var(--color-text-muted)', fontSize: 12, cursor: 'pointer', flexShrink: 0,
                   opacity: unblocking === user.id ? 0.5 : 1,
                 }}
               >

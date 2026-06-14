@@ -42,7 +42,6 @@ export const currentUser: UserProfile = {
     hideExactLocation: true,
     invisibleMode: false,
     hideOnlineStatus: false,
-    privateProfile: false,
   },
 };
 
@@ -71,7 +70,7 @@ export const mockProfiles: UserProfile[] = [
     accountStatus: 'active',
     registeredAt: new Date(Date.now() - 86400000 * 20).toISOString(),
     distanceKm: 1.2,
-    privacy: { hideExactLocation: false, invisibleMode: false, hideOnlineStatus: false, privateProfile: false },
+    privacy: { hideExactLocation: false, invisibleMode: false, hideOnlineStatus: false },
   },
   {
     id: 'u2',
@@ -95,7 +94,7 @@ export const mockProfiles: UserProfile[] = [
     accountStatus: 'active',
     registeredAt: new Date(Date.now() - 86400000 * 5).toISOString(),
     distanceKm: 3.8,
-    privacy: { hideExactLocation: false, invisibleMode: false, hideOnlineStatus: false, privateProfile: false },
+    privacy: { hideExactLocation: false, invisibleMode: false, hideOnlineStatus: false },
   },
   {
     id: 'u3',
@@ -119,7 +118,7 @@ export const mockProfiles: UserProfile[] = [
     accountStatus: 'active',
     registeredAt: new Date(Date.now() - 86400000 * 2).toISOString(),
     distanceKm: 320,
-    privacy: { hideExactLocation: true, invisibleMode: false, hideOnlineStatus: false, privateProfile: false },
+    privacy: { hideExactLocation: true, invisibleMode: false, hideOnlineStatus: false },
   },
   {
     id: 'u4',
@@ -144,7 +143,7 @@ export const mockProfiles: UserProfile[] = [
     accountStatus: 'active',
     registeredAt: new Date(Date.now() - 86400000 * 45).toISOString(),
     distanceKm: 5.6,
-    privacy: { hideExactLocation: false, invisibleMode: false, hideOnlineStatus: false, privateProfile: false },
+    privacy: { hideExactLocation: false, invisibleMode: false, hideOnlineStatus: false },
   },
   {
     id: 'u5',
@@ -170,7 +169,7 @@ export const mockProfiles: UserProfile[] = [
     registeredAt: new Date(Date.now() - 86400000 * 3).toISOString(),
     distanceKm: 2.1,
     reportsCount: 3,
-    privacy: { hideExactLocation: false, invisibleMode: false, hideOnlineStatus: false, privateProfile: false },
+    privacy: { hideExactLocation: false, invisibleMode: false, hideOnlineStatus: false },
   },
 ];
 

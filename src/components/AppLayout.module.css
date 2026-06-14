@@ -1,4 +1,16 @@
 .layout {
-  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  height: 100dvh; /* dynamic viewport height on mobile */
+  overflow: hidden;
   background: var(--color-bg);
+}
+
+.outlet {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  position: relative;
 }

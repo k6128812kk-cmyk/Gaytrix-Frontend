@@ -1,8 +1,7 @@
 .page {
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
-  padding-bottom: calc(var(--tabbar-height) + var(--safe-bottom));
+  min-height: 100%;
 }
 
 .content {

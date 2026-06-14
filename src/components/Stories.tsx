@@ -8,27 +8,26 @@ import styles from './Stories.module.css';
 
 // ==========================================================================
 // Stories — horizontal avatar row at top of Discover.
-// Tapping a story opens a full-screen viewer with next/prev navigation.
+// Errors are silently swallowed so a backend failure never blanks the page.
 // ==========================================================================
 
-interface StoriesProps {
-  onLoad?: () => void;
-}
-
-export function Stories({ onLoad }: StoriesProps) {
+export function Stories() {
   const { profile } = useSessionStore();
   const [stories, setStories] = useState<Story[]>([]);
   const [myStory, setMyStory] = useState<MyStory | null>(null);
   const [viewerIndex, setViewerIndex] = useState<number | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [ready, setReady] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    storyService.getStories().then(({ stories, myStory }) => {
-      setStories(stories);
-      setMyStory(myStory);
-      onLoad?.();
-    }).catch(() => onLoad?.());
+    storyService.getStories()
+      .then(({ stories: s, myStory: ms }) => {
+        setStories(s);
+        setMyStory(ms);
+      })
+      .catch(() => { /* Table may not exist yet — fail silently */ })
+      .finally(() => setReady(true));
   }, []);
 
   async function handleUpload(e: React.ChangeEvent<HTMLInputElement>) {
@@ -38,6 +37,8 @@ export function Stories({ onLoad }: StoriesProps) {
     try {
       const created = await storyService.createStory(file);
       setMyStory(created);
+    } catch {
+      // fail silently
     } finally {
       setUploading(false);
       e.target.value = '';
@@ -48,36 +49,52 @@ export function Stories({ onLoad }: StoriesProps) {
     setViewerIndex(index);
     const story = stories[index];
     if (story && !story.viewed) {
-      await storyService.markViewed(story.id);
+      storyService.markViewed(story.id).catch(() => {});
       setStories(prev => prev.map((s, i) => i === index ? { ...s, viewed: true } : s));
     }
   }
 
-  const myPhotoSrc = profile?.photos?.[0] || `https://i.pravatar.cc/80?u=${profile?.id}`;
+  // Don't render anything until loaded (avoid flash)
+  if (!ready) return null;
+  // No stories at all and no own story — hide the row entirely
+  if (stories.length === 0 && !myStory) return null;
 
-  if (stories.length === 0 && !myStory && !uploading) return null;
+  const myPhotoSrc = profile?.photos?.[0]
+    ? assetUrl(profile.photos[0])
+    : `https://i.pravatar.cc/80?u=${profile?.id}`;
 
   return (
     <>
       <div className={styles.row}>
-        {/* My story / add story */}
+        {/* My story / add story button */}
         <div className={styles.storyWrap}>
           <button
             className={`${styles.avatar} ${styles.myAvatar}`}
             onClick={() => fileRef.current?.click()}
             disabled={uploading}
-            aria-label={myStory ? 'View my story' : 'Add story'}
+            aria-label={myStory ? 'My story' : 'Add story'}
           >
-            <img src={myStory ? assetUrl(myStory.photoUrl) : myPhotoSrc} alt="My story" />
+            <img
+              src={myStory ? assetUrl(myStory.photoUrl) : myPhotoSrc}
+              alt="My story"
+              onError={(e) => { (e.target as HTMLImageElement).src = myPhotoSrc; }}
+            />
             {!myStory && (
               <span className={styles.addBadge}>
                 {uploading ? '⏳' : <Plus size={12} />}
               </span>
             )}
-            {myStory && <span className={`${styles.ring} ${styles.ringMine}`} />}
+            <span className={`${styles.ring} ${myStory ? styles.ringMine : styles.ringAdd}`} />
           </button>
           <span className={styles.label}>You</span>
-          <input ref={fileRef} type="file" accept="image/*" onChange={handleUpload} className={styles.fileInput} />
+          <input
+            ref={fileRef}
+            type="file"
+            accept="image/*"
+            capture="environment"
+            onChange={handleUpload}
+            className={styles.fileInput}
+          />
         </div>
 
         {/* Other users' stories */}
@@ -92,7 +109,11 @@ export function Stories({ onLoad }: StoriesProps) {
                 onClick={() => handleViewStory(i)}
                 aria-label={`${story.displayName}'s story`}
               >
-                <img src={src} alt={story.displayName} />
+                <img
+                  src={src}
+                  alt={story.displayName}
+                  onError={(e) => { (e.target as HTMLImageElement).src = `https://i.pravatar.cc/80?u=${story.userId}`; }}
+                />
                 <span className={`${styles.ring} ${story.viewed ? styles.ringViewed : styles.ringUnviewed}`} />
               </button>
               <span className={styles.label}>{story.displayName.split(' ')[0]}</span>
@@ -101,7 +122,7 @@ export function Stories({ onLoad }: StoriesProps) {
         })}
       </div>
 
-      {/* Full-screen story viewer */}
+      {/* Full-screen viewer */}
       {viewerIndex !== null && (
         <StoryViewer
           stories={stories}
@@ -109,12 +130,12 @@ export function Stories({ onLoad }: StoriesProps) {
           onClose={() => setViewerIndex(null)}
           onNext={() => {
             const next = viewerIndex + 1;
-            if (next < stories.length) { handleViewStory(next); }
+            if (next < stories.length) handleViewStory(next);
             else setViewerIndex(null);
           }}
           onPrev={() => {
             const prev = viewerIndex - 1;
-            if (prev >= 0) { handleViewStory(prev); }
+            if (prev >= 0) handleViewStory(prev);
           }}
         />
       )}
@@ -136,22 +157,29 @@ function StoryViewer({ stories, index, onClose, onNext, onPrev }: {
 
   useEffect(() => {
     setProgress(0);
+    clearInterval(timerRef.current);
     timerRef.current = setInterval(() => {
       setProgress(p => {
-        if (p >= 100) { clearInterval(timerRef.current); onNext(); return 100; }
+        if (p >= 100) {
+          clearInterval(timerRef.current);
+          onNext();
+          return 100;
+        }
         return p + 1;
       });
-    }, 50); // 5s total (100 * 50ms)
+    }, 50); // 5 seconds total
     return () => clearInterval(timerRef.current);
   }, [index]);
 
   if (!story) return null;
 
-  const avatarSrc = story.avatar ? assetUrl(story.avatar) : `https://i.pravatar.cc/80?u=${story.userId}`;
+  const avatarSrc = story.avatar
+    ? assetUrl(story.avatar)
+    : `https://i.pravatar.cc/80?u=${story.userId}`;
 
   return (
-    <div className={styles.viewer} onClick={onClose}>
-      {/* Progress bar */}
+    <div className={styles.viewer}>
+      {/* Progress bars */}
       <div className={styles.progressBar}>
         {stories.map((_, i) => (
           <div key={i} className={styles.progressSegment}>
@@ -164,22 +192,20 @@ function StoryViewer({ stories, index, onClose, onNext, onPrev }: {
       </div>
 
       {/* Header */}
-      <div className={styles.viewerHeader} onClick={e => e.stopPropagation()}>
+      <div className={styles.viewerHeader}>
         <img src={avatarSrc} alt="" className={styles.viewerAvatar} />
         <span className={styles.viewerName}>{story.displayName}</span>
-        <button className={styles.viewerClose} onClick={onClose}><X size={20} /></button>
+        <button className={styles.viewerClose} onClick={onClose} aria-label="Close">
+          <X size={20} />
+        </button>
       </div>
 
       {/* Story image */}
       <img src={assetUrl(story.photoUrl)} alt="Story" className={styles.storyImage} />
 
-      {/* Tap zones */}
-      <button className={styles.tapLeft} onClick={e => { e.stopPropagation(); onPrev(); }} aria-label="Previous">
-        <ChevronLeft size={24} />
-      </button>
-      <button className={styles.tapRight} onClick={e => { e.stopPropagation(); onNext(); }} aria-label="Next">
-        <ChevronRight size={24} />
-      </button>
+      {/* Tap zones for prev/next */}
+      <button className={styles.tapLeft} onClick={e => { e.stopPropagation(); onPrev(); }} aria-label="Previous" />
+      <button className={styles.tapRight} onClick={e => { e.stopPropagation(); onNext(); }} aria-label="Next" />
     </div>
   );
 }

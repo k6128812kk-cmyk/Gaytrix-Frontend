@@ -35,7 +35,14 @@ export function DiscoverPage() {
   const [explore, setExplore] = useState<Record<ExploreSection, UserProfile[]>>({
     new: [], verified: [], recent: [],
   });
-  const [loading, setLoading] = useState(true);
+  const [storyKey, setStoryKey] = useState(0);
+
+  // Refresh stories when a new one is created from the TabBar
+  useEffect(() => {
+    const handler = () => setStoryKey(k => k + 1);
+    window.addEventListener('story-created', handler);
+    return () => window.removeEventListener('story-created', handler);
+  }, []);
   const [activeFilters, setActiveFilters] = useState(false);
 
   useEffect(() => {
@@ -79,8 +86,8 @@ export function DiscoverPage() {
       />
 
       <div className={styles.content}>
-        {/* Stories row */}
-        <Stories />
+        {/* Stories row — remounts on new story creation */}
+        <Stories key={storyKey} />
 
         {/* Explore rails */}
         {SECTIONS.map(({ key, label, icon: Icon }) => (

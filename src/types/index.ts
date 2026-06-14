@@ -59,7 +59,6 @@ export interface PrivacySettings {
   hideExactLocation: boolean;
   invisibleMode: boolean;
   hideOnlineStatus: boolean;
-  privateProfile: boolean;
 }
 
 export interface VerificationRequest {
