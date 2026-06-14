@@ -9,10 +9,20 @@ import { wsClient } from '@/hooks/useGlobalWs';
 import type { ChatMessage, Conversation } from '@/types';
 import styles from './Conversation.module.css';
 
-const WS_URL = (import.meta.env.VITE_API_BASE_URL ?? '')
-  .replace('/v1', '')
-  .replace('https://', 'wss://')
-  .replace('http://', 'ws://') + '/ws';
+// ==========================================================================
+// ConversationPage — real-time 1:1 chat using the shared global WebSocket.
+//
+// Previously this page opened its own private WebSocket connection in
+// parallel with the global one, causing:
+//   - duplicate auth handshakes
+//   - message confirmations landing on the wrong socket
+//   - missed messages when the per-page socket reconnected
+//   - read receipts not reaching the correct listener
+//
+// Fix: all real-time events go through wsClient (the global singleton).
+// Sending is done via wsClient.send(), receiving via wsClient.addHandler().
+// The global socket is already authenticated by useGlobalWs() in App.tsx.
+// ==========================================================================
 
 export function ConversationPage() {
   const { id } = useParams<{ id: string }>();
@@ -21,24 +31,22 @@ export function ConversationPage() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [draft, setDraft] = useState('');
   const [loading, setLoading] = useState(true);
-  const [connected, setConnected] = useState(false);
   const [partnerTyping, setPartnerTyping] = useState(false);
   const [photoPreview, setPhotoPreview] = useState<{ file: File; url: string } | null>(null);
   const [sendingPhoto, setSendingPhoto] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
-  const wsRef = useRef<WebSocket | null>(null);
-  const reconnectTimer = useRef<ReturnType<typeof setTimeout>>();
   const typingTimer = useRef<ReturnType<typeof setTimeout>>();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Scroll to bottom
+  // ── Scroll to bottom when messages change ──────────────────────────────
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' });
   }, [messages, partnerTyping]);
 
-  // Load history via REST
+  // ── Load history via REST on mount ────────────────────────────────────
   useEffect(() => {
     if (!id) return;
+    setLoading(true);
     Promise.all([
       chatService.getConversations(),
       chatService.getMessages(id),
@@ -46,89 +54,91 @@ export function ConversationPage() {
       setConversation(convos.find((c) => c.id === id) ?? null);
       setMessages(msgs);
       setLoading(false);
+
+      // Tell the backend we've read all messages in this conversation
+      wsClient.send({ type: 'mark_read', conversationId: id });
+
+      // Refresh global unread count after marking read
+      wsClient.send({ type: 'get_unread_count' });
     }).catch(() => setLoading(false));
   }, [id]);
 
-  // WebSocket
-  const connectWs = useCallback(() => {
+  // ── Subscribe to real-time events via shared global WS ────────────────
+  useEffect(() => {
     if (!id) return;
-    const initData = window.Telegram?.WebApp?.initData || '';
-    // In production initData is always present. In dev it may be empty — still connect
-    // so the WS can handle the auth handshake (backend allows dev mode)
 
-    const ws = new WebSocket(WS_URL);
-    wsRef.current = ws;
+    // Incoming messages for this conversation
+    const onMessage = (raw: Record<string, unknown>) => {
+      const msg = raw.message as ChatMessage | undefined;
+      if (!msg || msg.conversationId !== id) return;
 
-    ws.onopen = () => ws.send(JSON.stringify({ type: 'auth', initData }));
+      setMessages((prev) => {
+        if (prev.some((m) => m.id === msg.id)) return prev;
+        return [...prev, msg];
+      });
+      setPartnerTyping(false);
 
-    ws.onmessage = (e) => {
-      try {
-        const msg = JSON.parse(e.data);
-        if (msg.type === 'auth_ok') {
-          setConnected(true);
-          ws.send(JSON.stringify({ type: 'mark_read', conversationId: id }));
-          // Request updated global unread count via the shared connection
-          wsClient.send({ type: 'get_unread_count' });
-        }
-        if (msg.type === 'message' && msg.message.conversationId === id) {
-          setMessages((prev) => {
-            if (prev.some((m) => m.id === msg.message.id)) return prev;
-            return [...prev, msg.message];
-          });
-          setPartnerTyping(false);
-          // Mark their message as read immediately
-          ws.send(JSON.stringify({ type: 'mark_read', conversationId: id }));
-        }
-        if (msg.type === 'read_receipt' && msg.conversationId === id) {
-          // Update all our sent messages to show read (checkmark ✓✓)
-          const readAt = new Date().toISOString();
-          setMessages((prev) => prev.map((m) =>
-            m.senderId === profile?.id && !m.readAt ? { ...m, readAt } : m
-          ));
-        }
-        if (msg.type === 'typing' && msg.conversationId === id && msg.userId !== profile?.id) {
-          setPartnerTyping(true);
-          clearTimeout(typingTimer.current);
-          typingTimer.current = setTimeout(() => setPartnerTyping(false), 3000);
-        }
-      } catch {}
+      // Mark as read immediately since we're looking at the conversation
+      wsClient.send({ type: 'mark_read', conversationId: id });
+      wsClient.send({ type: 'get_unread_count' });
     };
 
-    ws.onclose = () => {
-      setConnected(false);
-      reconnectTimer.current = setTimeout(connectWs, 3000);
+    // Read receipts — update our sent messages to show double-tick
+    const onReadReceipt = (raw: Record<string, unknown>) => {
+      if (raw.conversationId !== id) return;
+      const readAt = new Date().toISOString();
+      setMessages((prev) =>
+        prev.map((m) =>
+          m.senderId === profile?.id && !m.readAt ? { ...m, readAt } : m
+        )
+      );
     };
 
-    ws.onerror = () => ws.close();
+    // Typing indicator from partner
+    const onTyping = (raw: Record<string, unknown>) => {
+      if (raw.conversationId !== id) return;
+      if (raw.userId === profile?.id) return; // ignore our own typing events
+      setPartnerTyping(true);
+      clearTimeout(typingTimer.current);
+      typingTimer.current = setTimeout(() => setPartnerTyping(false), 3000);
+    };
+
+    wsClient.addHandler('message', onMessage);
+    wsClient.addHandler('read_receipt', onReadReceipt);
+    wsClient.addHandler('typing', onTyping);
+
+    return () => {
+      wsClient.removeHandler('message', onMessage);
+      wsClient.removeHandler('read_receipt', onReadReceipt);
+      wsClient.removeHandler('typing', onTyping);
+      clearTimeout(typingTimer.current);
+    };
   }, [id, profile?.id]);
 
-  useEffect(() => {
-    connectWs();
-    return () => {
-      clearTimeout(reconnectTimer.current);
-      clearTimeout(typingTimer.current);
-      wsRef.current?.close();
-    };
-  }, [connectWs]);
-
-  // Typing indicator — send via WS when user types
+  // ── Typing indicator — debounced ──────────────────────────────────────
   function handleDraftChange(value: string) {
     setDraft(value);
-    if (wsRef.current?.readyState === WebSocket.OPEN && connected && id) {
-      wsRef.current.send(JSON.stringify({ type: 'typing', conversationId: id }));
+    if (id) {
+      wsClient.send({ type: 'typing', conversationId: id });
     }
   }
 
+  // ── Send text message ─────────────────────────────────────────────────
   async function handleSend() {
     if (!id || !draft.trim()) return;
     const text = draft.trim();
     setDraft('');
 
-    if (wsRef.current?.readyState === WebSocket.OPEN && connected) {
-      wsRef.current.send(JSON.stringify({ type: 'send_message', conversationId: id, text }));
-    } else {
-      const message = await chatService.sendMessage(id, text);
-      setMessages((prev) => [...prev, message]);
+    // Try global WS first; fall back to REST if WS is not ready
+    const sent = wsClient.send({ type: 'send_message', conversationId: id, text });
+    if (!sent) {
+      try {
+        const message = await chatService.sendMessage(id, text);
+        setMessages((prev) => [...prev, message]);
+      } catch (err) {
+        console.error('Failed to send message:', err);
+        setDraft(text); // restore draft so user doesn't lose their text
+      }
     }
   }
 
@@ -146,6 +156,8 @@ export function ConversationPage() {
       const message = await chatService.sendPhotoMessage(id, photoPreview.file);
       setMessages((prev) => [...prev, message]);
       setPhotoPreview(null);
+    } catch (err) {
+      console.error('Failed to send photo:', err);
     } finally {
       setSendingPhoto(false);
     }
@@ -154,9 +166,9 @@ export function ConversationPage() {
   const title = conversation?.participant.displayName ?? 'Chat';
   const currentUserId = profile?.id ?? '';
 
-  // Build message list with date separators
+  // ── Build message list with date separators ────────────────────────────
   let lastDateKey = '';
-  const msgItems: Array<{ type: 'sep'; label: string } | { type: 'msg'; msg: typeof messages[0] }> = [];
+  const msgItems: Array<{ type: 'sep'; label: string } | { type: 'msg'; msg: (typeof messages)[0] }> = [];
   messages.forEach(msg => {
     const d = new Date(msg.sentAt);
     const key = format(d, 'yyyy-MM-dd');
@@ -173,11 +185,6 @@ export function ConversationPage() {
       <PageHeader
         title={title}
         showBack
-        action={
-          <span style={{ fontSize: 11, color: connected ? 'var(--color-success, #5ee6a8)' : 'var(--color-text-faint)' }}>
-            {connected ? '● Live' : '○ Offline'}
-          </span>
-        }
       />
 
       <div className={styles.messages} ref={scrollRef}>
@@ -241,7 +248,7 @@ export function ConversationPage() {
         )}
       </div>
 
-      {/* Photo preview */}
+      {/* Photo preview overlay */}
       {photoPreview && (
         <div style={{
           position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.85)',

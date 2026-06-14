@@ -35,10 +35,12 @@ function dispatch(msg: Record<string, unknown>) {
   globalHandlers.get('*')?.forEach(h => h(msg));
 }
 
-function send(data: Record<string, unknown>) {
+function send(data: Record<string, unknown>): boolean {
   if (globalWs?.readyState === WebSocket.OPEN) {
     globalWs.send(JSON.stringify(data));
+    return true;
   }
+  return false;
 }
 
 function connect(initData: string, onUnread: (count: number) => void) {
