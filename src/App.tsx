@@ -25,6 +25,7 @@ import { AdminReports } from '@/pages/admin/AdminReports';
 import { AdminAuditLog } from '@/pages/admin/AdminAuditLog';
 import { AdminModerators } from '@/pages/admin/AdminModerators';
 import { EventChatPage } from '@/pages/EventChat';
+import { MapPage } from '@/pages/MapPage';
 import { useTelegram } from '@/hooks/useTelegram';
 import { useGlobalWs } from '@/hooks/useGlobalWs';
 import { useSessionStore } from '@/context/sessionStore';
@@ -107,6 +108,7 @@ export default function App() {
         <Route path="/admin/audit" element={<AdminGuard><AdminAuditLog /></AdminGuard>} />
         <Route path="/admin/moderators" element={<AdminGuard><AdminModerators /></AdminGuard>} />
         <Route path="/event-chat/:conversationId" element={<EventChatPage />} />
+        <Route path="/map" element={<MapPage />} />
         <Route path="*" element={<Navigate to="/discover" replace />} />
       </Route>
     </Routes>

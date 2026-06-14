@@ -12,7 +12,7 @@ import {
   mockAdminActions, mockStats,
 } from '@/mock/data';
 
-const USE_MOCKS = import.meta.env.VITE_USE_MOCKS !== 'false';
+const USE_MOCKS = import.meta.env.VITE_USE_MOCKS === 'true';
 const delay = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 // ==========================================================================

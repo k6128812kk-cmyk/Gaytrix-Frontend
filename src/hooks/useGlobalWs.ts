@@ -8,6 +8,7 @@ import { useSessionStore } from '@/context/sessionStore';
 // ==========================================================================
 
 const WS_URL = (import.meta.env.VITE_API_BASE_URL ?? '')
+  .trim()
   .replace('/v1', '')
   .replace('https://', 'wss://')
   .replace('http://', 'ws://') + '/ws';
