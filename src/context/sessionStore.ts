@@ -6,18 +6,20 @@ import type { UserProfile } from '@/types';
 // global unread message count (for the TabBar badge).
 //
 // hasCompletedOnboarding is persisted in localStorage so it survives
-// page reloads. A new user with an empty profile would otherwise be
-// sent back to onboarding on every refresh even after completing it.
+// page reloads.
+//
+// profileLooksComplete is intentionally lenient — we only require a
+// displayName so new users aren't bounced back to onboarding on every
+// refresh if they only partially filled their profile.
 // ==========================================================================
 
 const ONBOARDING_KEY = 'k5_onboarding_done';
 
+// A profile is "complete enough" to skip onboarding if the user has set
+// at least a display name. Bio and photos are encouraged but not required
+// to exit the loading screen — onboarding will prompt for them.
 function profileLooksComplete(profile: UserProfile): boolean {
-  return (
-    profile.displayName.trim().length > 0 &&
-    profile.bio.trim().length > 0 &&
-    profile.photos.length > 0
-  );
+  return profile.displayName != null && profile.displayName.trim().length > 0;
 }
 
 function loadOnboardingFlag(): boolean {
@@ -57,7 +59,13 @@ export const useSessionStore = create<SessionState>((set, get) => ({
   totalUnreadCount: 0,
 
   setProfile: (profile) => {
-    const done = loadOnboardingFlag() || profileLooksComplete(profile);
+    // Only auto-mark onboarding done if localStorage already says so,
+    // OR if the profile genuinely looks complete (has a display name).
+    // This prevents a new user (empty displayName from backend) from
+    // being considered "done" and skipping onboarding.
+    const alreadyDone = loadOnboardingFlag();
+    const looksComplete = profileLooksComplete(profile);
+    const done = alreadyDone || looksComplete;
     if (done) saveOnboardingFlag();
     set({ profile, hasCompletedOnboarding: done });
   },

@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { AppLayout } from '@/components/AppLayout';
@@ -31,27 +31,57 @@ import { useGlobalWs } from '@/hooks/useGlobalWs';
 import { useSessionStore } from '@/context/sessionStore';
 import { profileService } from '@/api/services';
 import { setInitData } from '@/api/client';
-import { useTranslation } from '@/i18n/useTranslation';
 import styles from './App.module.css';
 
+// ─── Screens ──────────────────────────────────────────────────────────────────
+
+function LoadingScreen({ slow }: { slow: boolean }) {
+  return (
+    <div className={styles.loading}>
+      <div className={styles.loadingLogo}>K5</div>
+      {slow && (
+        <p style={{ color: 'var(--color-text-faint)', fontSize: 13, marginTop: 16, textAlign: 'center' }}>
+          Waking up the server…
+        </p>
+      )}
+    </div>
+  );
+}
+
+function ErrorScreen({ message, onRetry }: { message: string; onRetry: () => void }) {
+  return (
+    <div className={styles.loading}>
+      <div className={styles.loadingLogo}>K5</div>
+      <p style={{ color: 'var(--color-text-muted)', fontSize: 14, marginTop: 20, textAlign: 'center', padding: '0 32px', lineHeight: 1.6 }}>
+        {message}
+      </p>
+      <button onClick={onRetry} style={{
+        marginTop: 20, padding: '12px 32px',
+        borderRadius: 'var(--radius-pill)',
+        background: 'var(--color-accent)', color: '#1a1014',
+        fontWeight: 700, fontSize: 15, border: 'none', cursor: 'pointer',
+      }}>
+        Try Again
+      </button>
+    </div>
+  );
+}
+
 function BannedScreen({ status }: { status: string }) {
-  const { t } = useTranslation();
   return (
     <div className={styles.blockedScreen}>
       <div className={styles.blockedCard}>
         <span className={styles.blockedIcon}>🚫</span>
-        <h2>
-          {status === 'banned'
-            ? (t('accountBanned' as any) || 'Account permanently banned')
-            : (t('accountSuspended' as any) || 'Account suspended')}
+        <h2 style={{ color: 'var(--color-danger)', fontSize: 18, fontWeight: 800 }}>
+          {status === 'banned' ? 'Account permanently banned' : 'Account suspended'}
         </h2>
-        <p>
+        <p style={{ fontSize: 14, color: 'var(--color-text-muted)', lineHeight: 1.6 }}>
           {status === 'banned'
-            ? (t('bannedMessage' as any) || 'Your account has been permanently banned for violating community guidelines.')
-            : (t('suspendedMessage' as any) || 'Your account is temporarily suspended. Please check back later.')}
+            ? 'Your account has been permanently banned for violating community guidelines.'
+            : 'Your account is temporarily suspended. Please check back later.'}
         </p>
         <p className={styles.blockedContact}>
-          {t('contactSupport' as any) || 'If you believe this is an error, contact support via @K5Support on Telegram.'}
+          Contact @K5Support on Telegram if you believe this is an error.
         </p>
       </div>
     </div>
@@ -64,67 +94,85 @@ function AdminGuard({ children }: { children: ReactNode }) {
   return <>{children}</>;
 }
 
-// Shown while Telegram initData is being verified by the server
-function AuthLoadingScreen() {
-  const { t } = useTranslation();
-  return (
-    <div className={styles.loading}>
-      <div className={styles.loadingLogo}>K5</div>
-      <p>{t('loading')}</p>
-    </div>
-  );
-}
-
-// Shown when app is opened outside Telegram (no initData)
-function TelegramRequiredScreen() {
-  return (
-    <div className={styles.loading}>
-      <div className={styles.loadingLogo}>K5</div>
-      <p style={{ color: 'var(--color-text-muted)', fontSize: 14, marginTop: 16, textAlign: 'center', padding: '0 24px' }}>
-        Open this app inside Telegram to continue.
-      </p>
-    </div>
-  );
-}
+// ─── App ──────────────────────────────────────────────────────────────────────
 
 export default function App() {
   const { initData, isReady } = useTelegram();
-  const { profile, isLoading, hasCompletedOnboarding, setProfile, setLoading, isActive } = useSessionStore();
+  const { profile, isLoading, hasCompletedOnboarding, setProfile, setLoading, isActive } =
+    useSessionStore();
+
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  // Show "waking up" hint after 5s of loading
+  const [slowLoad, setSlowLoad] = useState(false);
+  const slowTimer = useRef<ReturnType<typeof setTimeout>>();
 
   useGlobalWs();
 
+  function doLoadProfile() {
+    setErrorMessage(null);
+    setSlowLoad(false);
+    setLoading(true);
+
+    // After 5s still loading, show the "waking up" message
+    clearTimeout(slowTimer.current);
+    slowTimer.current = setTimeout(() => setSlowLoad(true), 5000);
+
+    profileService.getMe()
+      .then((p) => {
+        clearTimeout(slowTimer.current);
+        setProfile(p);
+      })
+      .catch((err) => {
+        clearTimeout(slowTimer.current);
+        setSlowLoad(false);
+        const status = err?.response?.status;
+        if (status === 401) {
+          setErrorMessage('Session expired. Close and re-open this app from Telegram.');
+        } else if (status === 403) {
+          setErrorMessage('Account restricted. Contact @K5Support.');
+        } else if (status === 500) {
+          setErrorMessage('Server error. Please try again in a moment.');
+        } else {
+          // Network error, timeout, CORS — give a clear retry message
+          setErrorMessage('Could not reach the server. Check your internet and try again.');
+        }
+        console.error('getMe failed — status:', status, 'message:', err?.message);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  }
+
   useEffect(() => {
     if (!isReady) return;
-
-    // Outside Telegram — no initData means we cannot authenticate.
-    // Show a "please open in Telegram" screen rather than mock data.
     if (!initData) {
       setLoading(false);
       return;
     }
-
     setInitData(initData);
+    doLoadProfile();
+    return () => clearTimeout(slowTimer.current);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isReady, initData]);
 
-    profileService.getMe()
-      .then(setProfile)
-      .catch((err) => {
-        console.error('Failed to load profile:', err);
-        // Don't fall back to mock data — let the user see an error
-        // so they know to try again rather than seeing fake profiles.
-      })
-      .finally(() => setLoading(false));
-  }, [isReady, initData, setProfile, setLoading]);
+  // ── Render ─────────────────────────────────────────────────────────────────
 
-  if (isLoading || (!profile && initData)) {
-    return <AuthLoadingScreen />;
+  if (isLoading) return <LoadingScreen slow={slowLoad} />;
+
+  if (errorMessage) return <ErrorScreen message={errorMessage} onRetry={doLoadProfile} />;
+
+  if (!profile) {
+    return (
+      <div className={styles.loading}>
+        <div className={styles.loadingLogo}>K5</div>
+        <p style={{ color: 'var(--color-text-muted)', fontSize: 14, marginTop: 20, textAlign: 'center', padding: '0 32px' }}>
+          Open this app inside Telegram to continue.
+        </p>
+      </div>
+    );
   }
 
-  // Not inside Telegram — can't authenticate
-  if (!initData && !profile) {
-    return <TelegramRequiredScreen />;
-  }
-
-  if (!isActive()) return <BannedScreen status={profile!.accountStatus} />;
+  if (!isActive()) return <BannedScreen status={profile.accountStatus} />;
   if (!hasCompletedOnboarding) return <OnboardingPage />;
 
   return (
