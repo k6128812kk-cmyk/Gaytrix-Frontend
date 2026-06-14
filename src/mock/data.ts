@@ -27,7 +27,7 @@ export const currentUser: UserProfile = {
   nationality: 'Turkish',
   relationshipStatus: 'single',
   lookingFor: ['friends', 'community'],
-  bio: 'Building GayTrix. Coffee, code, and city walks.',
+  bio: 'Building K5. Coffee, code, and city walks.',
   languages: ['English', 'Turkish'],
   interests: ['Tech', 'Coffee', 'Hiking'],
   occupation: 'Founder',
@@ -251,7 +251,7 @@ export const mockMessages: Record<string, ChatMessage[]> = {
   c2: [
     {
       id: 'm4', conversationId: 'c2', senderId: 'u4', type: 'text',
-      text: 'Welcome to GayTrix! Let me know if you have questions 🙂',
+      text: 'Welcome to K5! Let me know if you have questions 🙂',
       sentAt: new Date(now.getTime() - 1000 * 60 * 60 * 3).toISOString(),
       readAt: new Date(now.getTime() - 1000 * 60 * 60 * 2).toISOString(),
     },

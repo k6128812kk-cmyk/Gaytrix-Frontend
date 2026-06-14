@@ -12,7 +12,7 @@ const CATEGORIES = [
   { key: 'likes', label: 'Profile views', description: 'Someone viewed your profile (Premium)' },
   { key: 'events', label: 'Community events', description: 'New events near you and RSVP reminders' },
   { key: 'verification', label: 'Verification updates', description: 'Status changes to your verification request' },
-  { key: 'announcements', label: 'Announcements', description: 'Important platform updates from GayTrix' },
+  { key: 'announcements', label: 'Announcements', description: 'Important platform updates from K5' },
 ];
 
 export function NotificationsPage() {

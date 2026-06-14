@@ -101,7 +101,7 @@ export function PremiumPage() {
       <div className={styles.content}>
         <div className={styles.hero}>
           <Crown size={32} className={styles.heroIcon} />
-          <h1 className={styles.heroTitle}>GayTrix Premium</h1>
+          <h1 className={styles.heroTitle}>K5 Premium</h1>
           <p className={styles.heroSubtitle}>Get noticed faster and unlock the full experience.</p>
         </div>
 

@@ -138,7 +138,7 @@ export function ProfileDetailPage() {
 
       {reported && (
         <div style={{ padding: '8px 16px', background: 'var(--color-secondary-soft)', fontSize: 13, color: 'var(--color-secondary)' }}>
-          ✓ Report submitted. Thank you for keeping GayTrix safe.
+          ✓ Report submitted. Thank you for keeping K5 safe.
         </div>
       )}
 

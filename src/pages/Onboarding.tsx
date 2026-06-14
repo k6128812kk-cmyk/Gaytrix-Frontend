@@ -86,6 +86,7 @@ export function OnboardingPage() {
   })();
 
   async function handleNext() {
+    setSaveError(null);
     if (step < TOTAL_STEPS - 1) {
       setStep((s) => s + 1);
       return;

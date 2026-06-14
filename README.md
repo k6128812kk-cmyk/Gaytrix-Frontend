@@ -1,6 +1,6 @@
-# GayTrix — Telegram Mini App (Frontend)
+# K5 — Telegram Mini App (Frontend)
 
-React + TypeScript frontend for the GayTrix LGBTQ+ social platform, built as a Telegram Mini App.
+React + TypeScript frontend for the K5 LGBTQ+ social platform, built as a Telegram Mini App.
 
 ## Stack
 

@@ -20,7 +20,7 @@ export const LANGUAGE_LABELS: Record<Language, string> = {
 };
 
 function detectLanguage(): Language {
-  const saved = localStorage.getItem('gaytrix_lang');
+  const saved = localStorage.getItem('k5_lang');
   if (saved === 'tr' || saved === 'ru' || saved === 'en') return saved;
   // Auto-detect from Telegram/browser
   const tgLang = window.Telegram?.WebApp?.initDataUnsafe?.user?.language_code;
@@ -42,7 +42,7 @@ export const useI18nStore = create<I18nState>((set, get) => ({
   language: detectLanguage(),
 
   setLanguage: (lang: Language) => {
-    localStorage.setItem('gaytrix_lang', lang);
+    localStorage.setItem('k5_lang', lang);
     set({ language: lang });
   },
 

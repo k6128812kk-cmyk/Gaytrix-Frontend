@@ -7,7 +7,7 @@ import styles from './Help.module.css';
 // ==========================================================================
 
 const LINKS = [
-  { icon: MessageSquare, label: 'Contact support', sublabel: 'Chat with the GayTrix support bot' },
+  { icon: MessageSquare, label: 'Contact support', sublabel: 'Chat with the K5 support bot' },
   { icon: FileText, label: 'Community guidelines', sublabel: 'Rules for a safe and respectful community' },
   { icon: ShieldAlert, label: 'Safety center', sublabel: 'Tips for staying safe while meeting people' },
   { icon: FileText, label: 'Terms & Privacy Policy', sublabel: 'How your data is handled' },
@@ -32,7 +32,7 @@ export function HelpPage() {
             </button>
           ))}
         </nav>
-        <p className={styles.version}>GayTrix v1.0.0</p>
+        <p className={styles.version}>K5 v1.0.0</p>
       </div>
     </div>
   );

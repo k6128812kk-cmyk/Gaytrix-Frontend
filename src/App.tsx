@@ -45,7 +45,7 @@ function BannedScreen({ status }: { status: string }) {
             : 'Your account is temporarily suspended. Please check back later.'}
         </p>
         <p className={styles.blockedContact}>
-          If you believe this is an error, contact support via @GayTrixSupport on Telegram.
+          If you believe this is an error, contact support via @K5Support on Telegram.
         </p>
       </div>
     </div>
@@ -73,7 +73,7 @@ export default function App() {
   if (isLoading || !profile) {
     return (
       <div className={styles.loading}>
-        <div className={styles.loadingLogo}>GT</div>
+        <div className={styles.loadingLogo}>K5</div>
         <p>Loading...</p>
       </div>
     );

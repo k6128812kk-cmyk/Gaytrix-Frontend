@@ -1,5 +1,5 @@
 // ==========================================================================
-// Core domain types — GayTrix Mini App
+// Core domain types — K5 Mini App
 // ==========================================================================
 
 export type RelationshipStatus =
