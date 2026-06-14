@@ -187,6 +187,8 @@ function StoryViewer({ stories, index, onClose, onNext, onPrev }: {
       storyService.getViewers(story.id).then(setViewers).catch(() => {});
     }
   }, [showViewers]);
+
+  useEffect(() => {
     setProgress(0);
     setShowViewers(false);
     clearInterval(timerRef.current);
