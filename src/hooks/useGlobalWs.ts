@@ -1,4 +1,4 @@
-import { useEffect, useRef, useCallback } from 'react';
+import { useEffect, useRef } from 'react';
 import { useSessionStore } from '@/context/sessionStore';
 
 // ==========================================================================
@@ -68,7 +68,6 @@ function connect(initData: string, onUnread: (count: number) => void) {
   globalWs.onclose = () => {
     isConnecting = false;
     globalWs = null;
-    // Reconnect after 3s
     if (reconnectTimer) clearTimeout(reconnectTimer);
     reconnectTimer = setTimeout(() => connect(initData, onUnread), 3000);
   };
@@ -91,11 +90,9 @@ export function useGlobalWs() {
     connect(initData, (count) => setTotalUnread(count));
 
     return () => {
-      // Don't disconnect on unmount — we want a persistent connection
+      // Don't disconnect on unmount — persistent connection
     };
   }, [setTotalUnread]);
 
-  const sendMessage = useCallback((data: Record<string, unknown>) => send(data), []);
-
-  return { send: sendMessage };
+  return { send };
 }
