@@ -31,21 +31,27 @@ import { useGlobalWs } from '@/hooks/useGlobalWs';
 import { useSessionStore } from '@/context/sessionStore';
 import { profileService } from '@/api/services';
 import { setInitData } from '@/api/client';
+import { useTranslation } from '@/i18n/useTranslation';
 import styles from './App.module.css';
 
 function BannedScreen({ status }: { status: string }) {
+  const { t } = useTranslation();
   return (
     <div className={styles.blockedScreen}>
       <div className={styles.blockedCard}>
         <span className={styles.blockedIcon}>🚫</span>
-        <h2>Account {status === 'banned' ? 'permanently banned' : 'suspended'}</h2>
+        <h2>
+          {status === 'banned'
+            ? (t('accountBanned' as any) || 'Account permanently banned')
+            : (t('accountSuspended' as any) || 'Account suspended')}
+        </h2>
         <p>
           {status === 'banned'
-            ? 'Your account has been permanently banned for violating community guidelines.'
-            : 'Your account is temporarily suspended. Please check back later.'}
+            ? (t('bannedMessage' as any) || 'Your account has been permanently banned for violating community guidelines.')
+            : (t('suspendedMessage' as any) || 'Your account is temporarily suspended. Please check back later.')}
         </p>
         <p className={styles.blockedContact}>
-          If you believe this is an error, contact support via @K5Support on Telegram.
+          {t('contactSupport' as any) || 'If you believe this is an error, contact support via @K5Support on Telegram.'}
         </p>
       </div>
     </div>
@@ -58,6 +64,29 @@ function AdminGuard({ children }: { children: ReactNode }) {
   return <>{children}</>;
 }
 
+// Shown while Telegram initData is being verified by the server
+function AuthLoadingScreen() {
+  const { t } = useTranslation();
+  return (
+    <div className={styles.loading}>
+      <div className={styles.loadingLogo}>K5</div>
+      <p>{t('loading')}</p>
+    </div>
+  );
+}
+
+// Shown when app is opened outside Telegram (no initData)
+function TelegramRequiredScreen() {
+  return (
+    <div className={styles.loading}>
+      <div className={styles.loadingLogo}>K5</div>
+      <p style={{ color: 'var(--color-text-muted)', fontSize: 14, marginTop: 16, textAlign: 'center', padding: '0 24px' }}>
+        Open this app inside Telegram to continue.
+      </p>
+    </div>
+  );
+}
+
 export default function App() {
   const { initData, isReady } = useTelegram();
   const { profile, isLoading, hasCompletedOnboarding, setProfile, setLoading, isActive } = useSessionStore();
@@ -66,37 +95,36 @@ export default function App() {
 
   useEffect(() => {
     if (!isReady) return;
-    setInitData(initData);
 
-    // Outside Telegram, initData is empty so the backend rejects with 401.
-    // Fall back to mock data so the app is fully usable in a browser.
+    // Outside Telegram — no initData means we cannot authenticate.
+    // Show a "please open in Telegram" screen rather than mock data.
     if (!initData) {
-      import('@/mock/data').then(({ currentUser }) => {
-        setProfile(currentUser);
-        setLoading(false);
-      });
+      setLoading(false);
       return;
     }
 
+    setInitData(initData);
+
     profileService.getMe()
       .then(setProfile)
-      .catch(() => {
-        // API failed even with initData — load mock so the screen doesn't hang.
-        import('@/mock/data').then(({ currentUser }) => setProfile(currentUser));
+      .catch((err) => {
+        console.error('Failed to load profile:', err);
+        // Don't fall back to mock data — let the user see an error
+        // so they know to try again rather than seeing fake profiles.
       })
       .finally(() => setLoading(false));
   }, [isReady, initData, setProfile, setLoading]);
 
-  if (isLoading || !profile) {
-    return (
-      <div className={styles.loading}>
-        <div className={styles.loadingLogo}>K5</div>
-        <p>Loading...</p>
-      </div>
-    );
+  if (isLoading || (!profile && initData)) {
+    return <AuthLoadingScreen />;
   }
 
-  if (!isActive()) return <BannedScreen status={profile.accountStatus} />;
+  // Not inside Telegram — can't authenticate
+  if (!initData && !profile) {
+    return <TelegramRequiredScreen />;
+  }
+
+  if (!isActive()) return <BannedScreen status={profile!.accountStatus} />;
   if (!hasCompletedOnboarding) return <OnboardingPage />;
 
   return (

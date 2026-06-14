@@ -4,6 +4,7 @@ import { SlidersHorizontal, ShieldCheck, Sparkles, Clock } from 'lucide-react';
 import { PageHeader } from '@/components/PageHeader';
 import { Stories } from '@/components/Stories';
 import { discoveryService } from '@/api/services';
+import { useTranslation } from '@/i18n/useTranslation';
 import { assetUrl } from '@/api/client';
 import type { UserProfile, DiscoveryFilters } from '@/types';
 import styles from './Discover.module.css';
@@ -13,12 +14,6 @@ import styles from './Discover.module.css';
 // ==========================================================================
 
 type ExploreSection = 'new' | 'verified' | 'recent';
-
-const SECTIONS: { key: ExploreSection; label: string; icon: typeof ShieldCheck }[] = [
-  { key: 'new', label: 'New members', icon: Sparkles },
-  { key: 'verified', label: 'Verified members', icon: ShieldCheck },
-  { key: 'recent', label: 'Recently active', icon: Clock },
-];
 
 function loadFilters(): Partial<DiscoveryFilters> {
   try {
@@ -31,12 +26,19 @@ function loadFilters(): Partial<DiscoveryFilters> {
 export function DiscoverPage() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { t } = useTranslation();
   const [nearby, setNearby] = useState<UserProfile[]>([]);
   const [explore, setExplore] = useState<Record<ExploreSection, UserProfile[]>>({
     new: [], verified: [], recent: [],
   });
   const [loading, setLoading] = useState(true);
   const [activeFilters, setActiveFilters] = useState(false);
+
+  const SECTIONS: { key: ExploreSection; label: string; icon: typeof ShieldCheck }[] = [
+    { key: 'new', label: t('newMembers'), icon: Sparkles },
+    { key: 'verified', label: t('verifiedMembers'), icon: ShieldCheck },
+    { key: 'recent', label: t('recentlyActive'), icon: Clock },
+  ];
 
   useEffect(() => {
     const filters = loadFilters();
@@ -65,12 +67,12 @@ export function DiscoverPage() {
   return (
     <div className={styles.page}>
       <PageHeader
-        title="Discover"
+        title={t('discover')}
         action={
           <button
             className={`${styles.filterButton} ${activeFilters ? styles.filterButtonActive : ''}`}
             onClick={() => navigate('/discover/filters')}
-            aria-label="Filters"
+            aria-label={t('filters')}
           >
             <SlidersHorizontal size={18} />
             {activeFilters && <span className={styles.filterDot} />}
@@ -93,7 +95,7 @@ export function DiscoverPage() {
               {loading
                 ? Array.from({ length: 4 }).map((_, i) => <div key={i} className={styles.railSkeleton} />)
                 : explore[key].length === 0
-                  ? <p className={styles.railEmpty}>No profiles yet</p>
+                  ? <p className={styles.railEmpty}>{t('noProfilesYet')}</p>
                   : explore[key].map(p => <MiniCard key={p.id} profile={p} />)}
             </div>
           </section>
@@ -102,7 +104,7 @@ export function DiscoverPage() {
         {/* Nearby grid */}
         <section className={styles.section}>
           <div className={styles.sectionHeader}>
-            <h2 className={styles.sectionTitle}>All members</h2>
+            <h2 className={styles.sectionTitle}>{t('allMembers')}</h2>
           </div>
           <div className={styles.grid}>
             {loading
@@ -110,7 +112,7 @@ export function DiscoverPage() {
               : nearby.map(p => <GridCard key={p.id} profile={p} />)}
           </div>
           {!loading && nearby.length === 0 && (
-            <p className={styles.railEmpty}>No profiles match your filters</p>
+            <p className={styles.railEmpty}>{t('noProfilesMatchFilters')}</p>
           )}
         </section>
       </div>
@@ -121,6 +123,7 @@ export function DiscoverPage() {
 // ── Compact rail card (horizontal scroll) ─────────────────────────────────
 function MiniCard({ profile }: { profile: UserProfile }) {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const src = profile.photos[0]
     ? (profile.photos[0].startsWith('http') ? profile.photos[0] : assetUrl(profile.photos[0]))
     : `https://i.pravatar.cc/200?u=${profile.id}`;
@@ -132,7 +135,7 @@ function MiniCard({ profile }: { profile: UserProfile }) {
         {profile.isOnline && <span className={styles.onlineDot} />}
         {profile.verification === 'verified' && <span className={styles.verifiedDot}>✓</span>}
       </div>
-      <div className={styles.miniName}>{profile.displayName?.split(' ')[0] || 'User'}</div>
+      <div className={styles.miniName}>{profile.displayName?.split(' ')[0] || t('noProfilesYet')}</div>
       {profile.age && <div className={styles.miniAge}>{profile.age}</div>}
     </button>
   );

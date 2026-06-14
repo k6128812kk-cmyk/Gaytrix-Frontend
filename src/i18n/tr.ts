@@ -7,6 +7,15 @@ export const tr: Partial<Record<TranslationKey, string>> = {
   chat: 'Sohbet',
   profile: 'Profil',
 
+  // Auth / Loading
+  loading: 'Yükleniyor…',
+  openInTelegram: 'Devam etmek için bu uygulamayı Telegram içinde açın.',
+  accountBanned: 'Hesap kalıcı olarak yasaklandı',
+  accountSuspended: 'Hesap askıya alındı',
+  bannedMessage: 'Hesabınız topluluk kurallarını ihlal ettiği için kalıcı olarak yasaklandı.',
+  suspendedMessage: 'Hesabınız geçici olarak askıya alındı. Lütfen daha sonra tekrar kontrol edin.',
+  contactSupport: 'Bunun bir hata olduğunu düşünüyorsanız, Telegram üzerinden @K5Support ile iletişime geçin.',
+
   // Discover
   newMembers: 'Yeni üyeler',
   verifiedMembers: 'Doğrulanmış üyeler',
@@ -44,6 +53,12 @@ export const tr: Partial<Record<TranslationKey, string>> = {
   yesterday: 'Dün',
   live: 'Canlı',
   connecting: 'Bağlanıyor…',
+  typeAMessage: 'Mesaj yazın…',
+  attachPhoto: 'Fotoğraf ekle',
+  voiceNote: 'Sesli not',
+  sendPhoto: 'Fotoğraf Gönder',
+  cancel: 'İptal',
+  sending: 'Gönderiliyor…',
 
   // Groups
   createGroup: 'Grup oluştur',
@@ -67,6 +82,17 @@ export const tr: Partial<Record<TranslationKey, string>> = {
   replyToStory: 'Hikayeye yanıtla…',
   storyExpired: 'Bu hikaye sona erdi',
   noStoriesYet: 'Henüz hikaye yok',
+  takePhoto: 'Fotoğraf Çek',
+  uploadPhoto: 'Galeriden Yükle',
+  addStoryTitle: 'Hikaye Ekle',
+  addStoryOption: 'Hikayenizi nasıl eklemek istediğinizi seçin',
+  storyUploading: 'Yükleniyor…',
+  storyViewers: 'Görüntüleyenler',
+  noViewsYet: 'Henüz görüntüleme yok',
+  deleteStory: 'Hikayeyi sil',
+  you: 'Sen',
+  replyTo: 'Yanıtla',
+  viewersLabel: 'Görüntüleyenler',
 
   // Profile
   editProfile: 'Profili düzenle',
@@ -88,6 +114,10 @@ export const tr: Partial<Record<TranslationKey, string>> = {
   help: 'Yardım & Destek',
   premium: 'Premium',
   verification: 'Doğrulama al',
+  editProfileMenu: 'Profili düzenle',
+  signOut: 'Çıkış yap',
+  managePremium: 'Premium Yönet',
+  upgradePremium: 'Premium\'a Yükselt',
 
   // Privacy
   invisibleMode: 'Görünmez mod',
@@ -99,11 +129,65 @@ export const tr: Partial<Record<TranslationKey, string>> = {
   blockedUsers: 'Engellenen kullanıcılar',
   noBlockedUsers: 'Hiçbir kişiyi engellememisiniz.',
   unblock: 'Engeli kaldır',
+  privacySettings: 'Gizlilik ayarları',
+
+  // Notifications
+  notificationsTitle: 'Bildirimler',
+  pushNotifications: 'Anlık bildirimler',
+  messageAlerts: 'Mesaj uyarıları',
+  storyReplies: 'Hikaye yanıtları',
+  profileViews: 'Profil görüntülemeleri',
+
+  // Help
+  helpTitle: 'Yardım & Destek',
+  faq: 'SSS',
+  contactUs: 'Bize ulaşın',
+  reportBug: 'Hata bildir',
+  termsOfService: 'Kullanım koşulları',
+  privacyPolicy: 'Gizlilik politikası',
+
+  // Verification
+  verificationTitle: 'Doğrulama Al',
+  verificationDesc: 'Kimliğinizi doğrulamak ve rozet almak için selfie çekin.',
+  verificationPending: 'Doğrulama bekleniyor…',
+  verificationVerified: 'Doğrulandı ✓',
+  verificationRejected: 'Doğrulama reddedildi — tekrar deneyin',
+  verificationBadge: 'Güvenilir profiller için isteğe bağlı rozet',
+  submitVerification: 'Doğrulamayı gönder',
+
+  // Premium
+  premiumTitle: 'Premium',
+  premiumFeatures: 'Premium özellikler',
+  upgradeToPremium: 'Premium\'a Yükselt',
+  premiumBoosts: 'Öne çıkarma, gelişmiş filtreler, profil görüntülemeleri',
+
+  // Onboarding
+  addPhotos: 'Fotoğraflarınızı ekleyin',
+  addPhotosDesc: 'En az bir fotoğraf ekleyin. Profilinizi kimin göreceğini gizlilik ayarlarından yönetebilirsiniz.',
+  addPhoto: 'Fotoğraf ekle',
+  theBasics: 'Temel bilgiler',
+  theBasicsDesc: 'Telegram hesabınız otomatik olarak bağlanır. Başkalarına nasıl görüneceğinizi seçin.',
+  telegramLinked: 'Telegram kullanıcı adı (otomatik bağlı)',
+  verifiedByTelegram: '✓ Telegram tarafından doğrulandı',
+  displayNameLabel: 'Görünen ad',
+  displayNamePlaceholder: 'Adınızın nasıl görüneceğini seçin (örn. Ali, Max)',
+  displayNameHint: 'Bu Telegram adınızdan ayrıdır — istediğiniz gibi seçersiniz.',
+  age: 'Yaş',
+  city: 'Şehir',
+  whatLookingFor: 'Ne arıyorsunuz?',
+  whatLookingForDesc: 'Uygun olanları seçin. İstediğiniz zaman değiştirebilirsiniz.',
+  writeBio: 'Biyografinizi yazın',
+  writeBioDesc: 'Kendiniz hakkında birkaç cümle çok işe yarar. Kendiniz olun.',
+  bioPlaceholder: 'Kendiniz hakkında bir şeyler anlatın...',
+  continue: 'Devam',
+  finish: 'Bitir',
 
   // Errors
   somethingWentWrong: 'Bir şeyler ters gitti',
   tryAgain: 'Lütfen tekrar deneyin.',
   failedToLoad: 'Yüklenemedi. Lütfen tekrar deneyin.',
+  failedToLoadConversations: 'Sohbetler yüklenemedi. Lütfen tekrar deneyin.',
+  failedToSend: 'Gönderilemedi. Lütfen tekrar deneyin.',
 
   // Admin
   adminPanel: 'Yönetici Paneli',
@@ -115,11 +199,18 @@ export const tr: Partial<Record<TranslationKey, string>> = {
   moderators: 'Moderatörler',
   announcements: 'Duyurular',
 
+  // Profile detail
+  sendMessage: 'Mesaj gönder',
+  report: 'Şikayet et',
+  block: 'Engelle',
+  about: 'Hakkında',
+  distance: 'Mesafe',
+  joined: 'Katıldı',
+  lastSeen: 'Son görülme',
+
   // Common
-  cancel: 'İptal',
   confirm: 'Onayla',
   close: 'Kapat',
-  loading: 'Yükleniyor…',
   search: 'Ara',
   optional: 'İsteğe bağlı',
   required: 'gerekli',
@@ -127,4 +218,6 @@ export const tr: Partial<Record<TranslationKey, string>> = {
   done: 'Tamam',
   yes: 'Evet',
   no: 'Hayır',
+  ok: 'Tamam',
+  error: 'Hata',
 };

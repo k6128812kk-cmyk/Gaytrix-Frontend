@@ -2,22 +2,11 @@ import { useEffect, useState } from 'react';
 import { EyeOff, MapPin, Lock, Ghost, Users, UserX } from 'lucide-react';
 import { PageHeader } from '@/components/PageHeader';
 import { useSessionStore } from '@/context/sessionStore';
+import { useTranslation } from '@/i18n/useTranslation';
 import { profileService } from '@/api/services';
 import { api } from '@/api/client';
 import type { PrivacySettings } from '@/types';
 import styles from './Privacy.module.css';
-
-const TOGGLES: {
-  key: keyof PrivacySettings;
-  icon: typeof EyeOff;
-  label: string;
-  description: string;
-}[] = [
-  { key: 'hideExactLocation', icon: MapPin, label: 'Approximate location only', description: 'Show your general area instead of your precise location.' },
-  { key: 'invisibleMode', icon: Ghost, label: 'Invisible mode', description: "Browse without appearing in other people's discovery feeds." },
-  { key: 'hideOnlineStatus', icon: EyeOff, label: 'Hide online status', description: 'Stop showing the green online indicator and "last active" time.' },
-  { key: 'privateProfile', icon: Lock, label: 'Private profile', description: 'Only people you message first can view your full profile.' },
-];
 
 interface BlockedUser {
   id: string;
@@ -28,10 +17,18 @@ interface BlockedUser {
 
 export function PrivacyPage() {
   const { profile, updateProfile } = useSessionStore();
+  const { t } = useTranslation();
   const [saving, setSaving] = useState<string | null>(null);
   const [blockedUsers, setBlockedUsers] = useState<BlockedUser[]>([]);
   const [loadingBlocked, setLoadingBlocked] = useState(true);
   const [unblocking, setUnblocking] = useState<string | null>(null);
+
+  const TOGGLES: { key: keyof PrivacySettings; icon: typeof EyeOff; label: string; description: string }[] = [
+    { key: 'hideExactLocation', icon: MapPin, label: t('approximateLocation'), description: t('approximateLocationDesc') },
+    { key: 'invisibleMode', icon: Ghost, label: t('invisibleMode'), description: t('invisibleModeDesc') },
+    { key: 'hideOnlineStatus', icon: EyeOff, label: t('hideOnlineStatus'), description: t('hideOnlineStatusDesc') },
+    { key: 'privateProfile', icon: Lock, label: 'Private profile', description: 'Only people you message first can view your full profile.' },
+  ];
 
   useEffect(() => {
     api.get<BlockedUser[]>('/users/blocked')
@@ -47,25 +44,20 @@ export function PrivacyPage() {
     try {
       const updated = await profileService.updateMe({ privacy: next });
       updateProfile(updated);
-    } finally {
-      setSaving(null);
-    }
+    } finally { setSaving(null); }
   }
 
   async function handleUnblock(userId: string) {
     setUnblocking(userId);
     try {
       await api.delete(`/users/${userId}/block`);
-      setBlockedUsers((prev) => prev.filter((u) => u.id !== userId));
-    } finally {
-      setUnblocking(null);
-    }
+      setBlockedUsers(prev => prev.filter(u => u.id !== userId));
+    } finally { setUnblocking(null); }
   }
 
   return (
     <div className={styles.page}>
-      <PageHeader title="Privacy" showBack />
-
+      <PageHeader title={t('privacySettings')} showBack />
       <div className={styles.content}>
         <section className={styles.group}>
           {TOGGLES.map(({ key, icon: Icon, label, description }) => (
@@ -92,30 +84,30 @@ export function PrivacyPage() {
           <div className={styles.row}>
             <span className={styles.icon}><Users size={18} /></span>
             <div className={styles.rowText}>
-              <p className={styles.label}>Blocked users</p>
+              <p className={styles.label}>{t('blockedUsers')}</p>
               <p className={styles.description}>People you've blocked can't see your profile or message you.</p>
             </div>
           </div>
 
           {loadingBlocked && (
             <div style={{ padding: '12px 16px', color: 'var(--color-text-faint)', fontSize: 13 }}>
-              Loading...
+              {t('loading')}
             </div>
           )}
 
           {!loadingBlocked && blockedUsers.length === 0 && (
             <div style={{ padding: '12px 16px', color: 'var(--color-text-faint)', fontSize: 13 }}>
-              You haven't blocked anyone.
+              {t('noBlockedUsers')}
             </div>
           )}
 
-          {blockedUsers.map((user) => (
+          {blockedUsers.map(user => (
             <div key={user.id} style={{
               display: 'flex', alignItems: 'center', gap: 12,
               padding: '10px 16px', borderTop: '1px solid var(--color-border)',
             }}>
               <img
-                src={user.photos?.[0] ?? 'https://i.pravatar.cc/100'}
+                src={user.photos?.[0] ?? `https://i.pravatar.cc/100?u=${user.id}`}
                 alt={user.displayName}
                 style={{ width: 38, height: 38, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }}
               />
@@ -140,7 +132,7 @@ export function PrivacyPage() {
                 }}
               >
                 <UserX size={13} />
-                {unblocking === user.id ? 'Unblocking...' : 'Unblock'}
+                {unblocking === user.id ? t('loading') : t('unblock')}
               </button>
             </div>
           ))}

@@ -5,6 +5,7 @@ import { PageHeader } from '@/components/PageHeader';
 import { Avatar } from '@/components/Avatar';
 import { chatService } from '@/api/services';
 import { wsClient } from '@/hooks/useGlobalWs';
+import { useTranslation } from '@/i18n/useTranslation';
 import type { Conversation } from '@/types';
 import styles from './ChatList.module.css';
 
@@ -14,6 +15,7 @@ import styles from './ChatList.module.css';
 
 export function ChatListPage() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -23,7 +25,7 @@ export function ChatListPage() {
       .then(data => { setConversations(data); setLoading(false); })
       .catch(err => {
         console.error('Failed to load conversations:', err);
-        setError('Failed to load conversations. Please try again.');
+        setError(t('failedToLoadConversations'));
         setLoading(false);
       });
   }, []);
@@ -35,8 +37,7 @@ export function ChatListPage() {
       if (!m?.conversationId) return;
       setConversations(prev => prev.map(c => {
         if (c.id !== m.conversationId) return c;
-        // If the message is from the other person, increment unread
-        if (m.senderId !== c.participant.id) return c; // it's our own message
+        if (m.senderId !== c.participant.id) return c;
         return { ...c, unreadCount: c.unreadCount + 1, lastMessage: _msg.message as any };
       }));
     };
@@ -44,21 +45,12 @@ export function ChatListPage() {
     return () => wsClient.removeHandler('message', handler);
   }, []);
 
-  // When we read a conversation, clear its local unread count
-  useEffect(() => {
-    const handler = (_msg: Record<string, unknown>) => {
-      // read_receipt means the other person read our messages (no unread change here)
-    };
-    wsClient.addHandler('read_receipt', handler);
-    return () => wsClient.removeHandler('read_receipt', handler);
-  }, []);
-
   const requests = conversations.filter(c => c.isMessageRequest);
   const active = conversations.filter(c => !c.isMessageRequest);
 
   return (
     <div className={styles.page}>
-      <PageHeader title="Chat" />
+      <PageHeader title={t('chat')} />
       <div className={styles.content}>
         {loading && (
           <div className={styles.skeletonList}>
@@ -68,14 +60,14 @@ export function ChatListPage() {
 
         {!loading && error && (
           <div className={styles.empty}>
-            <h3>Something went wrong</h3>
+            <h3>{t('somethingWentWrong')}</h3>
             <p>{error}</p>
           </div>
         )}
 
         {!loading && !error && requests.length > 0 && (
           <section className={styles.section}>
-            <h2 className={styles.sectionTitle}>Message requests ({requests.length})</h2>
+            <h2 className={styles.sectionTitle}>{t('messageRequests')} ({requests.length})</h2>
             {requests.map(conv => (
               <ConversationRow key={conv.id} conversation={conv}
                 onClick={() => {
@@ -90,8 +82,8 @@ export function ChatListPage() {
           <section className={styles.section}>
             {active.length === 0 ? (
               <div className={styles.empty}>
-                <h3>No conversations yet</h3>
-                <p>Start a conversation from someone's profile in Discover.</p>
+                <h3>{t('noConversationsYet')}</h3>
+                <p>{t('startConversationHint')}</p>
               </div>
             ) : (
               active.map(conv => (
@@ -110,6 +102,7 @@ export function ChatListPage() {
 }
 
 function ConversationRow({ conversation, onClick }: { conversation: Conversation; onClick: () => void }) {
+  const { t } = useTranslation();
   const { participant, lastMessage, unreadCount, isMessageRequest } = conversation;
   const hasUnread = unreadCount > 0;
 
@@ -138,8 +131,8 @@ function ConversationRow({ conversation, onClick }: { conversation: Conversation
         <div className={styles.rowBottom}>
           <span className={`${styles.rowPreview} ${hasUnread ? styles.rowPreviewBold : ''}`}>
             {isMessageRequest
-              ? 'Wants to send you a message'
-              : lastMessage?.text ?? (lastMessage?.type === 'image' ? '📷 Photo' : 'No messages yet')}
+              ? t('wantsToMessage')
+              : lastMessage?.text ?? (lastMessage?.type === 'image' ? '📷 Photo' : t('noMessagesYet'))}
           </span>
           {hasUnread && (
             <span className={styles.unreadBadge}>{unreadCount > 99 ? '99+' : unreadCount}</span>

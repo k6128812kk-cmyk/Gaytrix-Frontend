@@ -19,24 +19,24 @@ import styles from './Profile.module.css';
 export function ProfilePage() {
   const navigate = useNavigate();
   const { profile, isAdmin, isModerator } = useSessionStore();
-  const { language, setLanguage } = useTranslation();
+  const { t, language, setLanguage } = useTranslation();
 
   if (!profile) return null;
 
   const verificationLabel =
-    profile.verification === 'verified' ? 'Verified ✓' :
-    profile.verification === 'pending' ? 'Verification pending...' :
-    profile.verification === 'rejected' ? 'Verification rejected — retry' :
-    'Get verified';
+    profile.verification === 'verified' ? t('verificationVerified') :
+    profile.verification === 'pending' ? t('verificationPending') :
+    profile.verification === 'rejected' ? t('verificationRejected') :
+    t('verification');
 
   return (
     <div className={styles.page}>
-      <PageHeader title="Profile" />
+      <PageHeader title={t('profile')} />
 
       <div className={styles.content}>
         <button className={styles.profileSummary} onClick={() => navigate('/profile/edit')}>
           <Avatar
-            src={profile.photos[0] ?? 'https://i.pravatar.cc/100'}
+            src={profile.photos[0] ?? ''}
             alt={profile.displayName}
             size={64}
             isOnline={profile.isOnline}
@@ -50,7 +50,7 @@ export function ProfilePage() {
             <div className={styles.badgeRow}>
               {isAdmin() && <Badge variant="gold">👑 Admin</Badge>}
               {!isAdmin() && isModerator() && <Badge variant="gold">🛡 Moderator</Badge>}
-              {profile.verification === 'verified' && !isAdmin() && <Badge variant="gold">Verified</Badge>}
+              {profile.verification === 'verified' && !isAdmin() && <Badge variant="gold">{t('verificationVerified')}</Badge>}
               {profile.membership === 'premium' && <Badge variant="premium">Premium</Badge>}
             </div>
           </div>
@@ -61,23 +61,24 @@ export function ProfilePage() {
           <MenuItem
             icon={ShieldCheck}
             label={verificationLabel}
-            sublabel="Optional badge for trusted profiles"
+            sublabel={t('verificationBadge')}
             onClick={() => navigate('/profile/verification')}
             highlight={profile.verification !== 'verified'}
           />
           <MenuItem
             icon={Crown}
-            label={profile.membership === 'premium' ? 'Manage Premium' : 'Upgrade to Premium'}
-            sublabel="Boosts, advanced filters, profile views"
+            label={profile.membership === 'premium' ? t('managePremium') : t('upgradePremium')}
+            sublabel={t('premiumBoosts')}
             onClick={() => navigate('/profile/premium')}
             highlight={profile.membership !== 'premium'}
           />
-          <MenuItem icon={Settings} label="Edit profile" onClick={() => navigate('/profile/edit')} />
-          <MenuItem icon={Eye} label="Privacy settings" onClick={() => navigate('/profile/privacy')} />
+          <MenuItem icon={Settings} label={t('editProfileMenu')} onClick={() => navigate('/profile/edit')} />
+          <MenuItem icon={Eye} label={t('privacySettings')} onClick={() => navigate('/profile/privacy')} />
+
           {/* Language selector */}
           <div style={{ display: 'flex', alignItems: 'center', padding: '12px 16px', borderBottom: '1px solid var(--color-border)', gap: 12 }}>
             <Globe size={18} style={{ color: 'var(--color-text-muted)', flexShrink: 0 }} />
-            <span style={{ flex: 1, fontSize: 15, color: 'var(--color-text)' }}>Language</span>
+            <span style={{ flex: 1, fontSize: 15, color: 'var(--color-text)' }}>{t('language')}</span>
             <select
               value={language}
               onChange={e => setLanguage(e.target.value as Language)}
@@ -92,19 +93,22 @@ export function ProfilePage() {
               ))}
             </select>
           </div>
-          <MenuItem icon={Bell} label="Notifications" onClick={() => navigate('/profile/notifications')} />
+
+          <MenuItem icon={Bell} label={t('notifications')} onClick={() => navigate('/profile/notifications')} />
+
           {/* Admin panel — only shown when server assigns admin/moderator role */}
           {isModerator() && (
             <MenuItem
               icon={ShieldAlert}
-              label={isAdmin() ? '👑 Admin Panel' : '🛡 Moderator Panel'}
+              label={isAdmin() ? `👑 ${t('adminPanel')}` : `🛡 ${t('moderatorPanel')}`}
               sublabel="Manage users, reports, verification"
               onClick={() => navigate('/admin')}
               accent
             />
           )}
-          <MenuItem icon={HelpCircle} label="Help & support" onClick={() => navigate('/profile/help')} />
-          <MenuItem icon={LogOut} label="Sign out" onClick={() => {}} danger />
+
+          <MenuItem icon={HelpCircle} label={t('help')} onClick={() => navigate('/profile/help')} />
+          <MenuItem icon={LogOut} label={t('signOut')} onClick={() => {}} danger />
         </nav>
       </div>
     </div>

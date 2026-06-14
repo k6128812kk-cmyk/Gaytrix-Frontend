@@ -7,6 +7,15 @@ export const ru: Partial<Record<TranslationKey, string>> = {
   chat: 'Чат',
   profile: 'Профиль',
 
+  // Auth / Loading
+  loading: 'Загрузка…',
+  openInTelegram: 'Откройте это приложение в Telegram для продолжения.',
+  accountBanned: 'Аккаунт заблокирован навсегда',
+  accountSuspended: 'Аккаунт приостановлен',
+  bannedMessage: 'Ваш аккаунт был заблокирован навсегда за нарушение правил сообщества.',
+  suspendedMessage: 'Ваш аккаунт временно приостановлен. Пожалуйста, проверьте позже.',
+  contactSupport: 'Если вы считаете это ошибкой, свяжитесь с поддержкой через @K5Support в Telegram.',
+
   // Discover
   newMembers: 'Новые участники',
   verifiedMembers: 'Проверенные участники',
@@ -44,6 +53,12 @@ export const ru: Partial<Record<TranslationKey, string>> = {
   yesterday: 'Вчера',
   live: 'Онлайн',
   connecting: 'Подключение…',
+  typeAMessage: 'Введите сообщение…',
+  attachPhoto: 'Прикрепить фото',
+  voiceNote: 'Голосовое сообщение',
+  sendPhoto: 'Отправить фото',
+  cancel: 'Отмена',
+  sending: 'Отправка…',
 
   // Groups
   createGroup: 'Создать группу',
@@ -67,6 +82,17 @@ export const ru: Partial<Record<TranslationKey, string>> = {
   replyToStory: 'Ответить на историю…',
   storyExpired: 'Эта история истекла',
   noStoriesYet: 'Историй пока нет',
+  takePhoto: 'Сделать фото',
+  uploadPhoto: 'Загрузить из галереи',
+  addStoryTitle: 'Добавить историю',
+  addStoryOption: 'Выберите способ добавления истории',
+  storyUploading: 'Загрузка…',
+  storyViewers: 'Просмотры',
+  noViewsYet: 'Просмотров пока нет',
+  deleteStory: 'Удалить историю',
+  you: 'Вы',
+  replyTo: 'Ответить',
+  viewersLabel: 'Просмотры',
 
   // Profile
   editProfile: 'Редактировать профиль',
@@ -88,6 +114,10 @@ export const ru: Partial<Record<TranslationKey, string>> = {
   help: 'Помощь и поддержка',
   premium: 'Премиум',
   verification: 'Получить верификацию',
+  editProfileMenu: 'Редактировать профиль',
+  signOut: 'Выйти',
+  managePremium: 'Управление Premium',
+  upgradePremium: 'Перейти на Premium',
 
   // Privacy
   invisibleMode: 'Режим невидимки',
@@ -99,11 +129,65 @@ export const ru: Partial<Record<TranslationKey, string>> = {
   blockedUsers: 'Заблокированные пользователи',
   noBlockedUsers: 'Вы никого не заблокировали.',
   unblock: 'Разблокировать',
+  privacySettings: 'Настройки конфиденциальности',
+
+  // Notifications
+  notificationsTitle: 'Уведомления',
+  pushNotifications: 'Push-уведомления',
+  messageAlerts: 'Уведомления о сообщениях',
+  storyReplies: 'Ответы на истории',
+  profileViews: 'Просмотры профиля',
+
+  // Help
+  helpTitle: 'Помощь и поддержка',
+  faq: 'FAQ',
+  contactUs: 'Связаться с нами',
+  reportBug: 'Сообщить об ошибке',
+  termsOfService: 'Условия использования',
+  privacyPolicy: 'Политика конфиденциальности',
+
+  // Verification
+  verificationTitle: 'Получить верификацию',
+  verificationDesc: 'Сделайте селфи для подтверждения личности и получения значка.',
+  verificationPending: 'Верификация ожидается…',
+  verificationVerified: 'Верифицирован ✓',
+  verificationRejected: 'Верификация отклонена — попробуйте снова',
+  verificationBadge: 'Необязательный значок для доверенных профилей',
+  submitVerification: 'Отправить верификацию',
+
+  // Premium
+  premiumTitle: 'Премиум',
+  premiumFeatures: 'Премиум-функции',
+  upgradeToPremium: 'Перейти на Premium',
+  premiumBoosts: 'Буксты, расширенные фильтры, просмотры профиля',
+
+  // Onboarding
+  addPhotos: 'Добавьте фотографии',
+  addPhotosDesc: 'Добавьте хотя бы одну фотографию. В настройках конфиденциальности можно управлять тем, кто видит ваш профиль.',
+  addPhoto: 'Добавить фото',
+  theBasics: 'Основное',
+  theBasicsDesc: 'Ваш аккаунт Telegram привязывается автоматически. Выберите, как вы будете отображаться.',
+  telegramLinked: 'Имя пользователя Telegram (привязано автоматически)',
+  verifiedByTelegram: '✓ Подтверждено Telegram',
+  displayNameLabel: 'Отображаемое имя',
+  displayNamePlaceholder: 'Выберите, как будет отображаться ваше имя (напр. Алекс, Макс)',
+  displayNameHint: 'Это отдельно от имени в Telegram — выбираете сами.',
+  age: 'Возраст',
+  city: 'Город',
+  whatLookingFor: 'Что вы ищете?',
+  whatLookingForDesc: 'Выберите всё подходящее. Можно изменить в любое время.',
+  writeBio: 'Напишите биографию',
+  writeBioDesc: 'Несколько слов о себе помогут. Будьте собой.',
+  bioPlaceholder: 'Расскажите немного о себе...',
+  continue: 'Продолжить',
+  finish: 'Завершить',
 
   // Errors
   somethingWentWrong: 'Что-то пошло не так',
   tryAgain: 'Пожалуйста, попробуйте ещё раз.',
   failedToLoad: 'Не удалось загрузить. Попробуйте ещё раз.',
+  failedToLoadConversations: 'Не удалось загрузить чаты. Попробуйте ещё раз.',
+  failedToSend: 'Не удалось отправить. Попробуйте ещё раз.',
 
   // Admin
   adminPanel: 'Панель администратора',
@@ -115,11 +199,18 @@ export const ru: Partial<Record<TranslationKey, string>> = {
   moderators: 'Модераторы',
   announcements: 'Объявления',
 
+  // Profile detail
+  sendMessage: 'Отправить сообщение',
+  report: 'Пожаловаться',
+  block: 'Заблокировать',
+  about: 'О пользователе',
+  distance: 'Расстояние',
+  joined: 'Зарегистрирован',
+  lastSeen: 'Последний визит',
+
   // Common
-  cancel: 'Отмена',
   confirm: 'Подтвердить',
   close: 'Закрыть',
-  loading: 'Загрузка…',
   search: 'Поиск',
   optional: 'Необязательно',
   required: 'обязательно',
@@ -127,4 +218,6 @@ export const ru: Partial<Record<TranslationKey, string>> = {
   done: 'Готово',
   yes: 'Да',
   no: 'Нет',
+  ok: 'ОК',
+  error: 'Ошибка',
 };

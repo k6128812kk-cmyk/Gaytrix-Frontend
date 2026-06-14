@@ -6,6 +6,7 @@ import { PageHeader } from '@/components/PageHeader';
 import { Chip } from '@/components/Chip';
 import { Button } from '@/components/Button';
 import { useSessionStore } from '@/context/sessionStore';
+import { useTranslation } from '@/i18n/useTranslation';
 import { profileService } from '@/api/services';
 import type { LookingFor, GenderIdentity, InterestedIn, Orientation } from '@/types';
 import styles from './EditProfile.module.css';
@@ -16,34 +17,24 @@ const LANGUAGE_SUGGESTIONS = [
 ];
 
 const LOOKING_FOR_OPTIONS: { value: LookingFor; label: string }[] = [
-  { value: 'friends', label: 'Friends' },
-  { value: 'dating', label: 'Dating' },
-  { value: 'relationship', label: 'Relationship' },
-  { value: 'networking', label: 'Networking' },
-  { value: 'community', label: 'Community' },
-  { value: 'chat', label: 'Just chat' },
+  { value: 'friends', label: 'Friends' }, { value: 'dating', label: 'Dating' },
+  { value: 'relationship', label: 'Relationship' }, { value: 'networking', label: 'Networking' },
+  { value: 'community', label: 'Community' }, { value: 'chat', label: 'Just chat' },
 ];
 
 const GENDER_OPTIONS: { value: GenderIdentity; label: string }[] = [
-  { value: 'male', label: 'Male' },
-  { value: 'female', label: 'Female' },
-  { value: 'non_binary', label: 'Non-binary' },
-  { value: 'other', label: 'Other' },
+  { value: 'male', label: 'Male' }, { value: 'female', label: 'Female' },
+  { value: 'non_binary', label: 'Non-binary' }, { value: 'other', label: 'Other' },
 ];
 
 const INTERESTED_IN_OPTIONS: { value: InterestedIn; label: string }[] = [
-  { value: 'men', label: 'Men' },
-  { value: 'women', label: 'Women' },
-  { value: 'everyone', label: 'Everyone' },
+  { value: 'men', label: 'Men' }, { value: 'women', label: 'Women' }, { value: 'everyone', label: 'Everyone' },
 ];
 
 const ORIENTATION_OPTIONS: { value: Orientation; label: string }[] = [
-  { value: 'gay', label: 'Gay' },
-  { value: 'lesbian', label: 'Lesbian' },
-  { value: 'bisexual', label: 'Bisexual' },
-  { value: 'straight', label: 'Straight' },
-  { value: 'pansexual', label: 'Pansexual' },
-  { value: 'asexual', label: 'Asexual' },
+  { value: 'gay', label: 'Gay' }, { value: 'lesbian', label: 'Lesbian' },
+  { value: 'bisexual', label: 'Bisexual' }, { value: 'straight', label: 'Straight' },
+  { value: 'pansexual', label: 'Pansexual' }, { value: 'asexual', label: 'Asexual' },
   { value: 'other', label: 'Other' },
 ];
 
@@ -55,6 +46,7 @@ const INTEREST_SUGGESTIONS = [
 export function EditProfilePage() {
   const navigate = useNavigate();
   const { profile, updateProfile } = useSessionStore();
+  const { t } = useTranslation();
 
   const [photos, setPhotos] = useState<string[]>(profile?.photos ?? []);
   const [pendingUploads, setPendingUploads] = useState(0);
@@ -72,7 +64,6 @@ export function EditProfilePage() {
   function toggleInterest(value: string) {
     setInterests(prev => prev.includes(value) ? prev.filter(v => v !== value) : [...prev, value]);
   }
-
   function toggleLookingFor(value: LookingFor) {
     setLookingFor(prev => prev.includes(value) ? prev.filter(v => v !== value) : [...prev, value]);
   }
@@ -83,11 +74,10 @@ export function EditProfilePage() {
     const localUrl = URL.createObjectURL(file);
     setPhotos(prev => prev.length < 6 ? [...prev, localUrl] : prev);
     setPendingUploads(n => n + 1);
-    profileService.uploadPhoto(file).then(remoteUrl => {
-      setPhotos(prev => prev.map(u => u === localUrl ? remoteUrl : u));
-    }).catch(() => {
-      setPhotos(prev => prev.filter(u => u !== localUrl));
-    }).finally(() => setPendingUploads(n => n - 1));
+    profileService.uploadPhoto(file)
+      .then(remoteUrl => { setPhotos(prev => prev.map(u => u === localUrl ? remoteUrl : u)); })
+      .catch(() => { setPhotos(prev => prev.filter(u => u !== localUrl)); })
+      .finally(() => setPendingUploads(n => n - 1));
   }
 
   function removePhoto(index: number) {
@@ -112,15 +102,12 @@ export function EditProfilePage() {
       });
       updateProfile(updated);
       navigate(-1);
-    } finally {
-      setSaving(false);
-    }
+    } finally { setSaving(false); }
   }
 
   return (
     <div className={styles.page}>
-      <PageHeader title="Edit profile" showBack />
-
+      <PageHeader title={t('editProfile')} showBack />
       <div className={styles.content}>
         {/* Photos */}
         <section className={styles.section}>
@@ -143,28 +130,26 @@ export function EditProfilePage() {
           </div>
         </section>
 
-        {/* Basic info */}
         <section className={styles.section}>
-          <label className={styles.label} htmlFor="displayName">Display name</label>
+          <label className={styles.label} htmlFor="displayName">{t('displayName')}</label>
           <input id="displayName" value={displayName} onChange={e => setDisplayName(e.target.value)} className={styles.input} />
         </section>
 
         <section className={styles.section}>
-          <label className={styles.label} htmlFor="occupation">Occupation</label>
+          <label className={styles.label} htmlFor="occupation">{t('occupation')}</label>
           <input id="occupation" value={occupation} onChange={e => setOccupation(e.target.value)}
-            placeholder="Optional" className={styles.input} />
+            placeholder={t('optional')} className={styles.input} />
         </section>
 
         <section className={styles.section}>
-          <label className={styles.label} htmlFor="bio">Bio</label>
+          <label className={styles.label} htmlFor="bio">{t('bio')}</label>
           <textarea id="bio" value={bio} onChange={e => setBio(e.target.value)}
             rows={4} maxLength={400} className={styles.textarea} />
           <div className={styles.charCount}>{bio.length}/400</div>
         </section>
 
-        {/* Identity & preferences */}
         <section className={styles.section}>
-          <label className={styles.label}>Gender identity</label>
+          <label className={styles.label}>{t('genderIdentity')}</label>
           <div className={styles.chipWrap}>
             {GENDER_OPTIONS.map(opt => (
               <Chip key={opt.value} selected={genderIdentity === opt.value}
@@ -176,20 +161,18 @@ export function EditProfilePage() {
         </section>
 
         <section className={styles.section}>
-          <label className={styles.label}>Interested in</label>
+          <label className={styles.label}>{t('interestedIn')}</label>
           <div className={styles.chipWrap}>
             {INTERESTED_IN_OPTIONS.map(opt => (
-              <Chip key={opt.value} selected={interestedIn === opt.value}
-                onClick={() => setInterestedIn(opt.value)}>
+              <Chip key={opt.value} selected={interestedIn === opt.value} onClick={() => setInterestedIn(opt.value)}>
                 {opt.label}
               </Chip>
             ))}
           </div>
-          <p className={styles.fieldHint}>Used to personalise your discovery feed</p>
         </section>
 
         <section className={styles.section}>
-          <label className={styles.label}>Sexual orientation (optional)</label>
+          <label className={styles.label}>{t('orientation')} ({t('optional')})</label>
           <div className={styles.chipWrap}>
             {ORIENTATION_OPTIONS.map(opt => (
               <Chip key={opt.value} selected={orientation === opt.value}
@@ -200,43 +183,35 @@ export function EditProfilePage() {
           </div>
         </section>
 
-        {/* Languages */}
         <section className={styles.section}>
-          <label className={styles.label}>Languages spoken</label>
+          <label className={styles.label}>{t('languagesSpoken')}</label>
           <div className={styles.chipWrap}>
             {LANGUAGE_SUGGESTIONS.map(lang => (
-              <Chip key={lang}
-                selected={languages.includes(lang)}
-                onClick={() => setLanguages(prev =>
-                  prev.includes(lang) ? prev.filter(l => l !== lang) : [...prev, lang]
-                )}>
+              <Chip key={lang} selected={languages.includes(lang)}
+                onClick={() => setLanguages(prev => prev.includes(lang) ? prev.filter(l => l !== lang) : [...prev, lang])}>
                 {lang}
               </Chip>
             ))}
           </div>
         </section>
 
-        {/* Looking for */}
         <section className={styles.section}>
-          <label className={styles.label}>Looking for</label>
+          <label className={styles.label}>{t('lookingFor')}</label>
           <div className={styles.chipWrap}>
             {LOOKING_FOR_OPTIONS.map(opt => (
-              <Chip key={opt.value} selected={lookingFor.includes(opt.value)}
-                onClick={() => toggleLookingFor(opt.value)}>
+              <Chip key={opt.value} selected={lookingFor.includes(opt.value)} onClick={() => toggleLookingFor(opt.value)}>
                 {opt.label}
               </Chip>
             ))}
           </div>
         </section>
 
-        {/* Interests */}
         <section className={styles.section}>
-          <label className={styles.label}>Interests</label>
+          <label className={styles.label}>{t('interests')}</label>
           <div className={styles.chipWrap}>
             {INTEREST_SUGGESTIONS.map(interest => (
-              <Chip key={interest} selected={interests.includes(interest)}
-                onClick={() => toggleInterest(interest)}>
-                {interests.includes(interest) ? null : <Plus size={12} />}
+              <Chip key={interest} selected={interests.includes(interest)} onClick={() => toggleInterest(interest)}>
+                {!interests.includes(interest) && <Plus size={12} />}
                 {interest}
               </Chip>
             ))}
@@ -247,8 +222,8 @@ export function EditProfilePage() {
       <div className={styles.footer}>
         <Button fullWidth onClick={handleSave} disabled={saving || pendingUploads > 0}>
           {pendingUploads > 0
-            ? `Uploading ${pendingUploads} photo${pendingUploads > 1 ? 's' : ''}...`
-            : saving ? 'Saving...' : 'Save changes'}
+            ? `${t('loading')} ${pendingUploads} photo${pendingUploads > 1 ? 's' : ''}...`
+            : saving ? t('saving') : t('saveChanges')}
         </Button>
       </div>
     </div>

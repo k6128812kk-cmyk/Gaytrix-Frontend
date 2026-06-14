@@ -5,14 +5,18 @@ import styles from './AppLayout.module.css';
 // ==========================================================================
 // AppLayout — flex column filling viewport exactly.
 // The .outlet div handles scrolling; TabBar is pinned below it.
-// This prevents the fixed TabBar from covering content.
+// This prevents the TabBar from covering content on iPhone 15.
 // ==========================================================================
 
 const TAB_ROOTS = ['/discover', '/groups', '/chat', '/profile'];
 
 export function AppLayout() {
   const location = useLocation();
-  const showTabBar = TAB_ROOTS.some(r => location.pathname === r || location.pathname.startsWith(r + '/') && r !== '/');
+  // Show tab bar only on root tab pages (not nested sub-pages like /chat/:id)
+  const showTabBar = TAB_ROOTS.some(r =>
+    location.pathname === r ||
+    (location.pathname.startsWith(r + '/') && r !== '/')
+  );
 
   return (
     <div className={styles.layout}>

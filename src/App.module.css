@@ -4,9 +4,12 @@
   align-items: center;
   justify-content: center;
   height: 100vh;
+  height: 100dvh;
   gap: var(--space-3);
   color: var(--color-text-muted);
   font-size: 14px;
+  text-align: center;
+  padding: 0 24px;
 }
 
 .loadingLogo {
@@ -28,6 +31,7 @@
   align-items: center;
   justify-content: center;
   min-height: 100vh;
+  min-height: 100dvh;
   padding: var(--space-5);
   background: var(--color-bg);
 }

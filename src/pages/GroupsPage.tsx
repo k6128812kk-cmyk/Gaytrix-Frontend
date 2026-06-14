@@ -7,23 +7,14 @@ import { Button } from '@/components/Button';
 import { groupService } from '@/api/services';
 import { assetUrl } from '@/api/client';
 import { useSessionStore } from '@/context/sessionStore';
+import { useTranslation } from '@/i18n/useTranslation';
 import type { CommunityGroup, GroupSortOption } from '@/types';
 import styles from './GroupsPage.module.css';
-
-// ==========================================================================
-// GroupsPage — community group chats. Replaces the Map tab.
-// ==========================================================================
-
-const SORT_OPTIONS: { value: GroupSortOption; label: string }[] = [
-  { value: 'recent', label: 'Most recent' },
-  { value: 'last_message', label: 'Last message' },
-  { value: 'members_desc', label: 'Most members' },
-  { value: 'members_asc', label: 'Fewest members' },
-];
 
 export function GroupsPage() {
   const navigate = useNavigate();
   const { profile, isModerator } = useSessionStore();
+  const { t } = useTranslation();
   const [groups, setGroups] = useState<CommunityGroup[]>([]);
   const [sort, setSort] = useState<GroupSortOption>('recent');
   const [search, setSearch] = useState('');
@@ -32,10 +23,14 @@ export function GroupsPage() {
   const [showCreate, setShowCreate] = useState(false);
   const searchTimer = useRef<ReturnType<typeof setTimeout>>();
 
-  useEffect(() => {
-    load();
-  }, [sort]);
+  const SORT_OPTIONS: { value: GroupSortOption; label: string }[] = [
+    { value: 'recent', label: 'Most recent' },
+    { value: 'last_message', label: 'Last message' },
+    { value: 'members_desc', label: 'Most members' },
+    { value: 'members_asc', label: 'Fewest members' },
+  ];
 
+  useEffect(() => { load(); }, [sort]);
   useEffect(() => {
     clearTimeout(searchTimer.current);
     searchTimer.current = setTimeout(load, 400);
@@ -46,9 +41,7 @@ export function GroupsPage() {
     try {
       const data = await groupService.getGroups(sort, search || undefined);
       setGroups(data);
-    } finally {
-      setLoading(false);
-    }
+    } finally { setLoading(false); }
   }
 
   async function handleJoin(group: CommunityGroup) {
@@ -57,7 +50,6 @@ export function GroupsPage() {
       g.id === group.id ? { ...g, isMember: true, memberCount: result.memberCount } : g
     ));
   }
-
 
   async function handleDelete(group: CommunityGroup) {
     if (!confirm(`Delete "${group.name}"?`)) return;
@@ -74,22 +66,21 @@ export function GroupsPage() {
   return (
     <div className={styles.page}>
       <PageHeader
-        title="Groups"
+        title={t('groups')}
         action={
-          <button className={styles.addBtn} onClick={() => setShowCreate(true)} aria-label="Create group">
+          <button className={styles.addBtn} onClick={() => setShowCreate(true)} aria-label={t('createGroup')}>
             <Plus size={20} />
           </button>
         }
       />
 
-      {/* Search + sort */}
       <div className={styles.toolbar}>
         <div className={styles.searchWrap}>
           <Search size={15} className={styles.searchIcon} />
           <input
             value={search}
             onChange={e => setSearch(e.target.value)}
-            placeholder="Search groups..."
+            placeholder={t('search')}
             className={styles.searchInput}
           />
         </div>
@@ -114,21 +105,18 @@ export function GroupsPage() {
         </div>
       </div>
 
-      {/* Group list */}
       <div className={styles.list}>
         {loading && Array.from({ length: 4 }).map((_, i) => (
           <div key={i} className={styles.skeleton} />
         ))}
-
         {!loading && groups.length === 0 && (
           <div className={styles.empty}>
             <Users size={40} />
-            <h3>No groups yet</h3>
-            <p>Be the first to create a community group!</p>
-            <Button onClick={() => setShowCreate(true)}>Create group</Button>
+            <h3>{t('noGroupsYet')}</h3>
+            <p>{t('beFirstToCreate')}</p>
+            <Button onClick={() => setShowCreate(true)}>{t('createGroup')}</Button>
           </div>
         )}
-
         {!loading && groups.map(group => (
           <GroupCard
             key={group.id}
@@ -141,7 +129,6 @@ export function GroupsPage() {
         ))}
       </div>
 
-      {/* Create group sheet */}
       {showCreate && (
         <CreateGroupSheet
           onClose={() => setShowCreate(false)}
@@ -152,7 +139,6 @@ export function GroupsPage() {
   );
 }
 
-// ── Group card ─────────────────────────────────────────────────────────────
 function GroupCard({ group, canDelete, onJoin, onDelete, onOpen }: {
   group: CommunityGroup;
   canDelete: boolean;
@@ -160,6 +146,7 @@ function GroupCard({ group, canDelete, onJoin, onDelete, onOpen }: {
   onDelete: () => void;
   onOpen: () => void;
 }) {
+  const { t } = useTranslation();
   const photoSrc = group.photoUrl ? assetUrl(group.photoUrl) : null;
 
   return (
@@ -174,24 +161,24 @@ function GroupCard({ group, canDelete, onJoin, onDelete, onOpen }: {
         <div className={styles.cardName}>{group.name}</div>
         {group.description && <div className={styles.cardDesc}>{group.description}</div>}
         <div className={styles.cardMeta}>
-          <span><Users size={12} /> {group.memberCount} members</span>
+          <span><Users size={12} /> {group.memberCount} {t('members')}</span>
           {group.lastMessageAt && (
-            <span>Active {formatDistanceToNowStrict(new Date(group.lastMessageAt))} ago</span>
+            <span>{formatDistanceToNowStrict(new Date(group.lastMessageAt))} ago</span>
           )}
         </div>
       </div>
       <div className={styles.cardActions}>
         {group.isMember ? (
-          <button className={styles.chatBtn} onClick={onOpen} aria-label="Open chat">
+          <button className={styles.chatBtn} onClick={onOpen} aria-label={t('messageGroup')}>
             <MessageSquare size={18} />
           </button>
         ) : (
           <button className={styles.joinBtn} onClick={e => { e.stopPropagation(); onJoin(); }}>
-            Join
+            {t('join')}
           </button>
         )}
         {canDelete && (
-          <button className={styles.deleteBtn} onClick={e => { e.stopPropagation(); onDelete(); }} aria-label="Delete group">
+          <button className={styles.deleteBtn} onClick={e => { e.stopPropagation(); onDelete(); }} aria-label={t('delete')}>
             <Trash2 size={15} />
           </button>
         )}
@@ -200,11 +187,11 @@ function GroupCard({ group, canDelete, onJoin, onDelete, onOpen }: {
   );
 }
 
-// ── Create group sheet ─────────────────────────────────────────────────────
 function CreateGroupSheet({ onClose, onCreated }: {
   onClose: () => void;
   onCreated: (group: CommunityGroup) => void;
 }) {
+  const { t } = useTranslation();
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [photo, setPhoto] = useState<File | null>(null);
@@ -226,7 +213,7 @@ function CreateGroupSheet({ onClose, onCreated }: {
       const group = await groupService.createGroup(name.trim(), description.trim(), photo || undefined);
       onCreated(group);
     } catch {
-      setError('Could not create group. Please try again.');
+      setError(t('couldNotCreateGroup'));
       setSubmitting(false);
     }
   }
@@ -235,35 +222,29 @@ function CreateGroupSheet({ onClose, onCreated }: {
     <div className={styles.overlay} onClick={onClose}>
       <div className={styles.sheet} onClick={e => e.stopPropagation()}>
         <div className={styles.sheetHeader}>
-          <h3>Create group</h3>
+          <h3>{t('createGroup')}</h3>
           <button onClick={onClose} className={styles.closeBtn}><X size={18} /></button>
         </div>
-
-        {/* Photo picker */}
         <label className={styles.photoPicker}>
           {photoPreview
             ? <img src={photoPreview} alt="Group photo" className={styles.photoPreview} />
-            : <><Camera size={24} /><span>Add group photo</span></>
+            : <><Camera size={24} /><span>{t('addGroupPhoto')}</span></>
           }
           <input type="file" accept="image/*" onChange={handlePhoto} className={styles.fileInput} />
         </label>
-
         <div className={styles.field}>
-          <label>Group name *</label>
+          <label>{t('groupName')} *</label>
           <input value={name} onChange={e => setName(e.target.value)}
-            placeholder="e.g. Istanbul LGBTQ+ Coffee" className={styles.input} />
+            placeholder={t('groupName')} className={styles.input} />
         </div>
-
         <div className={styles.field}>
-          <label>Description</label>
+          <label>{t('groupDescription')}</label>
           <textarea value={description} onChange={e => setDescription(e.target.value)}
-            placeholder="What is this group about?" rows={3} className={styles.textarea} />
+            placeholder={t('groupDescription')} rows={3} className={styles.textarea} />
         </div>
-
         {error && <p className={styles.errorText}>{error}</p>}
-
         <Button fullWidth disabled={!name.trim() || submitting} onClick={handleSubmit}>
-          {submitting ? 'Creating...' : 'Create group'}
+          {submitting ? t('creating') : t('createGroup')}
         </Button>
       </div>
     </div>

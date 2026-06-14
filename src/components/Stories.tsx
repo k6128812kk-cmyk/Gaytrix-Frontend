@@ -1,9 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
-import { Plus, X, Eye, Trash2, Send } from 'lucide-react';
+import { Plus, X, Eye, Trash2, Send, Camera, Image as ImageIcon } from 'lucide-react';
 import { storyService } from '@/api/services';
 import { assetUrl } from '@/api/client';
 import { useSessionStore } from '@/context/sessionStore';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from '@/i18n/useTranslation';
 import { formatDistanceToNowStrict } from 'date-fns';
 import type { Story, MyStory, StoryViewer } from '@/types';
 import styles from './Stories.module.css';
@@ -11,18 +12,22 @@ import styles from './Stories.module.css';
 // ==========================================================================
 // Stories — circular avatars with thumbnail preview, full-screen viewer,
 // swipe navigation, view counter, viewer list, replies, and delete.
+// "+" button now shows a bottom sheet to choose camera vs gallery.
 // All API errors are silently caught so no story failure blanks the page.
 // ==========================================================================
 
 export function Stories() {
   const { profile } = useSessionStore();
+  const { t } = useTranslation();
   const [stories, setStories] = useState<Story[]>([]);
   const [myStory, setMyStory] = useState<MyStory | null>(null);
   const [viewerIndex, setViewerIndex] = useState<number | null>(null);
   const [showMyStory, setShowMyStory] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [showAddSheet, setShowAddSheet] = useState(false);
   const [ready, setReady] = useState(false);
-  const fileRef = useRef<HTMLInputElement>(null);
+  const cameraRef = useRef<HTMLInputElement>(null);
+  const galleryRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     load();
@@ -43,11 +48,23 @@ export function Stories() {
     const file = e.target.files?.[0];
     if (!file) return;
     setUploading(true);
+    setShowAddSheet(false);
     try {
       const created = await storyService.createStory(file);
       setMyStory(created);
+      // Refresh story list
+      await load();
+      window.dispatchEvent(new CustomEvent('story-created'));
     } catch { /* fail silently */ }
     finally { setUploading(false); e.target.value = ''; }
+  }
+
+  function handlePlusClick() {
+    if (myStory) {
+      setShowMyStory(true);
+    } else {
+      setShowAddSheet(true);
+    }
   }
 
   async function handleViewStory(index: number) {
@@ -67,28 +84,28 @@ export function Stories() {
   }
 
   if (!ready) return null;
-  if (stories.length === 0 && !myStory) return null;
 
   const myPhotoSrc = profile?.photos?.[0]
     ? assetUrl(profile.photos[0])
     : `https://i.pravatar.cc/80?u=${profile?.id}`;
   const myStoryThumb = myStory ? assetUrl(myStory.photoUrl) : null;
 
+  const hasContent = stories.length > 0 || myStory !== null;
+
   return (
     <>
       <div className={styles.row}>
-        {/* My story */}
+        {/* My story / add button */}
         <div className={styles.storyWrap}>
           <button
             className={`${styles.avatar} ${styles.myAvatar}`}
-            onClick={() => myStory ? setShowMyStory(true) : fileRef.current?.click()}
+            onClick={handlePlusClick}
             disabled={uploading}
-            aria-label={myStory ? 'View my story' : 'Add story'}
+            aria-label={myStory ? t('myStory') : t('addStory')}
           >
-            {/* Thumbnail preview inside circle */}
             <img
               src={myStoryThumb ?? myPhotoSrc}
-              alt="My story"
+              alt={t('myStory')}
               className={styles.avatarImg}
               onError={(e) => { (e.target as HTMLImageElement).src = myPhotoSrc; }}
             />
@@ -97,8 +114,11 @@ export function Stories() {
             )}
             <span className={`${styles.ring} ${myStory ? styles.ringMine : styles.ringAdd}`} />
           </button>
-          <span className={styles.label}>You</span>
-          <input ref={fileRef} type="file" accept="image/*,video/*"
+          <span className={styles.label}>{uploading ? t('storyUploading') : t('you')}</span>
+          {/* Hidden inputs for camera and gallery */}
+          <input ref={cameraRef} type="file" accept="image/*" capture="environment"
+            onChange={handleUpload} className={styles.fileInput} />
+          <input ref={galleryRef} type="file" accept="image/*"
             onChange={handleUpload} className={styles.fileInput} />
         </div>
 
@@ -109,14 +129,12 @@ export function Stories() {
             <div key={story.id} className={styles.storyWrap}>
               <button className={styles.avatar} onClick={() => handleViewStory(i)}
                 aria-label={`${story.displayName}'s story`}>
-                {/* Story thumbnail as background, avatar as overlay */}
                 <img
                   src={thumbSrc ?? avatarSrc}
                   alt={story.displayName}
                   className={styles.avatarImg}
                   onError={(e) => { (e.target as HTMLImageElement).src = avatarSrc; }}
                 />
-                {/* Small profile photo overlay bottom-left */}
                 <img
                   src={avatarSrc}
                   alt=""
@@ -129,7 +147,34 @@ export function Stories() {
             </div>
           );
         })}
+
+        {/* Show placeholder if no stories at all */}
+        {!hasContent && (
+          <p className={styles.noStories}>{t('noStoriesYet')}</p>
+        )}
       </div>
+
+      {/* Bottom sheet — camera vs gallery */}
+      {showAddSheet && (
+        <div className={styles.sheet} onClick={() => setShowAddSheet(false)}>
+          <div className={styles.sheetInner} onClick={e => e.stopPropagation()}>
+            <div className={styles.sheetHandle} />
+            <h3 className={styles.sheetTitle}>{t('addStoryTitle')}</h3>
+            <p className={styles.sheetSubtitle}>{t('addStoryOption')}</p>
+            <button className={styles.sheetBtn} onClick={() => { setShowAddSheet(false); setTimeout(() => cameraRef.current?.click(), 50); }}>
+              <Camera size={22} />
+              <span>{t('takePhoto')}</span>
+            </button>
+            <button className={styles.sheetBtn} onClick={() => { setShowAddSheet(false); setTimeout(() => galleryRef.current?.click(), 50); }}>
+              <ImageIcon size={22} />
+              <span>{t('uploadPhoto')}</span>
+            </button>
+            <button className={styles.sheetCancel} onClick={() => setShowAddSheet(false)}>
+              {t('cancel')}
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Viewer for other users' stories */}
       {viewerIndex !== null && (
@@ -172,6 +217,7 @@ function StoryViewer({ stories, index, onClose, onNext, onPrev }: {
   onPrev: () => void;
 }) {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const story = stories[index];
   const [progress, setProgress] = useState(0);
   const [showViewers, setShowViewers] = useState(false);
@@ -273,7 +319,7 @@ function StoryViewer({ stories, index, onClose, onNext, onPrev }: {
           value={replyText}
           onChange={e => setReplyText(e.target.value)}
           onKeyDown={e => e.key === 'Enter' && handleSendReply()}
-          placeholder={`Reply to ${story.displayName}…`}
+          placeholder={`${t('replyTo')} ${story.displayName}…`}
           className={styles.replyInput}
         />
         {replyText.trim() && (
@@ -288,7 +334,7 @@ function StoryViewer({ stories, index, onClose, onNext, onPrev }: {
         <div className={styles.viewerSheet} onClick={() => setShowViewers(false)}>
           <div className={styles.viewerSheetInner} onClick={e => e.stopPropagation()}>
             <div className={styles.viewerSheetHeader}>
-              <span>Viewers ({viewers.length})</span>
+              <span>{t('viewersLabel')} ({viewers.length})</span>
               <button onClick={() => setShowViewers(false)}><X size={16} /></button>
             </div>
             {viewers.map(v => (
@@ -303,7 +349,7 @@ function StoryViewer({ stories, index, onClose, onNext, onPrev }: {
                 </div>
               </div>
             ))}
-            {viewers.length === 0 && <p style={{ textAlign: 'center', color: 'var(--color-text-faint)', padding: 16 }}>No views yet</p>}
+            {viewers.length === 0 && <p style={{ textAlign: 'center', color: 'var(--color-text-faint)', padding: 16 }}>{t('noViewsYet')}</p>}
           </div>
         </div>
       )}
@@ -316,6 +362,7 @@ function MyStoryViewer({ myStory, myPhotoSrc, displayName, onClose, onDelete }: 
   myStory: MyStory; myPhotoSrc: string; displayName: string;
   onClose: () => void; onDelete: () => void;
 }) {
+  const { t } = useTranslation();
   const [viewers, setViewers] = useState<StoryViewer[]>([]);
   const [showViewers, setShowViewers] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -343,20 +390,21 @@ function MyStoryViewer({ myStory, myPhotoSrc, displayName, onClose, onDelete }: 
             {formatDistanceToNowStrict(new Date(myStory.createdAt))} ago
           </div>
         </div>
-        <button className={styles.viewerClose} onClick={() => setShowViewers(true)} title="View viewers">
+        <button className={styles.viewerClose} onClick={() => setShowViewers(true)} title={t('viewersLabel')}>
           <Eye size={16} /><span style={{ fontSize: 12, marginLeft: 3 }}>{viewers.length}</span>
         </button>
-        <button className={styles.viewerClose} style={{ color: '#e74c3c' }} onClick={onDelete}><Trash2 size={16} /></button>
+        <button className={styles.viewerClose} style={{ color: '#e74c3c' }} onClick={onDelete}
+          title={t('deleteStory')}><Trash2 size={16} /></button>
         <button className={styles.viewerClose} onClick={onClose}><X size={20} /></button>
       </div>
 
-      <img src={assetUrl(myStory.photoUrl)} alt="My story" className={styles.storyImage} />
+      <img src={assetUrl(myStory.photoUrl)} alt={t('myStory')} className={styles.storyImage} />
 
       {showViewers && (
         <div className={styles.viewerSheet} onClick={() => setShowViewers(false)}>
           <div className={styles.viewerSheetInner} onClick={e => e.stopPropagation()}>
             <div className={styles.viewerSheetHeader}>
-              <span>Viewers ({viewers.length})</span>
+              <span>{t('viewersLabel')} ({viewers.length})</span>
               <button onClick={() => setShowViewers(false)}><X size={16} /></button>
             </div>
             {viewers.map(v => (
@@ -371,7 +419,7 @@ function MyStoryViewer({ myStory, myPhotoSrc, displayName, onClose, onDelete }: 
                 </div>
               </div>
             ))}
-            {viewers.length === 0 && <p style={{ textAlign: 'center', color: 'var(--color-text-faint)', padding: 16 }}>No views yet</p>}
+            {viewers.length === 0 && <p style={{ textAlign: 'center', color: 'var(--color-text-faint)', padding: 16 }}>{t('noViewsYet')}</p>}
           </div>
         </div>
       )}

@@ -1,6 +1,6 @@
-import { useRef } from 'react';
+import { useState } from 'react';
 import { NavLink } from 'react-router-dom';
-import { Compass, Users, MessageCircle, User, Plus } from 'lucide-react';
+import { Compass, Users, MessageCircle, User, Plus, Camera, Image as ImageIcon } from 'lucide-react';
 import { useTelegram } from '@/hooks/useTelegram';
 import { useSessionStore } from '@/context/sessionStore';
 import { storyService } from '@/api/services';
@@ -10,13 +10,14 @@ import styles from './TabBar.module.css';
 // ==========================================================================
 // TabBar — 4 nav tabs + centre "+" story creation button.
 // Layout: Discover | Groups | [+] | Chat | Profile
+// The "+" button shows a bottom sheet to choose camera vs gallery.
 // ==========================================================================
 
 export function TabBar() {
   const { haptic } = useTelegram();
   const { totalUnreadCount } = useSessionStore();
   const { t } = useTranslation();
-  const fileRef = useRef<HTMLInputElement>(null);
+  const [showSheet, setShowSheet] = useState(false);
 
   const LEFT_TABS = [
     { to: '/discover', label: t('discover'), icon: Compass, badge: 0 },
@@ -27,7 +28,7 @@ export function TabBar() {
     { to: '/profile', label: t('profile'), icon: User, badge: 0 },
   ];
 
-  async function handleStoryUpload(e: React.ChangeEvent<HTMLInputElement>) {
+  async function handleFileUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
     try {
@@ -59,28 +60,52 @@ export function TabBar() {
   }
 
   return (
-    <nav className={styles.tabbar} aria-label="Primary">
-      {LEFT_TABS.map(renderTab)}
+    <>
+      <nav className={styles.tabbar} aria-label="Primary">
+        {LEFT_TABS.map(renderTab)}
 
-      <div className={styles.createWrap}>
-        <button
-          className={styles.createBtn}
-          onClick={() => { haptic.selection(); fileRef.current?.click(); }}
-          aria-label="Create story"
-        >
-          <Plus size={22} strokeWidth={2.5} />
-        </button>
-        <input
-          ref={fileRef}
-          type="file"
-          accept="image/*"
-          capture="environment"
-          onChange={handleStoryUpload}
-          style={{ display: 'none' }}
-        />
-      </div>
+        <div className={styles.createWrap}>
+          <button
+            className={styles.createBtn}
+            onClick={() => { haptic.selection(); setShowSheet(true); }}
+            aria-label={t('addStory')}
+          >
+            <Plus size={22} strokeWidth={2.5} />
+          </button>
+        </div>
 
-      {RIGHT_TABS.map(renderTab)}
-    </nav>
+        {RIGHT_TABS.map(renderTab)}
+      </nav>
+
+      {/* Bottom sheet — camera vs gallery */}
+      {showSheet && (
+        <div className={styles.sheetOverlay} onClick={() => setShowSheet(false)}>
+          <div className={styles.sheetInner} onClick={e => e.stopPropagation()}>
+            <div className={styles.sheetHandle} />
+            <h3 className={styles.sheetTitle}>{t('addStoryTitle')}</h3>
+
+            <label className={styles.sheetBtn}>
+              <Camera size={22} />
+              <span>{t('takePhoto')}</span>
+              <input type="file" accept="image/*" capture="environment"
+                onChange={e => { setShowSheet(false); handleFileUpload(e); }}
+                style={{ display: 'none' }} />
+            </label>
+
+            <label className={styles.sheetBtn}>
+              <ImageIcon size={22} />
+              <span>{t('uploadPhoto')}</span>
+              <input type="file" accept="image/*"
+                onChange={e => { setShowSheet(false); handleFileUpload(e); }}
+                style={{ display: 'none' }} />
+            </label>
+
+            <button className={styles.sheetCancel} onClick={() => setShowSheet(false)}>
+              {t('cancel')}
+            </button>
+          </div>
+        </div>
+      )}
+    </>
   );
 }

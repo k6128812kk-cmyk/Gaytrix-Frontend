@@ -5,28 +5,20 @@ import { format, isToday, isYesterday } from 'date-fns';
 import { PageHeader } from '@/components/PageHeader';
 import { chatService } from '@/api/services';
 import { useSessionStore } from '@/context/sessionStore';
+import { useTranslation } from '@/i18n/useTranslation';
 import { wsClient } from '@/hooks/useGlobalWs';
 import type { ChatMessage, Conversation } from '@/types';
 import styles from './Conversation.module.css';
 
 // ==========================================================================
 // ConversationPage — real-time 1:1 chat using the shared global WebSocket.
-//
-// Previously this page opened its own private WebSocket connection in
-// parallel with the global one, causing:
-//   - duplicate auth handshakes
-//   - message confirmations landing on the wrong socket
-//   - missed messages when the per-page socket reconnected
-//   - read receipts not reaching the correct listener
-//
-// Fix: all real-time events go through wsClient (the global singleton).
-// Sending is done via wsClient.send(), receiving via wsClient.addHandler().
-// The global socket is already authenticated by useGlobalWs() in App.tsx.
+// All real-time events go through wsClient (the global singleton).
 // ==========================================================================
 
 export function ConversationPage() {
   const { id } = useParams<{ id: string }>();
   const { profile } = useSessionStore();
+  const { t } = useTranslation();
   const [conversation, setConversation] = useState<Conversation | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [draft, setDraft] = useState('');
@@ -38,12 +30,12 @@ export function ConversationPage() {
   const typingTimer = useRef<ReturnType<typeof setTimeout>>();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // ── Scroll to bottom when messages change ──────────────────────────────
+  // Scroll to bottom when messages change
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' });
   }, [messages, partnerTyping]);
 
-  // ── Load history via REST on mount ────────────────────────────────────
+  // Load history via REST on mount
   useEffect(() => {
     if (!id) return;
     setLoading(true);
@@ -55,19 +47,15 @@ export function ConversationPage() {
       setMessages(msgs);
       setLoading(false);
 
-      // Tell the backend we've read all messages in this conversation
       wsClient.send({ type: 'mark_read', conversationId: id });
-
-      // Refresh global unread count after marking read
       wsClient.send({ type: 'get_unread_count' });
     }).catch(() => setLoading(false));
   }, [id]);
 
-  // ── Subscribe to real-time events via shared global WS ────────────────
+  // Subscribe to real-time events via shared global WS
   useEffect(() => {
     if (!id) return;
 
-    // Incoming messages for this conversation
     const onMessage = (raw: Record<string, unknown>) => {
       const msg = raw.message as ChatMessage | undefined;
       if (!msg || msg.conversationId !== id) return;
@@ -78,12 +66,10 @@ export function ConversationPage() {
       });
       setPartnerTyping(false);
 
-      // Mark as read immediately since we're looking at the conversation
       wsClient.send({ type: 'mark_read', conversationId: id });
       wsClient.send({ type: 'get_unread_count' });
     };
 
-    // Read receipts — update our sent messages to show double-tick
     const onReadReceipt = (raw: Record<string, unknown>) => {
       if (raw.conversationId !== id) return;
       const readAt = new Date().toISOString();
@@ -94,10 +80,9 @@ export function ConversationPage() {
       );
     };
 
-    // Typing indicator from partner
     const onTyping = (raw: Record<string, unknown>) => {
       if (raw.conversationId !== id) return;
-      if (raw.userId === profile?.id) return; // ignore our own typing events
+      if (raw.userId === profile?.id) return;
       setPartnerTyping(true);
       clearTimeout(typingTimer.current);
       typingTimer.current = setTimeout(() => setPartnerTyping(false), 3000);
@@ -115,7 +100,6 @@ export function ConversationPage() {
     };
   }, [id, profile?.id]);
 
-  // ── Typing indicator — debounced ──────────────────────────────────────
   function handleDraftChange(value: string) {
     setDraft(value);
     if (id) {
@@ -123,13 +107,11 @@ export function ConversationPage() {
     }
   }
 
-  // ── Send text message ─────────────────────────────────────────────────
   async function handleSend() {
     if (!id || !draft.trim()) return;
     const text = draft.trim();
     setDraft('');
 
-    // Try global WS first; fall back to REST if WS is not ready
     const sent = wsClient.send({ type: 'send_message', conversationId: id, text });
     if (!sent) {
       try {
@@ -137,7 +119,7 @@ export function ConversationPage() {
         setMessages((prev) => [...prev, message]);
       } catch (err) {
         console.error('Failed to send message:', err);
-        setDraft(text); // restore draft so user doesn't lose their text
+        setDraft(text);
       }
     }
   }
@@ -163,17 +145,17 @@ export function ConversationPage() {
     }
   }
 
-  const title = conversation?.participant.displayName ?? 'Chat';
+  const title = conversation?.participant.displayName ?? t('chat');
   const currentUserId = profile?.id ?? '';
 
-  // ── Build message list with date separators ────────────────────────────
+  // Build message list with date separators
   let lastDateKey = '';
   const msgItems: Array<{ type: 'sep'; label: string } | { type: 'msg'; msg: (typeof messages)[0] }> = [];
   messages.forEach(msg => {
     const d = new Date(msg.sentAt);
     const key = format(d, 'yyyy-MM-dd');
     if (key !== lastDateKey) {
-      const label = isToday(d) ? 'Today' : isYesterday(d) ? 'Yesterday' : format(d, 'MMMM d, yyyy');
+      const label = isToday(d) ? t('today') : isYesterday(d) ? t('yesterday') : format(d, 'MMMM d, yyyy');
       msgItems.push({ type: 'sep', label });
       lastDateKey = key;
     }
@@ -182,19 +164,16 @@ export function ConversationPage() {
 
   return (
     <div className={styles.page}>
-      <PageHeader
-        title={title}
-        showBack
-      />
+      <PageHeader title={title} showBack />
 
       <div className={styles.messages} ref={scrollRef}>
-        {loading && <div className={styles.loading}>Loading messages...</div>}
+        {loading && <div className={styles.loading}>{t('loading')}</div>}
 
         {!loading && messages.length === 0 && (
           <div className={styles.requestNotice}>
             <p>{conversation?.isMessageRequest
-              ? <><strong>{title}</strong> wants to message you. Reply to start.</>
-              : 'No messages yet. Say hello!'
+              ? <><strong>{title}</strong> {t('wantsToMessage')}. Reply to start.</>
+              : t('noMessagesYet')
             }</p>
           </div>
         )}
@@ -258,14 +237,14 @@ export function ConversationPage() {
           <img src={photoPreview.url} alt="Preview" style={{ maxWidth: '80%', maxHeight: '60vh', borderRadius: 12 }} />
           <div style={{ display: 'flex', gap: 12 }}>
             <button onClick={() => setPhotoPreview(null)} style={{ padding: '10px 20px', borderRadius: 20, background: 'rgba(255,255,255,0.15)', color: '#fff', fontSize: 15 }}>
-              <X size={16} style={{ verticalAlign: 'middle' }} /> Cancel
+              <X size={16} style={{ verticalAlign: 'middle' }} /> {t('cancel')}
             </button>
             <button
               onClick={handleSendPhoto}
               disabled={sendingPhoto}
               style={{ padding: '10px 24px', borderRadius: 20, background: 'var(--color-accent)', color: '#1a1014', fontSize: 15, fontWeight: 700 }}
             >
-              {sendingPhoto ? 'Sending...' : 'Send Photo'}
+              {sendingPhoto ? t('sending') : t('sendPhoto')}
             </button>
           </div>
         </div>
@@ -273,22 +252,22 @@ export function ConversationPage() {
 
       <div className={styles.composer}>
         <input ref={fileInputRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handlePhotoSelect} />
-        <button className={styles.composerIcon} aria-label="Attach photo" onClick={() => fileInputRef.current?.click()}>
+        <button className={styles.composerIcon} aria-label={t('attachPhoto')} onClick={() => fileInputRef.current?.click()}>
           <ImageIcon size={20} />
         </button>
         <input
           value={draft}
           onChange={(e) => handleDraftChange(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && handleSend()}
-          placeholder="Message..."
+          placeholder={t('typeAMessage')}
           className={styles.composerInput}
         />
         {draft.trim() ? (
-          <button className={styles.sendButton} onClick={handleSend} aria-label="Send">
+          <button className={styles.sendButton} onClick={handleSend} aria-label={t('send')}>
             <Send size={18} />
           </button>
         ) : (
-          <button className={styles.composerIcon} aria-label="Voice note">
+          <button className={styles.composerIcon} aria-label={t('voiceNote')}>
             <Mic size={20} />
           </button>
         )}

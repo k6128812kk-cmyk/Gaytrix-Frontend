@@ -1,6 +1,13 @@
+/* ==========================================================================
+   AppLayout — fills the viewport exactly with a flex column.
+   The .outlet handles scrolling, TabBar is pinned at the bottom.
+   Safe-area insets are handled via CSS env() throughout components.
+   ========================================================================== */
+
 .layout {
   display: flex;
   flex-direction: column;
+  /* Use both 100vh fallback and 100dvh for dynamic viewport (iOS Safari) */
   height: 100vh;
   height: 100dvh;
   overflow: hidden;
@@ -14,4 +21,6 @@
   overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
   position: relative;
+  /* Critical: min-height: 0 prevents flex overflow issues */
+  min-height: 0;
 }

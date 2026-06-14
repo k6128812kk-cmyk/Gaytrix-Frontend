@@ -7,14 +7,9 @@ import { Badge } from '@/components/Badge';
 import { Chip } from '@/components/Chip';
 import { Button } from '@/components/Button';
 import { discoveryService, profileService, chatService } from '@/api/services';
+import { useTranslation } from '@/i18n/useTranslation';
 import type { UserProfile } from '@/types';
 import styles from './ProfileDetail.module.css';
-
-// ==========================================================================
-// ProfileDetail — view another user's profile.
-// Report and block actions are surfaced clearly.
-// Suspended/banned profiles show a placeholder instead of profile data.
-// ==========================================================================
 
 const RELATIONSHIP_LABELS: Record<string, string> = {
   single: 'Single', in_relationship: 'In a relationship', married: 'Married',
@@ -28,7 +23,6 @@ const LOOKING_FOR_LABELS: Record<string, string> = {
 };
 
 type ReportReason = 'Spam / fake profile' | 'Inappropriate content' | 'Harassment' | 'Underage' | 'Other';
-
 const REPORT_REASONS: ReportReason[] = [
   'Spam / fake profile', 'Inappropriate content', 'Harassment', 'Underage', 'Other',
 ];
@@ -36,6 +30,7 @@ const REPORT_REASONS: ReportReason[] = [
 export function ProfileDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [notFound, setNotFound] = useState(false);
   const [activePhoto, setActivePhoto] = useState(0);
@@ -59,22 +54,15 @@ export function ProfileDetailPage() {
     if (!profile) return;
     setStartingChat(true);
     try {
-      // Create or open existing conversation WITHOUT sending any automatic message
       const { conversationId } = await chatService.startConversation(profile.id);
       navigate(`/chat/${conversationId}`);
     } catch {
-      // Fallback: find existing conversation by participant
       try {
         const convos = await chatService.getConversations();
         const existing = convos.find(c => c.participant.id === profile.id);
-        if (existing) {
-          navigate(`/chat/${existing.id}`);
-        } else {
-          setStartingChat(false);
-        }
-      } catch {
-        setStartingChat(false);
-      }
+        if (existing) navigate(`/chat/${existing.id}`);
+        else setStartingChat(false);
+      } catch { setStartingChat(false); }
     }
   }
 
@@ -97,7 +85,7 @@ export function ProfileDetailPage() {
   if (notFound || blocked) {
     return (
       <div className={styles.page}>
-        <PageHeader title="Profile" showBack />
+        <PageHeader title={t('profile')} showBack />
         <div style={{ padding: 'var(--space-6)', textAlign: 'center', color: 'var(--color-text-faint)' }}>
           {blocked ? 'User blocked. Taking you back...' : 'Profile not available.'}
         </div>
@@ -106,8 +94,12 @@ export function ProfileDetailPage() {
   }
 
   if (!profile) {
-    return <div className={styles.page}><PageHeader title="Profile" showBack /></div>;
+    return <div className={styles.page}><PageHeader title={t('profile')} showBack /></div>;
   }
+
+  const photoSrc = profile.photos[activePhoto]
+    ? (profile.photos[activePhoto].startsWith('http') ? profile.photos[activePhoto] : `/uploads/${profile.photos[activePhoto]}`)
+    : `https://i.pravatar.cc/600?u=${profile.id}`;
 
   return (
     <div className={styles.page}>
@@ -115,11 +107,7 @@ export function ProfileDetailPage() {
         title={profile.displayName}
         showBack
         action={
-          <button
-            className={styles.moreButton}
-            onClick={() => setShowReport(s => !s)}
-            aria-label="Report or block"
-          >
+          <button className={styles.moreButton} onClick={() => setShowReport(s => !s)} aria-label={t('report')}>
             <Flag size={18} />
           </button>
         }
@@ -128,10 +116,10 @@ export function ProfileDetailPage() {
       {showReport && !reported && (
         <div className={styles.actionsMenu}>
           <button className={styles.actionsMenuItem} onClick={() => { setShowReport(false); setTimeout(() => setShowReport(true), 50); }}>
-            <Flag size={16} /> Report {profile.displayName}
+            <Flag size={16} /> {t('report')} {profile.displayName}
           </button>
           <button className={`${styles.actionsMenuItem} ${styles.danger}`} onClick={handleBlock}>
-            <Ban size={16} /> Block {profile.displayName}
+            <Ban size={16} /> {t('block')} {profile.displayName}
           </button>
         </div>
       )}
@@ -143,7 +131,7 @@ export function ProfileDetailPage() {
       )}
 
       <div className={styles.gallery}>
-        <img src={profile.photos[activePhoto] ?? 'https://i.pravatar.cc/600'} alt={profile.displayName} className={styles.photo} />
+        <img src={photoSrc} alt={profile.displayName} className={styles.photo} />
         {profile.photos.length > 1 && (
           <div className={styles.photoDots}>
             {profile.photos.map((_, i) => (
@@ -157,7 +145,7 @@ export function ProfileDetailPage() {
 
       <div className={styles.content}>
         <div className={styles.headerRow}>
-          <Avatar src={profile.photos[0] ?? 'https://i.pravatar.cc/100'} alt=""
+          <Avatar src={profile.photos[0]} alt=""
             size={48} isOnline={profile.isOnline} verification={profile.verification} membership={profile.membership} />
           <div className={styles.headerText}>
             <h2 className={styles.name}>{profile.displayName}, {profile.age}</h2>
@@ -174,18 +162,18 @@ export function ProfileDetailPage() {
           {profile.adminRole === 'moderator' && <Badge variant="gold">🛡 Moderator</Badge>}
           {profile.verification === 'verified' && profile.adminRole === 'none' && <Badge variant="neutral">✓ Verified</Badge>}
           {profile.membership === 'premium' && <Badge variant="premium">Premium</Badge>}
-          {profile.isOnline && <Badge variant="online">Online now</Badge>}
+          {profile.isOnline && <Badge variant="online">{t('online')}</Badge>}
         </div>
 
         {profile.bio && (
           <section className={styles.section}>
-            <h3 className={styles.sectionTitle}>About</h3>
+            <h3 className={styles.sectionTitle}>{t('about')}</h3>
             <p className={styles.bio}>{profile.bio}</p>
           </section>
         )}
 
         <section className={styles.section}>
-          <h3 className={styles.sectionTitle}>Looking for</h3>
+          <h3 className={styles.sectionTitle}>{t('lookingFor')}</h3>
           <div className={styles.chipWrap}>
             {profile.lookingFor.map(lf => <Chip key={lf}>{LOOKING_FOR_LABELS[lf]}</Chip>)}
           </div>
@@ -193,7 +181,7 @@ export function ProfileDetailPage() {
 
         {profile.interests.length > 0 && (
           <section className={styles.section}>
-            <h3 className={styles.sectionTitle}>Interests</h3>
+            <h3 className={styles.sectionTitle}>{t('interests')}</h3>
             <div className={styles.chipWrap}>
               {profile.interests.map(i => <Chip key={i}>{i}</Chip>)}
             </div>
@@ -204,7 +192,7 @@ export function ProfileDetailPage() {
           <h3 className={styles.sectionTitle}>Details</h3>
           <div className={styles.detailsList}>
             <div className={styles.detailRow}>
-              <span className={styles.detailLabel}>Status</span>
+              <span className={styles.detailLabel}>{t('relationshipStatus')}</span>
               <span className={styles.detailValue}>{RELATIONSHIP_LABELS[profile.relationshipStatus]}</span>
             </div>
             {profile.heightCm && (
@@ -215,29 +203,21 @@ export function ProfileDetailPage() {
             )}
             {profile.occupation && (
               <div className={styles.detailRow}>
-                <span className={styles.detailLabel}><Briefcase size={13} /> Occupation</span>
+                <span className={styles.detailLabel}><Briefcase size={13} /> {t('occupation')}</span>
                 <span className={styles.detailValue}>{profile.occupation}</span>
               </div>
             )}
             {profile.languages.length > 0 && (
               <div className={styles.detailRow}>
-                <span className={styles.detailLabel}><Globe2 size={13} /> Languages</span>
+                <span className={styles.detailLabel}><Globe2 size={13} /> {t('languagesSpoken')}</span>
                 <span className={styles.detailValue}>{profile.languages.join(', ')}</span>
               </div>
             )}
             {profile.orientation && (
               <div className={styles.detailRow}>
-                <span className={styles.detailLabel}>🏳️‍🌈 Orientation</span>
+                <span className={styles.detailLabel}>🏳️‍🌈 {t('orientation')}</span>
                 <span className={styles.detailValue} style={{ textTransform: 'capitalize' }}>
                   {profile.orientation.replace('_', ' ')}
-                </span>
-              </div>
-            )}
-            {profile.genderIdentity && (
-              <div className={styles.detailRow}>
-                <span className={styles.detailLabel}>⚧ Gender</span>
-                <span className={styles.detailValue} style={{ textTransform: 'capitalize' }}>
-                  {profile.genderIdentity.replace('_', ' ')}
                 </span>
               </div>
             )}
@@ -247,16 +227,15 @@ export function ProfileDetailPage() {
 
       <div className={styles.footer}>
         <Button fullWidth onClick={handleSendMessage} disabled={startingChat}>
-          <MessageCircle size={18} /> {startingChat ? 'Opening chat...' : 'Send message'}
+          <MessageCircle size={18} /> {startingChat ? t('connecting') : t('sendMessage')}
         </Button>
       </div>
 
-      {/* Report sheet */}
       {showReport && !reported && (
         <div className={styles.reportOverlay} onClick={() => setShowReport(false)}>
           <div className={styles.reportSheet} onClick={e => e.stopPropagation()}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <h3 style={{ fontSize: 17, fontWeight: 800 }}>Report {profile.displayName}</h3>
+              <h3 style={{ fontSize: 17, fontWeight: 800 }}>{t('report')} {profile.displayName}</h3>
               <button onClick={() => setShowReport(false)}><X size={18} /></button>
             </div>
             <p style={{ fontSize: 13, color: 'var(--color-text-muted)' }}>
@@ -283,7 +262,7 @@ export function ProfileDetailPage() {
               <textarea
                 value={reportDetails}
                 onChange={e => setReportDetails(e.target.value)}
-                placeholder="Additional details (optional)..."
+                placeholder={`${t('optional')}...`}
                 rows={3}
                 style={{
                   background: 'var(--color-surface)', border: '1px solid var(--color-border-subtle)',
@@ -293,13 +272,13 @@ export function ProfileDetailPage() {
               />
             )}
             <Button fullWidth onClick={submitReport} disabled={!reportReason || reporting}>
-              {reporting ? 'Submitting...' : 'Submit report'}
+              {reporting ? t('saving') : 'Submit report'}
             </Button>
             <button
               style={{ color: 'var(--color-danger)', fontWeight: 600, fontSize: 14, textAlign: 'center', width: '100%', padding: 8 }}
               onClick={handleBlock}
             >
-              Block this user
+              {t('block')} this user
             </button>
           </div>
         </div>

@@ -4,7 +4,9 @@ import type {
 } from '@/types';
 
 // ==========================================================================
-// Mock data — dev/design preview only.
+// Mock data — STRIPPED of fake/demo profiles.
+// Only the super admin is kept as a placeholder until real Telegram auth
+// populates the session. ALL mock profiles (u1–u5) have been removed.
 // SUPER ADMIN is @k54lid (telegramId 528269003). This is enforced
 // server-side by checking telegramId on every authenticated request;
 // the client role display is purely cosmetic and driven by the server response.
@@ -18,7 +20,7 @@ export const currentUser: UserProfile = {
   telegramId: SUPER_ADMIN_TELEGRAM_ID,
   telegramUsername: SUPER_ADMIN_USERNAME,
   displayName: 'Khalid',
-  photos: ['https://i.pravatar.cc/600?img=12'],
+  photos: [],
   age: 29,
   heightCm: 178,
   weightKg: 72,
@@ -33,8 +35,8 @@ export const currentUser: UserProfile = {
   occupation: 'Founder',
   lastActiveAt: new Date().toISOString(),
   isOnline: true,
-  verification: 'verified',
-  membership: 'premium',
+  verification: 'none',
+  membership: 'free',
   adminRole: 'super_admin',
   accountStatus: 'active',
   registeredAt: new Date(Date.now() - 86400000 * 90).toISOString(),
@@ -46,315 +48,31 @@ export const currentUser: UserProfile = {
   },
 };
 
-export const mockProfiles: UserProfile[] = [
-  {
-    id: 'u1',
-    telegramId: 1001,
-    telegramUsername: 'aliriza',
-    displayName: 'Ali',
-    photos: ['https://i.pravatar.cc/600?img=15', 'https://i.pravatar.cc/600?img=33'],
-    age: 26,
-    heightCm: 182,
-    country: 'Turkey',
-    city: 'Istanbul',
-    relationshipStatus: 'single',
-    lookingFor: ['dating', 'relationship'],
-    bio: 'Designer by day, DJ by night. Looking for someone to explore the city with.',
-    languages: ['Turkish', 'English'],
-    interests: ['Music', 'Design', 'Nightlife'],
-    occupation: 'Graphic Designer',
-    lastActiveAt: new Date().toISOString(),
-    isOnline: true,
-    verification: 'verified',
-    membership: 'premium',
-    adminRole: 'none',
-    accountStatus: 'active',
-    registeredAt: new Date(Date.now() - 86400000 * 20).toISOString(),
-    distanceKm: 1.2,
-    privacy: { hideExactLocation: false, invisibleMode: false, hideOnlineStatus: false, privateProfile: false },
-  },
-  {
-    id: 'u2',
-    telegramId: 1002,
-    telegramUsername: 'mertc',
-    displayName: 'Mert',
-    photos: ['https://i.pravatar.cc/600?img=51'],
-    age: 31,
-    country: 'Turkey',
-    city: 'Istanbul',
-    relationshipStatus: 'in_relationship',
-    lookingFor: ['friends', 'networking'],
-    bio: 'New to the city, always up for coffee and good conversation.',
-    languages: ['Turkish', 'English', 'German'],
-    interests: ['Coffee', 'Travel', 'Books'],
-    lastActiveAt: new Date(Date.now() - 1000 * 60 * 12).toISOString(),
-    isOnline: false,
-    verification: 'none',
-    membership: 'free',
-    adminRole: 'none',
-    accountStatus: 'active',
-    registeredAt: new Date(Date.now() - 86400000 * 5).toISOString(),
-    distanceKm: 3.8,
-    privacy: { hideExactLocation: false, invisibleMode: false, hideOnlineStatus: false, privateProfile: false },
-  },
-  {
-    id: 'u3',
-    telegramId: 1003,
-    telegramUsername: 'deniz_',
-    displayName: 'Deniz',
-    photos: ['https://i.pravatar.cc/600?img=22'],
-    age: 24,
-    country: 'Turkey',
-    city: 'Izmir',
-    relationshipStatus: 'single',
-    lookingFor: ['friends', 'chat', 'community'],
-    bio: 'Student, into hiking and photography. New here, be nice!',
-    languages: ['Turkish'],
-    interests: ['Photography', 'Hiking', 'Cinema'],
-    lastActiveAt: new Date(Date.now() - 1000 * 60 * 60 * 5).toISOString(),
-    isOnline: false,
-    verification: 'pending',
-    membership: 'free',
-    adminRole: 'none',
-    accountStatus: 'active',
-    registeredAt: new Date(Date.now() - 86400000 * 2).toISOString(),
-    distanceKm: 320,
-    privacy: { hideExactLocation: true, invisibleMode: false, hideOnlineStatus: false, privateProfile: false },
-  },
-  {
-    id: 'u4',
-    telegramId: 1004,
-    telegramUsername: 'erenk',
-    displayName: 'Eren',
-    photos: ['https://i.pravatar.cc/600?img=8'],
-    age: 35,
-    country: 'Turkey',
-    city: 'Istanbul',
-    relationshipStatus: 'open_relationship',
-    lookingFor: ['friends', 'dating'],
-    bio: 'Chef. Will cook for you if you bring good wine.',
-    languages: ['Turkish', 'English', 'French'],
-    interests: ['Food', 'Wine', 'Travel'],
-    occupation: 'Chef',
-    lastActiveAt: new Date(Date.now() - 1000 * 60 * 2).toISOString(),
-    isOnline: true,
-    verification: 'verified',
-    membership: 'free',
-    adminRole: 'none',
-    accountStatus: 'active',
-    registeredAt: new Date(Date.now() - 86400000 * 45).toISOString(),
-    distanceKm: 5.6,
-    privacy: { hideExactLocation: false, invisibleMode: false, hideOnlineStatus: false, privateProfile: false },
-  },
-  {
-    id: 'u5',
-    telegramId: 1005,
-    telegramUsername: 'burak99',
-    displayName: 'Burak',
-    photos: ['https://i.pravatar.cc/600?img=60'],
-    age: 28,
-    country: 'Turkey',
-    city: 'Istanbul',
-    relationshipStatus: 'single',
-    lookingFor: ['dating'],
-    bio: 'Just moved to Istanbul. Architect, love brutalist buildings.',
-    languages: ['Turkish', 'English'],
-    interests: ['Architecture', 'Art', 'Coffee'],
-    occupation: 'Architect',
-    lastActiveAt: new Date(Date.now() - 1000 * 60 * 30).toISOString(),
-    isOnline: false,
-    verification: 'none',
-    membership: 'free',
-    adminRole: 'none',
-    accountStatus: 'suspended',
-    registeredAt: new Date(Date.now() - 86400000 * 3).toISOString(),
-    distanceKm: 2.1,
-    reportsCount: 3,
-    privacy: { hideExactLocation: false, invisibleMode: false, hideOnlineStatus: false, privateProfile: false },
-  },
-];
+// No fake profiles — all discovery comes from the real API
+export const mockProfiles: UserProfile[] = [];
 
-export const mockLocations: MapLocation[] = [
-  {
-    id: 'loc1',
-    name: 'Cihangir Café Corner',
-    description: 'Laid-back café, friendly staff, good for daytime meetups.',
-    category: 'cafe',
-    lat: 41.0297,
-    lng: 28.9836,
-    upvotes: 142,
-    reportsCount: 0,
-    createdBy: 'u1',
-    createdAt: new Date(Date.now() - 86400000 * 30).toISOString(),
-  },
-  {
-    id: 'loc2',
-    name: 'Kadikoy Pride Bar',
-    description: 'Welcoming bar with weekly community nights.',
-    category: 'bar',
-    lat: 40.9908,
-    lng: 29.0277,
-    upvotes: 287,
-    reportsCount: 1,
-    createdBy: 'u4',
-    createdAt: new Date(Date.now() - 86400000 * 60).toISOString(),
-  },
-  {
-    id: 'loc3',
-    name: 'Maçka Park Walk',
-    description: 'Popular evening walking spot, safe and well-lit.',
-    category: 'outdoor_spot',
-    lat: 41.0466,
-    lng: 28.9925,
-    upvotes: 96,
-    reportsCount: 0,
-    createdBy: 'u2',
-    createdAt: new Date(Date.now() - 86400000 * 10).toISOString(),
-  },
-  {
-    id: 'loc4',
-    name: 'Beyoglu Community Center',
-    description: 'Hosts regular discussion groups and support meetups.',
-    category: 'community_gathering',
-    lat: 41.0362,
-    lng: 28.9779,
-    upvotes: 201,
-    reportsCount: 0,
-    createdBy: 'u1',
-    createdAt: new Date(Date.now() - 86400000 * 90).toISOString(),
-  },
-];
+export const mockLocations: MapLocation[] = [];
 
-const now = new Date();
+export const mockMessages: Record<string, ChatMessage[]> = {};
 
-export const mockMessages: Record<string, ChatMessage[]> = {
-  c1: [
-    {
-      id: 'm1', conversationId: 'c1', senderId: 'u1', type: 'text',
-      text: 'Hey! Saw you like hiking too 😄',
-      sentAt: new Date(now.getTime() - 1000 * 60 * 40).toISOString(),
-      readAt: new Date(now.getTime() - 1000 * 60 * 38).toISOString(),
-    },
-    {
-      id: 'm2', conversationId: 'c1', senderId: 'u_super_admin', type: 'text',
-      text: 'Yeah! Belgrad Forest is my favorite spot',
-      sentAt: new Date(now.getTime() - 1000 * 60 * 35).toISOString(),
-      readAt: new Date(now.getTime() - 1000 * 60 * 34).toISOString(),
-    },
-    {
-      id: 'm3', conversationId: 'c1', senderId: 'u1', type: 'text',
-      text: 'There\u2019s a group hike there this weekend, you should join',
-      sentAt: new Date(now.getTime() - 1000 * 60 * 5).toISOString(),
-      readAt: null,
-    },
-  ],
-  c2: [
-    {
-      id: 'm4', conversationId: 'c2', senderId: 'u4', type: 'text',
-      text: 'Welcome to K5! Let me know if you have questions 🙂',
-      sentAt: new Date(now.getTime() - 1000 * 60 * 60 * 3).toISOString(),
-      readAt: new Date(now.getTime() - 1000 * 60 * 60 * 2).toISOString(),
-    },
-  ],
-};
+// No fake conversations — real conversations come from the API
+export const mockConversations: Conversation[] = [];
 
-export const mockConversations: Conversation[] = [
-  {
-    id: 'c1',
-    participant: {
-      id: 'u1', displayName: 'Ali',
-      photos: ['https://i.pravatar.cc/600?img=15'],
-      isOnline: true, verification: 'verified', membership: 'premium', adminRole: 'none',
-    },
-    lastMessage: mockMessages.c1[mockMessages.c1.length - 1],
-    unreadCount: 1,
-    isMessageRequest: false,
-  },
-  {
-    id: 'c2',
-    participant: {
-      id: 'u4', displayName: 'Eren',
-      photos: ['https://i.pravatar.cc/600?img=8'],
-      isOnline: true, verification: 'verified', membership: 'free', adminRole: 'none',
-    },
-    lastMessage: mockMessages.c2[mockMessages.c2.length - 1],
-    unreadCount: 0,
-    isMessageRequest: false,
-  },
-  {
-    id: 'c3',
-    participant: {
-      id: 'u3', displayName: 'Deniz',
-      photos: ['https://i.pravatar.cc/600?img=22'],
-      isOnline: false, verification: 'pending', membership: 'free', adminRole: 'none',
-    },
-    lastMessage: null,
-    unreadCount: 0,
-    isMessageRequest: true,
-  },
-];
+export const mockVerificationRequests: VerificationRequest[] = [];
 
-// Verification queue — selfieUrl only ever sent to admin-authenticated sessions
-export const mockVerificationRequests: VerificationRequest[] = [
-  {
-    id: 'vr1',
-    userId: 'u3',
-    telegramId: 1003,
-    telegramUsername: 'deniz_',
-    displayName: 'Deniz',
-    selfieUrl: 'https://i.pravatar.cc/600?img=44',
-    submittedAt: new Date(Date.now() - 86400000 * 1).toISOString(),
-    status: 'pending',
-  },
-];
+export const mockReports: UserReport[] = [];
 
-export const mockReports: UserReport[] = [
-  {
-    id: 'rep1',
-    reporterId: 'u1',
-    reporterUsername: 'aliriza',
-    reportedUserId: 'u5',
-    reportedUsername: 'burak99',
-    reason: 'Spam / fake profile',
-    details: 'Sending unsolicited messages and profile looks auto-generated.',
-    createdAt: new Date(Date.now() - 86400000 * 2).toISOString(),
-    status: 'pending',
-  },
-  {
-    id: 'rep2',
-    reporterId: 'u4',
-    reporterUsername: 'erenk',
-    reportedUserId: 'u5',
-    reportedUsername: 'burak99',
-    reason: 'Inappropriate content',
-    details: 'Sent unsolicited explicit content.',
-    createdAt: new Date(Date.now() - 86400000 * 1).toISOString(),
-    status: 'pending',
-  },
-];
-
-export const mockAdminActions: AdminAction[] = [
-  {
-    id: 'act1',
-    adminId: 'u_super_admin',
-    adminUsername: 'k54lid',
-    targetUserId: 'u5',
-    targetUsername: 'burak99',
-    action: 'suspend',
-    reason: 'Multiple reports — under review',
-    performedAt: new Date(Date.now() - 86400000 * 1).toISOString(),
-  },
-];
+export const mockAdminActions: AdminAction[] = [];
 
 export const mockStats: PlatformStats = {
-  totalUsers: 5,
-  activeToday: 3,
-  activeThisMonth: 5,
-  verifiedUsers: 2,
-  premiumUsers: 2,
-  pendingVerifications: 1,
-  pendingReports: 2,
+  totalUsers: 0,
+  activeToday: 0,
+  activeThisMonth: 0,
+  verifiedUsers: 0,
+  premiumUsers: 0,
+  pendingVerifications: 0,
+  pendingReports: 0,
   bannedUsers: 0,
-  newUsersToday: 1,
-  newUsersThisWeek: 3,
+  newUsersToday: 0,
+  newUsersThisWeek: 0,
 };

@@ -5,6 +5,15 @@ export const en = {
   chat: 'Chat',
   profile: 'Profile',
 
+  // Auth / Loading
+  loading: 'Loading…',
+  openInTelegram: 'Open this app inside Telegram to continue.',
+  accountBanned: 'Account permanently banned',
+  accountSuspended: 'Account suspended',
+  bannedMessage: 'Your account has been permanently banned for violating community guidelines.',
+  suspendedMessage: 'Your account is temporarily suspended. Please check back later.',
+  contactSupport: 'If you believe this is an error, contact support via @K5Support on Telegram.',
+
   // Discover
   newMembers: 'New members',
   verifiedMembers: 'Verified members',
@@ -42,6 +51,12 @@ export const en = {
   yesterday: 'Yesterday',
   live: 'Live',
   connecting: 'Connecting…',
+  typeAMessage: 'Type a message…',
+  attachPhoto: 'Attach photo',
+  voiceNote: 'Voice note',
+  sendPhoto: 'Send Photo',
+  cancel: 'Cancel',
+  sending: 'Sending…',
 
   // Groups
   createGroup: 'Create group',
@@ -65,6 +80,17 @@ export const en = {
   replyToStory: 'Reply to story…',
   storyExpired: 'This story has expired',
   noStoriesYet: 'No stories yet',
+  takePhoto: 'Take Photo',
+  uploadPhoto: 'Upload Photo',
+  addStoryTitle: 'Add Story',
+  addStoryOption: 'Choose how to add your story',
+  storyUploading: 'Uploading…',
+  storyViewers: 'Viewers',
+  noViewsYet: 'No views yet',
+  deleteStory: 'Delete story',
+  you: 'You',
+  replyTo: 'Reply to',
+  viewersLabel: 'Viewers',
 
   // Profile
   editProfile: 'Edit profile',
@@ -86,6 +112,10 @@ export const en = {
   help: 'Help & Support',
   premium: 'Premium',
   verification: 'Get verified',
+  editProfileMenu: 'Edit profile',
+  signOut: 'Sign out',
+  managePremium: 'Manage Premium',
+  upgradePremium: 'Upgrade to Premium',
 
   // Privacy
   invisibleMode: 'Invisible mode',
@@ -97,11 +127,65 @@ export const en = {
   blockedUsers: 'Blocked users',
   noBlockedUsers: "You haven't blocked anyone.",
   unblock: 'Unblock',
+  privacySettings: 'Privacy settings',
+
+  // Notifications
+  notificationsTitle: 'Notifications',
+  pushNotifications: 'Push notifications',
+  messageAlerts: 'Message alerts',
+  storyReplies: 'Story replies',
+  profileViews: 'Profile views',
+
+  // Help
+  helpTitle: 'Help & Support',
+  faq: 'FAQ',
+  contactUs: 'Contact us',
+  reportBug: 'Report a bug',
+  termsOfService: 'Terms of service',
+  privacyPolicy: 'Privacy policy',
+
+  // Verification
+  verificationTitle: 'Get Verified',
+  verificationDesc: 'Take a selfie to verify your identity and get a badge.',
+  verificationPending: 'Verification pending…',
+  verificationVerified: 'Verified ✓',
+  verificationRejected: 'Verification rejected — retry',
+  verificationBadge: 'Optional badge for trusted profiles',
+  submitVerification: 'Submit verification',
+
+  // Premium
+  premiumTitle: 'Premium',
+  premiumFeatures: 'Premium features',
+  upgradeToPremium: 'Upgrade to Premium',
+  premiumBoosts: 'Boosts, advanced filters, profile views',
+
+  // Onboarding
+  addPhotos: 'Add your photos',
+  addPhotosDesc: 'Add at least one photo. You can manage who sees your profile in privacy settings.',
+  addPhoto: 'Add photo',
+  theBasics: 'The basics',
+  theBasicsDesc: 'Your Telegram account is linked automatically. Choose how you appear to others.',
+  telegramLinked: 'Telegram username (auto-linked)',
+  verifiedByTelegram: '✓ Verified by Telegram',
+  displayNameLabel: 'Display name',
+  displayNamePlaceholder: 'Choose how your name appears (e.g. Alex, Max, J)',
+  displayNameHint: 'This is separate from your Telegram name — you choose it freely.',
+  age: 'Age',
+  city: 'City',
+  whatLookingFor: 'What are you looking for?',
+  whatLookingForDesc: 'Select all that apply. You can change this anytime.',
+  writeBio: 'Write your bio',
+  writeBioDesc: 'A few sentences about you go a long way. Be yourself.',
+  bioPlaceholder: 'Tell people a bit about yourself...',
+  continue: 'Continue',
+  finish: 'Finish',
 
   // Errors
   somethingWentWrong: 'Something went wrong',
   tryAgain: 'Please try again.',
   failedToLoad: 'Failed to load. Please try again.',
+  failedToLoadConversations: 'Failed to load conversations. Please try again.',
+  failedToSend: 'Failed to send. Please try again.',
 
   // Admin
   adminPanel: 'Admin Panel',
@@ -113,11 +197,18 @@ export const en = {
   moderators: 'Moderators',
   announcements: 'Announcements',
 
+  // Profile detail
+  sendMessage: 'Send message',
+  report: 'Report',
+  block: 'Block',
+  about: 'About',
+  distance: 'Distance',
+  joined: 'Joined',
+  lastSeen: 'Last seen',
+
   // Common
-  cancel: 'Cancel',
   confirm: 'Confirm',
   close: 'Close',
-  loading: 'Loading…',
   search: 'Search',
   optional: 'Optional',
   required: 'required',
@@ -125,6 +216,8 @@ export const en = {
   done: 'Done',
   yes: 'Yes',
   no: 'No',
+  ok: 'OK',
+  error: 'Error',
 };
 
 export type TranslationKey = keyof typeof en;
