@@ -8,7 +8,7 @@ import axios from 'axios';
 // see backend AuthGuard. Never trust a decoded-but-unverified payload.
 // ==========================================================================
 
-const BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'https://api.gaytrix.app/v1';
+const BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'https://gaytrix-production.up.railway.app';
 
 export const api = axios.create({
   baseURL: BASE_URL,
