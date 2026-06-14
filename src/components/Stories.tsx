@@ -195,15 +195,6 @@ function StoryViewer({ stories, index, onClose, onNext, onPrev }: {
     touchStartX.current = null;
   }
 
-  async function handleViewersTap() {
-    try {
-      const data = await storyService.getViewers(story.id);
-      setViewers(data);
-      setShowViewers(true);
-      clearInterval(timerRef.current); // pause while viewing list
-    } catch { /* fail silently */ }
-  }
-
   if (!story) return null;
 
   const avatarSrc = story.avatar ? assetUrl(story.avatar) : `https://i.pravatar.cc/80?u=${story.userId}`;
@@ -282,13 +273,12 @@ function StoryViewer({ stories, index, onClose, onNext, onPrev }: {
 }
 
 // ── My own story viewer ────────────────────────────────────────────────────
-function MyStoryViewer({ myStory, myPhotoSrc, displayName, onClose, onDelete, onReplace }: {
+function MyStoryViewer({ myStory, myPhotoSrc, displayName, onClose, onDelete }: {
   myStory: MyStory;
   myPhotoSrc: string;
   displayName: string;
   onClose: () => void;
   onDelete: () => void;
-  onReplace: () => void;
 }) {
   const [viewers, setViewers] = useState<StoryViewer[]>([]);
   const [showViewers, setShowViewers] = useState(false);

@@ -58,12 +58,6 @@ export function GroupsPage() {
     ));
   }
 
-  async function handleLeave(group: CommunityGroup) {
-    const result = await groupService.leaveGroup(group.id);
-    setGroups(prev => prev.map(g =>
-      g.id === group.id ? { ...g, isMember: false, memberCount: result.memberCount } : g
-    ));
-  }
 
   async function handleDelete(group: CommunityGroup) {
     if (!confirm(`Delete "${group.name}"?`)) return;
