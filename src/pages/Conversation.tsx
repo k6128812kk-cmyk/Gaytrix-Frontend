@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useCallback } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Send, Mic, Image as ImageIcon, Check, CheckCheck, X } from 'lucide-react';
 import { format, isToday, isYesterday } from 'date-fns';
