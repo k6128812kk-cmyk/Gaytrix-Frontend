@@ -50,9 +50,9 @@ export function DiscoverPage() {
       try {
         const [nearbyData, ...exploreData] = await Promise.all([
           discoveryService.getNearby(filters),
-          discoveryService.getExplore('new'),
-          discoveryService.getExplore('verified'),
-          discoveryService.getExplore('recent'),
+          discoveryService.getExplore('new', filters),
+          discoveryService.getExplore('verified', filters),
+          discoveryService.getExplore('recent', filters),
         ]);
         setNearby(nearbyData);
         setExplore({ new: exploreData[0], verified: exploreData[1], recent: exploreData[2] });

@@ -248,3 +248,56 @@
   object-fit: cover;
   flex-shrink: 0;
 }
+
+/* Thumbnail overlay on story circles */
+.avatarOverlay {
+  position: absolute;
+  bottom: 3px;
+  left: 3px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1.5px solid var(--color-bg);
+}
+
+/* Reply bar at bottom of viewer */
+.replyBar {
+  position: absolute;
+  bottom: calc(var(--safe-bottom, 0px) + 12px);
+  left: 12px;
+  right: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  z-index: 10;
+}
+
+.replyInput {
+  flex: 1;
+  background: rgba(255,255,255,0.15);
+  border: 1px solid rgba(255,255,255,0.3);
+  border-radius: 22px;
+  padding: 10px 16px;
+  color: #fff;
+  font-size: 14px;
+  font-family: var(--font-body);
+  outline: none;
+  backdrop-filter: blur(4px);
+}
+
+.replyInput::placeholder { color: rgba(255,255,255,0.6); }
+
+.replyBtn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--color-accent);
+  color: #fff;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+}

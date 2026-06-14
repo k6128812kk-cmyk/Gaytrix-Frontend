@@ -76,7 +76,7 @@ export const discoveryService = {
     const { data } = await api.get<UserProfile[]>('/discovery/nearby', { params: filters });
     return data;
   },
-  async getExplore(section: 'trending' | 'new' | 'verified' | 'recent'): Promise<UserProfile[]> {
+  async getExplore(section: 'trending' | 'new' | 'verified' | 'recent', filters?: Partial<DiscoveryFilters>): Promise<UserProfile[]> {
     if (USE_MOCKS) {
       await delay(250);
       const active = mockProfiles.filter(p => p.accountStatus === 'active');
@@ -87,7 +87,7 @@ export const discoveryService = {
         case 'recent': return active.filter(p => p.isOnline);
       }
     }
-    const { data } = await api.get<UserProfile[]>(`/discovery/explore/${section}`);
+    const { data } = await api.get<UserProfile[]>(`/discovery/explore/${section}`, { params: filters });
     return data;
   },
   async getProfile(id: string): Promise<UserProfile | undefined> {
@@ -385,6 +385,11 @@ export const groupService = {
     const { data } = await api.get<CommunityGroup[]>('/groups', { params: { sort, search } });
     return data;
   },
+  async getGroup(groupId: string): Promise<CommunityGroup> {
+    if (USE_MOCKS) { await delay(150); return {} as CommunityGroup; }
+    const { data } = await api.get<CommunityGroup>(`/groups/${groupId}`);
+    return data;
+  },
   async createGroup(name: string, description: string, photo?: File): Promise<CommunityGroup> {
     if (USE_MOCKS) {
       await delay(300);
@@ -412,6 +417,11 @@ export const groupService = {
   async deleteGroup(groupId: string): Promise<{ ok: boolean }> {
     if (USE_MOCKS) { await delay(200); return { ok: true }; }
     const { data } = await api.delete(`/groups/${groupId}`);
+    return data;
+  },
+  async getGroupMembers(groupId: string): Promise<EventAttendee[]> {
+    if (USE_MOCKS) { return []; }
+    const { data } = await api.get<EventAttendee[]>(`/groups/${groupId}/members`);
     return data;
   },
   async getMessages(groupId: string): Promise<CommunityGroupMessage[]> {
@@ -453,6 +463,11 @@ export const storyService = {
   async getViewers(storyId: string): Promise<StoryViewer[]> {
     if (USE_MOCKS) { return []; }
     const { data } = await api.get<StoryViewer[]>(`/stories/${storyId}/viewers`);
+    return data;
+  },
+  async replyToStory(storyId: string, text: string): Promise<{ ok: boolean; conversationId: string }> {
+    if (USE_MOCKS) { return { ok: true, conversationId: '' }; }
+    const { data } = await api.post(`/stories/${storyId}/reply`, { text });
     return data;
   },
 };

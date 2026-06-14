@@ -8,6 +8,7 @@ import { FiltersPage } from '@/pages/Filters';
 import { ProfileDetailPage } from '@/pages/ProfileDetail';
 import { GroupsPage } from '@/pages/GroupsPage';
 import { GroupChatPage } from '@/pages/GroupChat';
+import { GroupInfoPage } from '@/pages/GroupInfo';
 import { ChatListPage } from '@/pages/ChatList';
 import { ConversationPage } from '@/pages/Conversation';
 import { ProfilePage } from '@/pages/Profile';
@@ -89,6 +90,7 @@ export default function App() {
         <Route path="/u/:id" element={<ProfileDetailPage />} />
         <Route path="/groups" element={<GroupsPage />} />
         <Route path="/groups/:groupId" element={<GroupChatPage />} />
+        <Route path="/groups/:groupId/info" element={<GroupInfoPage />} />
         <Route path="/chat" element={<ChatListPage />} />
         <Route path="/chat/:id" element={<ConversationPage />} />
         <Route path="/profile" element={<ProfilePage />} />

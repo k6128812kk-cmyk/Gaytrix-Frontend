@@ -158,6 +158,7 @@ export interface EventAttendee {
   verification: VerificationStatus;
   membership: MembershipTier;
   adminRole: AdminRole;
+  isOnline?: boolean;
 }
 
 export interface GroupMessage {

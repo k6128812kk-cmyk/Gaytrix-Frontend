@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import { Send, Mic, Image as ImageIcon, Check, CheckCheck, X } from 'lucide-react';
-import { format } from 'date-fns';
+import { format, isToday, isYesterday } from 'date-fns';
 import { PageHeader } from '@/components/PageHeader';
 import { chatService } from '@/api/services';
 import { useSessionStore } from '@/context/sessionStore';
@@ -153,6 +153,20 @@ export function ConversationPage() {
   const title = conversation?.participant.displayName ?? 'Chat';
   const currentUserId = profile?.id ?? '';
 
+  // Build message list with date separators
+  let lastDateKey = '';
+  const msgItems: Array<{ type: 'sep'; label: string } | { type: 'msg'; msg: typeof messages[0] }> = [];
+  messages.forEach(msg => {
+    const d = new Date(msg.sentAt);
+    const key = format(d, 'yyyy-MM-dd');
+    if (key !== lastDateKey) {
+      const label = isToday(d) ? 'Today' : isYesterday(d) ? 'Yesterday' : format(d, 'MMMM d, yyyy');
+      msgItems.push({ type: 'sep', label });
+      lastDateKey = key;
+    }
+    msgItems.push({ type: 'msg', msg });
+  });
+
   return (
     <div className={styles.page}>
       <PageHeader
@@ -177,7 +191,17 @@ export function ConversationPage() {
           </div>
         )}
 
-        {messages.map((msg) => {
+        {msgItems.map((item, idx) => {
+          if (item.type === 'sep') {
+            return (
+              <div key={`sep-${idx}`} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '8px 0' }}>
+                <span style={{ background: 'var(--color-surface)', color: 'var(--color-text-faint)', fontSize: 11, padding: '3px 10px', borderRadius: 'var(--radius-pill)' }}>
+                  {item.label}
+                </span>
+              </div>
+            );
+          }
+          const msg = item.msg;
           const isMine = msg.senderId === currentUserId;
           return (
             <div key={msg.id} className={`${styles.bubbleRow} ${isMine ? styles.bubbleRowMine : ''}`}>
