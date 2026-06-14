@@ -4,7 +4,6 @@ import { Plus, Search, Users, ArrowUpDown, MessageSquare, Trash2, X, Camera } fr
 import { formatDistanceToNowStrict } from 'date-fns';
 import { PageHeader } from '@/components/PageHeader';
 import { Button } from '@/components/Button';
-import { Avatar } from '@/components/Avatar';
 import { groupService } from '@/api/services';
 import { assetUrl } from '@/api/client';
 import { useSessionStore } from '@/context/sessionStore';
