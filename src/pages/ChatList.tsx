@@ -31,13 +31,13 @@ export function ChatListPage() {
   // Listen for new incoming messages to update unread counts live
   useEffect(() => {
     const handler = (_msg: Record<string, unknown>) => {
-      const m = msg.message as { conversationId: string; senderId: string };
+      const m = _msg.message as { conversationId: string; senderId: string };
       if (!m?.conversationId) return;
       setConversations(prev => prev.map(c => {
         if (c.id !== m.conversationId) return c;
         // If the message is from the other person, increment unread
         if (m.senderId !== c.participant.id) return c; // it's our own message
-        return { ...c, unreadCount: c.unreadCount + 1, lastMessage: msg.message as any };
+        return { ...c, unreadCount: c.unreadCount + 1, lastMessage: _msg.message as any };
       }));
     };
     wsClient.addHandler('message', handler);
