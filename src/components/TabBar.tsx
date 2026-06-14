@@ -4,6 +4,7 @@ import { Compass, Users, MessageCircle, User, Plus } from 'lucide-react';
 import { useTelegram } from '@/hooks/useTelegram';
 import { useSessionStore } from '@/context/sessionStore';
 import { storyService } from '@/api/services';
+import { useTranslation } from '@/i18n/useTranslation';
 import styles from './TabBar.module.css';
 
 // ==========================================================================
@@ -14,15 +15,16 @@ import styles from './TabBar.module.css';
 export function TabBar() {
   const { haptic } = useTelegram();
   const { totalUnreadCount } = useSessionStore();
+  const { t } = useTranslation();
   const fileRef = useRef<HTMLInputElement>(null);
 
   const LEFT_TABS = [
-    { to: '/discover', label: 'Discover', icon: Compass, badge: 0 },
-    { to: '/groups', label: 'Groups', icon: Users, badge: 0 },
+    { to: '/discover', label: t('discover'), icon: Compass, badge: 0 },
+    { to: '/groups', label: t('groups'), icon: Users, badge: 0 },
   ];
   const RIGHT_TABS = [
-    { to: '/chat', label: 'Chat', icon: MessageCircle, badge: totalUnreadCount },
-    { to: '/profile', label: 'Profile', icon: User, badge: 0 },
+    { to: '/chat', label: t('chat'), icon: MessageCircle, badge: totalUnreadCount },
+    { to: '/profile', label: t('profile'), icon: User, badge: 0 },
   ];
 
   async function handleStoryUpload(e: React.ChangeEvent<HTMLInputElement>) {

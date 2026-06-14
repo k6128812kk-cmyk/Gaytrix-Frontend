@@ -3,7 +3,7 @@
 .page {
   display: flex;
   flex-direction: column;
-  height: 100dvh; /* dynamic viewport height — adjusts when keyboard appears */
+  height: 100%; /* dynamic viewport height — adjusts when keyboard appears */
   background: var(--color-bg);
   overflow: hidden;
 }

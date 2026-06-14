@@ -52,8 +52,9 @@ export function ConversationPage() {
   // WebSocket
   const connectWs = useCallback(() => {
     if (!id) return;
-    const initData = window.Telegram?.WebApp?.initData;
-    if (!initData) return;
+    const initData = window.Telegram?.WebApp?.initData || '';
+    // In production initData is always present. In dev it may be empty — still connect
+    // so the WS can handle the auth handshake (backend allows dev mode)
 
     const ws = new WebSocket(WS_URL);
     wsRef.current = ws;

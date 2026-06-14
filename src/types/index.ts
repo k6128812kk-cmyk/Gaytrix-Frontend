@@ -250,6 +250,9 @@ export interface ChatMessage {
   readAt?: string | null;
 }
 
+// "Show Me" combines gender + orientation into one intuitive picker
+export type ShowMeOption = 'men' | 'women' | 'gay' | 'everyone' | '';
+
 export interface DiscoveryFilters {
   ageMin: number;
   ageMax: number;
@@ -263,6 +266,8 @@ export interface DiscoveryFilters {
   onlineOnly?: boolean;
   genderIdentity?: GenderIdentity;
   interestedIn?: InterestedIn;
+  orientation?: Orientation;
+  showMe?: ShowMeOption;
 }
 
 export interface CommunityEvent {

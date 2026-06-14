@@ -1,12 +1,13 @@
 import { useNavigate } from 'react-router-dom';
 import {
-  ChevronRight, ShieldCheck, Crown, Settings,
+  ChevronRight, ShieldCheck, Crown, Settings, Globe,
   Eye, Bell, HelpCircle, LogOut, ShieldAlert,
 } from 'lucide-react';
 import { PageHeader } from '@/components/PageHeader';
 import { Avatar } from '@/components/Avatar';
 import { Badge } from '@/components/Badge';
 import { useSessionStore } from '@/context/sessionStore';
+import { useTranslation, LANGUAGE_LABELS, type Language } from '@/i18n/useTranslation';
 import styles from './Profile.module.css';
 
 // ==========================================================================
@@ -18,6 +19,7 @@ import styles from './Profile.module.css';
 export function ProfilePage() {
   const navigate = useNavigate();
   const { profile, isAdmin, isModerator } = useSessionStore();
+  const { language, setLanguage } = useTranslation();
 
   if (!profile) return null;
 
@@ -72,6 +74,24 @@ export function ProfilePage() {
           />
           <MenuItem icon={Settings} label="Edit profile" onClick={() => navigate('/profile/edit')} />
           <MenuItem icon={Eye} label="Privacy settings" onClick={() => navigate('/profile/privacy')} />
+          {/* Language selector */}
+          <div style={{ display: 'flex', alignItems: 'center', padding: '12px 16px', borderBottom: '1px solid var(--color-border)', gap: 12 }}>
+            <Globe size={18} style={{ color: 'var(--color-text-muted)', flexShrink: 0 }} />
+            <span style={{ flex: 1, fontSize: 15, color: 'var(--color-text)' }}>Language</span>
+            <select
+              value={language}
+              onChange={e => setLanguage(e.target.value as Language)}
+              style={{
+                background: 'var(--color-surface)', border: '1px solid var(--color-border)',
+                borderRadius: 'var(--radius-md)', color: 'var(--color-text)',
+                padding: '4px 8px', fontSize: 13, cursor: 'pointer',
+              }}
+            >
+              {(Object.entries(LANGUAGE_LABELS) as [Language, string][]).map(([code, label]) => (
+                <option key={code} value={code}>{label}</option>
+              ))}
+            </select>
+          </div>
           <MenuItem icon={Bell} label="Notifications" onClick={() => navigate('/profile/notifications')} />
           {/* Admin panel — only shown when server assigns admin/moderator role */}
           {isModerator() && (
