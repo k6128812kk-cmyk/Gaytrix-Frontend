@@ -67,7 +67,24 @@ export default function App() {
   useEffect(() => {
     if (!isReady) return;
     setInitData(initData);
-    profileService.getMe().then(setProfile).finally(() => setLoading(false));
+
+    // Outside Telegram, initData is empty so the backend rejects with 401.
+    // Fall back to mock data so the app is fully usable in a browser.
+    if (!initData) {
+      import('@/mock/data').then(({ currentUser }) => {
+        setProfile(currentUser);
+        setLoading(false);
+      });
+      return;
+    }
+
+    profileService.getMe()
+      .then(setProfile)
+      .catch(() => {
+        // API failed even with initData — load mock so the screen doesn't hang.
+        import('@/mock/data').then(({ currentUser }) => setProfile(currentUser));
+      })
+      .finally(() => setLoading(false));
   }, [isReady, initData, setProfile, setLoading]);
 
   if (isLoading || !profile) {
