@@ -183,6 +183,10 @@ function StoryViewer({ stories, index, onClose, onNext, onPrev }: {
   const touchStartY = useRef<number | null>(null);
 
   useEffect(() => {
+    if (showViewers) {
+      storyService.getViewers(story.id).then(setViewers).catch(() => {});
+    }
+  }, [showViewers]);
     setProgress(0);
     setShowViewers(false);
     clearInterval(timerRef.current);

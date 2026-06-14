@@ -35,7 +35,7 @@ export function GroupChatPage() {
   useGlobalWs();
 
   // Scroll to bottom on new messages
-  const scrollToBottom = useCallback((smooth = true) => {
+  const scrollToBottom = useCallback((_smooth = true) => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
