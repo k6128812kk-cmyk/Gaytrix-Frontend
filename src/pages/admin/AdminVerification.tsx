@@ -75,12 +75,23 @@ export function AdminVerification() {
             <div key={req.id} className={styles.verificationCard}>
               {/* Selfie — admin-only view */}
               <div style={{ position: 'relative' }}>
-                <img
-                  src={assetUrl(req.selfieUrl)}
-                  alt="Verification selfie"
-                  className={styles.selfieImage}
-                  onError={(e) => { (e.target as HTMLImageElement).src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><rect fill="%23333" width="100" height="100"/><text fill="%23999" font-size="14" x="50%" y="50%" text-anchor="middle" dy=".3em">No image</text></svg>'; }}
-                />
+                {req.selfieUrl ? (
+                  <img
+                    src={assetUrl(req.selfieUrl)}
+                    alt="Verification selfie"
+                    className={styles.selfieImage}
+                    onError={(e) => {
+                      const img = e.target as HTMLImageElement;
+                      img.style.display = 'none';
+                      img.nextElementSibling?.removeAttribute('style');
+                    }}
+                  />
+                ) : null}
+                <div style={{ display: req.selfieUrl ? 'none' : 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: 180, gap: 8, background: 'var(--color-surface)', borderRadius: 'var(--radius-md)', color: 'var(--color-text-faint)', fontSize: 13 }}>
+                  <span style={{ fontSize: 32 }}>🖼</span>
+                  <span>Photo unavailable</span>
+                  <span style={{ fontSize: 11, fontFamily: 'var(--font-mono)' }}>{req.selfieUrl}</span>
+                </div>
                 <div style={{
                   position: 'absolute', top: 8, left: 8,
                   background: 'rgba(0,0,0,0.7)', borderRadius: 'var(--radius-pill)',

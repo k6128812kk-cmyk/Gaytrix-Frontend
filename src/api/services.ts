@@ -4,7 +4,7 @@ import type {
   Conversation, ChatMessage,
   DiscoveryFilters, VerificationRequest,
   UserReport, AdminAction, PlatformStats,
-  Story, MyStory, CommunityGroup, CommunityGroupMessage, GroupSortOption,
+  Story, MyStory, StoryViewer, CommunityGroup, CommunityGroupMessage, GroupSortOption,
 } from '@/types';
 import {
   currentUser, mockProfiles, mockLocations, mockConversations,
@@ -31,7 +31,9 @@ export const profileService = {
     }
     const form = new FormData();
     form.append('photo', file);
-    const { data } = await api.post<{ url: string }>('/profile/photos', form);
+    const { data } = await api.post<{ url: string }>('/profile/photos', form, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
     // Backend now returns an absolute URL directly
     return data.url;
   },
@@ -44,7 +46,9 @@ export const profileService = {
     if (USE_MOCKS) { await delay(400); return { status: 'pending' }; }
     const form = new FormData();
     form.append('selfie', selfieFile);
-    const { data } = await api.post('/verification/request', form);
+    const { data } = await api.post('/verification/request', form, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
     return data;
   },
   async reportUser(userId: string, reason: string, details?: string): Promise<{ ok: true }> {
@@ -179,7 +183,8 @@ export const chatService = {
     const form = new FormData();
     form.append('photo', file);
     const { data } = await api.post<ChatMessage>(
-      `/messages/conversations/${conversationId}/photo`, form
+      `/messages/conversations/${conversationId}/photo`, form,
+      { headers: { 'Content-Type': 'multipart/form-data' } }
     );
     return data;
   },
@@ -391,8 +396,7 @@ export const groupService = {
     form.append('name', name);
     form.append('description', description);
     if (photo) form.append('photo', photo);
-    // Do NOT set Content-Type manually — axios/browser must set it with the multipart boundary
-    const { data } = await api.post<CommunityGroup>('/groups', form);
+    const { data } = await api.post<CommunityGroup>('/groups', form, { headers: { 'Content-Type': 'multipart/form-data' } });
     return data;
   },
   async joinGroup(groupId: string): Promise<{ ok: boolean; memberCount: number }> {
@@ -435,11 +439,20 @@ export const storyService = {
     if (USE_MOCKS) { await delay(300); return { id: `s_${Date.now()}`, photoUrl: URL.createObjectURL(photo), createdAt: new Date().toISOString() }; }
     const form = new FormData();
     form.append('photo', photo);
-    const { data } = await api.post<MyStory>('/stories', form);
+    const { data } = await api.post<MyStory>('/stories', form, { headers: { 'Content-Type': 'multipart/form-data' } });
     return data;
   },
   async markViewed(storyId: string): Promise<void> {
     if (USE_MOCKS) { return; }
     await api.post(`/stories/${storyId}/view`);
+  },
+  async deleteStory(storyId: string): Promise<void> {
+    if (USE_MOCKS) { return; }
+    await api.delete(`/stories/${storyId}`);
+  },
+  async getViewers(storyId: string): Promise<StoryViewer[]> {
+    if (USE_MOCKS) { return []; }
+    const { data } = await api.get<StoryViewer[]>(`/stories/${storyId}/viewers`);
+    return data;
   },
 };

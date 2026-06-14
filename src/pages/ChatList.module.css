@@ -1,13 +1,10 @@
 .page {
-  display: flex;
-  flex-direction: column;
   min-height: 100%;
 }
 
 .content {
   display: flex;
   flex-direction: column;
-  flex: 1;
 }
 
 .section {
@@ -33,11 +30,9 @@
   text-align: left;
   background: transparent;
   border: none;
-  border-bottom: 1px solid rgba(255,255,255,0.06);
+  border-bottom: 1px solid var(--color-border-subtle, rgba(255,255,255,0.05));
   cursor: pointer;
   color: var(--color-text);
-  font-family: inherit;
-  -webkit-tap-highlight-color: transparent;
 }
 
 .row:active {
@@ -56,21 +51,11 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 8px;
 }
 
 .rowName {
-  font-weight: 600;
-  font-size: 15px;
-  color: var(--color-text);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  flex: 1;
-}
-
-.rowNameBold {
   font-weight: 700;
+  font-size: 15px;
 }
 
 .rowTime {
@@ -93,12 +78,6 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  flex: 1;
-}
-
-.rowPreviewBold {
-  font-weight: 600;
-  color: var(--color-text);
 }
 
 .skeletonList {
@@ -112,12 +91,6 @@
   height: 64px;
   border-radius: var(--radius-md);
   background: var(--color-surface);
-  animation: pulse 1.4s ease-in-out infinite;
-}
-
-@keyframes pulse {
-  0%, 100% { opacity: 0.5; }
-  50% { opacity: 1; }
 }
 
 .empty {
@@ -126,32 +99,36 @@
   align-items: center;
   text-align: center;
   gap: var(--space-2);
-  padding: 48px var(--space-5);
+  padding: var(--space-6) var(--space-5);
   color: var(--color-text-muted);
 }
 
 .empty h3 {
   color: var(--color-text);
   font-size: 16px;
-  margin: 0;
 }
 
 .empty p {
   font-size: 13px;
-  margin: 0;
 }
 
-/* Unread indicators */
+/* Unread state */
 .rowUnread {
-  background: rgba(127, 90, 240, 0.05);
+  background: var(--color-surface-alt, rgba(127,90,240,0.06));
 }
-
+.rowNameBold {
+  font-weight: 700;
+}
+.rowPreviewBold {
+  font-weight: 600;
+  color: var(--color-text-primary, #fff);
+}
 .unreadBadge {
   min-width: 20px;
   height: 20px;
   padding: 0 5px;
   border-radius: 10px;
-  background: var(--color-accent);
+  background: var(--color-primary, #7f5af0);
   color: #fff;
   font-size: 11px;
   font-weight: 700;

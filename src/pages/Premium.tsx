@@ -19,6 +19,8 @@ const PLANS = [
   { id: 'yearly', label: 'Yearly', stars: 2200, period: '/ year', badge: 'Best value' },
 ];
 
+const ADMIN_TEST_PLAN = { id: 'admin_test', label: '⭐ Admin Test', stars: 1, period: '/ test', badge: 'Admin only' };
+
 const FEATURES = [
   { icon: Zap, label: 'Unlimited profile boosts' },
   { icon: SlidersHorizontal, label: 'Advanced discovery filters' },
@@ -28,12 +30,14 @@ const FEATURES = [
 ];
 
 export function PremiumPage() {
-  const { profile, updateProfile } = useSessionStore();
+  const { profile, updateProfile, isAdmin } = useSessionStore();
   const { webApp, haptic } = useTelegram();
   const [selectedPlan, setSelectedPlan] = useState('quarterly');
   const [purchasing, setPurchasing] = useState(false);
 
   if (!profile) return null;
+
+  const visiblePlans = isAdmin() ? [...PLANS, ADMIN_TEST_PLAN] : PLANS;
 
   async function handlePurchase() {
     if (!webApp) {
@@ -113,7 +117,7 @@ export function PremiumPage() {
         </section>
 
         <section className={styles.plans}>
-          {PLANS.map((plan) => (
+          {visiblePlans.map((plan) => (
             <button
               key={plan.id}
               className={`${styles.plan} ${selectedPlan === plan.id ? styles.planSelected : ''}`}

@@ -338,3 +338,16 @@
   color: var(--color-danger);
   margin: 0;
 }
+
+.cardPhotoPlaceholder {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: var(--color-surface);
+  border: 2px solid var(--color-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  cursor: pointer;
+}

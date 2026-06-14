@@ -59,6 +59,7 @@ export interface PrivacySettings {
   hideExactLocation: boolean;
   invisibleMode: boolean;
   hideOnlineStatus: boolean;
+  privateProfile: boolean;
 }
 
 export interface VerificationRequest {
@@ -182,6 +183,15 @@ export interface Story {
   membership: MembershipTier;
   adminRole: AdminRole;
   viewed: boolean;
+  viewCount?: number;
+}
+
+export interface StoryViewer {
+  id: string;
+  username: string;
+  displayName: string;
+  avatar?: string;
+  viewedAt: string;
 }
 
 export interface MyStory {

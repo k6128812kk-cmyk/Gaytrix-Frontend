@@ -141,7 +141,6 @@ export function GroupsPage() {
             group={group}
             canDelete={canDelete(group)}
             onJoin={() => handleJoin(group)}
-            onLeave={() => handleLeave(group)}
             onDelete={() => handleDelete(group)}
             onOpen={() => navigate(`/groups/${group.id}`)}
           />
@@ -160,21 +159,23 @@ export function GroupsPage() {
 }
 
 // ── Group card ─────────────────────────────────────────────────────────────
-function GroupCard({ group, canDelete, onJoin, onLeave, onDelete, onOpen }: {
+function GroupCard({ group, canDelete, onJoin, onDelete, onOpen }: {
   group: CommunityGroup;
   canDelete: boolean;
   onJoin: () => void;
-  onLeave: () => void;
   onDelete: () => void;
   onOpen: () => void;
 }) {
-  const photoSrc = group.photoUrl
-    ? assetUrl(group.photoUrl)
-    : `https://i.pravatar.cc/80?u=${group.id}`;
+  const photoSrc = group.photoUrl ? assetUrl(group.photoUrl) : null;
 
   return (
     <div className={styles.card}>
-      <img src={photoSrc} alt={group.name} className={styles.cardPhoto} onClick={onOpen} />
+      {photoSrc
+        ? <img src={photoSrc} alt={group.name} className={styles.cardPhoto} onClick={onOpen} />
+        : <div className={styles.cardPhotoPlaceholder} onClick={onOpen}>
+            <span style={{ fontSize: 24 }}>👥</span>
+          </div>
+      }
       <div className={styles.cardBody} onClick={onOpen}>
         <div className={styles.cardName}>{group.name}</div>
         {group.description && <div className={styles.cardDesc}>{group.description}</div>}
@@ -187,14 +188,9 @@ function GroupCard({ group, canDelete, onJoin, onLeave, onDelete, onOpen }: {
       </div>
       <div className={styles.cardActions}>
         {group.isMember ? (
-          <>
-            <button className={styles.chatBtn} onClick={onOpen} aria-label="Open chat">
-              <MessageSquare size={18} />
-            </button>
-            <button className={styles.leaveBtn} onClick={e => { e.stopPropagation(); onLeave(); }} aria-label="Leave">
-              Leave
-            </button>
-          </>
+          <button className={styles.chatBtn} onClick={onOpen} aria-label="Open chat">
+            <MessageSquare size={18} />
+          </button>
         ) : (
           <button className={styles.joinBtn} onClick={e => { e.stopPropagation(); onJoin(); }}>
             Join

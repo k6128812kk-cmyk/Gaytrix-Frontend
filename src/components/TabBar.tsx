@@ -30,10 +30,9 @@ export function TabBar() {
     if (!file) return;
     try {
       await storyService.createStory(file);
-      // Trigger discover page refresh to show the story
       window.dispatchEvent(new CustomEvent('story-created'));
     } catch {
-      // fail silently
+      // fail silently — story row handles errors
     } finally {
       e.target.value = '';
     }
@@ -61,14 +60,13 @@ export function TabBar() {
     <nav className={styles.tabbar} aria-label="Primary">
       {LEFT_TABS.map(renderTab)}
 
-      {/* Centre story creation button */}
       <div className={styles.createWrap}>
         <button
           className={styles.createBtn}
           onClick={() => { haptic.selection(); fileRef.current?.click(); }}
           aria-label="Create story"
         >
-          <Plus size={24} strokeWidth={2.5} />
+          <Plus size={22} strokeWidth={2.5} />
         </button>
         <input
           ref={fileRef}

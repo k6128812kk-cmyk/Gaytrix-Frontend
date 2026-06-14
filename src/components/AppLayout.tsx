@@ -3,16 +3,16 @@ import { TabBar } from './TabBar';
 import styles from './AppLayout.module.css';
 
 // ==========================================================================
-// AppLayout — flex column that fills the viewport exactly.
-// The outlet scrolls independently; TabBar is always pinned at the bottom.
-// TAB_ROOTS: paths where the bottom tab bar is visible.
+// AppLayout — flex column filling viewport exactly.
+// The .outlet div handles scrolling; TabBar is pinned below it.
+// This prevents the fixed TabBar from covering content.
 // ==========================================================================
 
 const TAB_ROOTS = ['/discover', '/groups', '/chat', '/profile'];
 
 export function AppLayout() {
   const location = useLocation();
-  const showTabBar = TAB_ROOTS.some(root => location.pathname === root || location.pathname.startsWith(root + '/') && root !== '/');
+  const showTabBar = TAB_ROOTS.some(r => location.pathname === r || location.pathname.startsWith(r + '/') && r !== '/');
 
   return (
     <div className={styles.layout}>
