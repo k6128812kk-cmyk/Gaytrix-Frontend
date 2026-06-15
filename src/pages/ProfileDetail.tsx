@@ -215,7 +215,7 @@ export function ProfileDetailPage() {
             )}
             {profile.orientation && (
               <div className={styles.detailRow}>
-                <span className={styles.detailLabel}>🏳️‍🌈 {t('orientation')}</span>
+                <span className={styles.detailLabel}>❤️ {t('orientation')}</span>
                 <span className={styles.detailValue} style={{ textTransform: 'capitalize' }}>
                   {profile.orientation.replace('_', ' ')}
                 </span>
