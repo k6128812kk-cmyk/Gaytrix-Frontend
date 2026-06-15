@@ -318,3 +318,18 @@
 .modToggleBtnActive {
   color: var(--color-accent);
 }
+
+.kickBtn {
+  background: none;
+  border: none;
+  padding: 8px 10px;
+  cursor: pointer;
+  color: var(--color-danger, #e74c3c);
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+.kickBtn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}

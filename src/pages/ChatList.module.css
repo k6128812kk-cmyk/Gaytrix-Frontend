@@ -136,3 +136,92 @@
   text-align: center;
   flex-shrink: 0;
 }
+
+/* ── Delete slide action ─────────────────────────────────────────────────── */
+.rowWrap {
+  display: flex;
+  align-items: stretch;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.2s;
+}
+
+.deleteSlideBtn {
+  flex-shrink: 0;
+  width: 0;
+  overflow: hidden;
+  background: var(--color-danger, #e74c3c);
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: width 0.2s;
+  border-radius: 0 10px 10px 0;
+}
+.rowWrapSlid .deleteSlideBtn {
+  width: 64px;
+}
+
+/* ── Delete confirmation sheet ───────────────────────────────────────────── */
+.deleteOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  align-items: flex-end;
+  z-index: 500;
+}
+.deleteSheet {
+  background: var(--color-bg-elevated, #1a1a1a);
+  border-radius: 20px 20px 0 0;
+  padding: 12px 20px calc(24px + var(--safe-bottom, 0px));
+  width: 100%;
+}
+.deleteSheetHandle {
+  width: 36px;
+  height: 4px;
+  background: var(--color-border, #333);
+  border-radius: 2px;
+  margin: 0 auto 16px;
+}
+.deleteSheetTitle {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--color-text, #fff);
+  margin: 0 0 8px;
+}
+.deleteSheetDesc {
+  font-size: 14px;
+  color: var(--color-text-muted, #aaa);
+  margin: 0 0 20px;
+  line-height: 1.5;
+}
+.deleteConfirmBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 14px;
+  border-radius: 12px;
+  background: var(--color-danger, #e74c3c);
+  color: #fff;
+  border: none;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  margin-bottom: 10px;
+}
+.deleteCancelBtn {
+  width: 100%;
+  padding: 14px;
+  border-radius: 12px;
+  background: var(--color-surface, #2a2a2a);
+  color: var(--color-text-muted, #aaa);
+  border: none;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+}

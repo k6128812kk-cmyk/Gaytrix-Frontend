@@ -167,6 +167,11 @@ export const chatService = {
     const { data } = await api.post<{ conversationId: string }>('/messages/start', { targetUserId });
     return data;
   },
+  async deleteConversation(conversationId: string): Promise<{ ok: boolean; fullyDeleted: boolean }> {
+    if (USE_MOCKS) { await delay(200); return { ok: true, fullyDeleted: false }; }
+    const { data } = await api.delete(`/messages/conversations/${conversationId}`);
+    return data;
+  },
   async sendPhotoMessage(conversationId: string, file: File): Promise<ChatMessage> {
     if (USE_MOCKS) {
       await delay(300);
@@ -475,6 +480,16 @@ export const groupService = {
   async unmuteGroup(groupId: string): Promise<{ ok: boolean; muted: boolean }> {
     if (USE_MOCKS) { return { ok: true, muted: false }; }
     const { data } = await api.delete(`/groups/${groupId}/mute`);
+    return data;
+  },
+  async kickMember(groupId: string, userId: string): Promise<{ ok: boolean }> {
+    if (USE_MOCKS) { await delay(150); return { ok: true }; }
+    const { data } = await api.delete(`/groups/${groupId}/members/${userId}`);
+    return data;
+  },
+  async deleteGroupMessage(groupId: string, messageId: string): Promise<{ ok: boolean }> {
+    if (USE_MOCKS) { await delay(150); return { ok: true }; }
+    const { data } = await api.delete(`/groups/${groupId}/messages/${messageId}`);
     return data;
   },
 };

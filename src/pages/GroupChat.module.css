@@ -316,3 +316,31 @@
 .muteBtn:hover {
   background: var(--color-surface);
 }
+
+/* ── Deleted message ──────────────────────────────────────────────────────── */
+.bubbleDeleted {
+  opacity: 0.5;
+  font-style: italic;
+}
+.msgDeleted {
+  font-size: 13px;
+  color: var(--color-text-faint);
+}
+
+/* ── Delete message button (shown next to bubble for admins/mods) ─────────── */
+.deleteMsgBtn {
+  background: none;
+  border: none;
+  padding: 4px;
+  cursor: pointer;
+  color: var(--color-text-faint);
+  opacity: 0;
+  transition: opacity 0.15s;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+}
+.row:hover .deleteMsgBtn,
+.row:focus-within .deleteMsgBtn {
+  opacity: 1;
+}

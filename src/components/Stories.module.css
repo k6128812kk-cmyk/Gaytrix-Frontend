@@ -27,6 +27,7 @@
   padding: 0;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
+  overflow: hidden; /* clips child images to the circle */
 }
 
 .avatarImg {
@@ -34,6 +35,7 @@
   height: 56px;
   border-radius: 50%;
   object-fit: cover;
+  object-position: center;
   display: block;
   margin: 3px;
   border: 2px solid var(--color-bg);
@@ -490,4 +492,57 @@
 .captionShare:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+}
+
+/* ── Delete confirmation dialog ─────────────────────────────────────────── */
+.confirmOverlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 30;
+  padding: 24px;
+}
+.confirmBox {
+  background: var(--color-bg-elevated, #1e1e1e);
+  border-radius: 16px;
+  padding: 24px 20px 16px;
+  width: 100%;
+  max-width: 320px;
+  text-align: center;
+}
+.confirmMessage {
+  color: var(--color-text, #fff);
+  font-size: 15px;
+  font-weight: 600;
+  margin: 0 0 20px;
+  line-height: 1.5;
+}
+.confirmActions {
+  display: flex;
+  gap: 10px;
+}
+.confirmCancel {
+  flex: 1;
+  padding: 12px;
+  border-radius: 10px;
+  background: var(--color-surface, #2a2a2a);
+  color: var(--color-text-muted, #aaa);
+  border: none;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.confirmDelete {
+  flex: 1;
+  padding: 12px;
+  border-radius: 10px;
+  background: var(--color-danger, #e74c3c);
+  color: #fff;
+  border: none;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
 }

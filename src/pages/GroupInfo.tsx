@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Users, Settings, Shield, ShieldOff, CheckCircle, XCircle, Lock } from 'lucide-react';
+import { ArrowLeft, Users, Settings, Shield, ShieldOff, CheckCircle, XCircle, Lock, UserMinus } from 'lucide-react';
 import { groupService } from '@/api/services';
 import { assetUrl } from '@/api/client';
 import { useSessionStore } from '@/context/sessionStore';
@@ -85,6 +85,17 @@ export function GroupInfoPage() {
       setShowEdit(false);
     } catch { /* fail silently */ }
     finally { setSaving(false); }
+  }
+
+  async function handleKickMember(memberId: string, memberName: string) {
+    if (!groupId) return;
+    if (!confirm(`Remove ${memberName} from the group?`)) return;
+    setActionLoading(memberId);
+    try {
+      await groupService.kickMember(groupId, memberId);
+      setMembers(prev => prev.filter(m => m.id !== memberId));
+    } catch { /* fail silently */ }
+    finally { setActionLoading(null); }
   }
 
   async function handleToggleMod(member: MemberWithRole) {
@@ -269,6 +280,18 @@ export function GroupInfoPage() {
                       title={member.groupRole === 'moderator' ? 'Remove moderator' : 'Make moderator'}
                     >
                       {member.groupRole === 'moderator' ? <ShieldOff size={15} /> : <Shield size={15} />}
+                    </button>
+                  )}
+                  {/* Kick button — creator, mods (non-mod targets), or super-admin */}
+                  {isMod && member.groupRole !== 'creator' && member.id !== profile?.id &&
+                    (member.groupRole !== 'moderator' || isCreator) && (
+                    <button
+                      className={styles.kickBtn}
+                      onClick={() => handleKickMember(member.id, member.displayName)}
+                      disabled={actionLoading === member.id}
+                      title="Remove from group"
+                    >
+                      <UserMinus size={15} />
                     </button>
                   )}
                 </div>

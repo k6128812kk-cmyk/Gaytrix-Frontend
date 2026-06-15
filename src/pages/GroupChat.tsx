@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Send, ArrowLeft, Users, Info, BellOff, Bell } from 'lucide-react';
+import { Send, ArrowLeft, Users, Info, BellOff, Bell, Trash2 } from 'lucide-react';
 import { format, isToday, isYesterday } from 'date-fns';
 import { groupService } from '@/api/services';
 import { assetUrl } from '@/api/client';
@@ -20,6 +20,7 @@ export function GroupChatPage() {
   const [draft, setDraft] = useState('');
   const [loading, setLoading] = useState(true);
   const [isMuted, setIsMuted] = useState(false);
+  const [confirmDeleteMsgId, setConfirmDeleteMsgId] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
@@ -73,6 +74,22 @@ export function GroupChatPage() {
       }
     } catch { /* fail silently */ }
   }
+
+  async function handleDeleteMessage(messageId: string) {
+    if (!groupId) return;
+    try {
+      await groupService.deleteGroupMessage(groupId, messageId);
+      // Mark message as deleted locally
+      setMessages(prev => prev.map(m =>
+        m.id === messageId ? { ...m, contentType: 'deleted' as const, text: undefined, mediaUrl: undefined } : m
+      ));
+    } catch { /* fail silently */ }
+    setConfirmDeleteMsgId(null);
+  }
+
+  // Can this user delete group messages?
+  const canDeleteMessages = profile?.adminRole === 'admin' || profile?.adminRole === 'super_admin' ||
+    group?.userRole === 'creator' || group?.userRole === 'moderator';
 
   function handleSend() {
     if (!groupId || !draft.trim()) return;
@@ -180,13 +197,26 @@ export function GroupChatPage() {
               )}
               <div className={styles.bubbleGroup}>
                 {!isMe && showName && <span className={styles.senderName}>{msg.senderName}</span>}
-                <div className={`${styles.bubble} ${isMe ? styles.bubbleMe : styles.bubbleThem}`}>
-                  {msg.contentType === 'image' && msg.mediaUrl ? (
-                    <img src={assetUrl(msg.mediaUrl)} alt="Photo" style={{ maxWidth: 200, borderRadius: 10, display: 'block' }} />
-                  ) : (
-                    <span className={styles.msgText}>{msg.text}</span>
+                <div style={{ display: 'flex', alignItems: 'flex-end', gap: 4 }}>
+                  <div className={`${styles.bubble} ${isMe ? styles.bubbleMe : styles.bubbleThem} ${msg.contentType === 'deleted' ? styles.bubbleDeleted : ''}`}>
+                    {msg.contentType === 'deleted' ? (
+                      <span className={styles.msgDeleted}>🚫 Message deleted</span>
+                    ) : msg.contentType === 'image' && msg.mediaUrl ? (
+                      <img src={assetUrl(msg.mediaUrl)} alt="Photo" style={{ maxWidth: 200, borderRadius: 10, display: 'block' }} />
+                    ) : (
+                      <span className={styles.msgText}>{msg.text}</span>
+                    )}
+                    <span className={styles.msgTime}>{format(new Date(msg.sentAt), 'HH:mm')}</span>
+                  </div>
+                  {canDeleteMessages && msg.contentType !== 'deleted' && (
+                    <button
+                      className={styles.deleteMsgBtn}
+                      onClick={() => setConfirmDeleteMsgId(msg.id)}
+                      title="Delete message"
+                    >
+                      <Trash2 size={12} />
+                    </button>
                   )}
-                  <span className={styles.msgTime}>{format(new Date(msg.sentAt), 'HH:mm')}</span>
                 </div>
               </div>
             </div>
@@ -208,6 +238,36 @@ export function GroupChatPage() {
           <Send size={18} />
         </button>
       </div>
+
+      {/* Delete message confirmation */}
+      {confirmDeleteMsgId && (
+        <div style={{
+          position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.5)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          zIndex: 500, padding: 24,
+        }} onClick={() => setConfirmDeleteMsgId(null)}>
+          <div style={{
+            background: 'var(--color-bg-elevated)', borderRadius: 16,
+            padding: '24px 20px 16px', width: '100%', maxWidth: 320, textAlign: 'center',
+          }} onClick={e => e.stopPropagation()}>
+            <p style={{ color: 'var(--color-text)', fontSize: 15, fontWeight: 600, margin: '0 0 20px', lineHeight: 1.5 }}>
+              Delete this message? This cannot be undone.
+            </p>
+            <div style={{ display: 'flex', gap: 10 }}>
+              <button onClick={() => setConfirmDeleteMsgId(null)} style={{
+                flex: 1, padding: 12, borderRadius: 10,
+                background: 'var(--color-surface)', color: 'var(--color-text-muted)',
+                border: 'none', fontSize: 15, fontWeight: 600, cursor: 'pointer',
+              }}>Cancel</button>
+              <button onClick={() => handleDeleteMessage(confirmDeleteMsgId)} style={{
+                flex: 1, padding: 12, borderRadius: 10,
+                background: 'var(--color-danger)', color: '#fff',
+                border: 'none', fontSize: 15, fontWeight: 700, cursor: 'pointer',
+              }}>Delete</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

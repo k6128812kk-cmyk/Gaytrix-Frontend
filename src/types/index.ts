@@ -240,7 +240,8 @@ export interface CommunityGroupMessage {
   senderPhoto?: string;
   text?: string;
   mediaUrl?: string;
-  contentType: 'text' | 'image';
+  contentType: 'text' | 'image' | 'deleted';
+  deletedAt?: string | null;
   sentAt: string;
 }
 

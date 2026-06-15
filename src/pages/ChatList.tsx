@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { formatDistanceToNowStrict } from 'date-fns';
+import { Trash2 } from 'lucide-react';
 import { PageHeader } from '@/components/PageHeader';
 import { Avatar } from '@/components/Avatar';
 import { chatService } from '@/api/services';
@@ -11,6 +12,7 @@ import styles from './ChatList.module.css';
 
 // ==========================================================================
 // ChatList — list of conversations with real-time unread indicators.
+// Long-press or swipe reveals delete option (soft-delete for requester only).
 // ==========================================================================
 
 export function ChatListPage() {
@@ -19,6 +21,7 @@ export function ChatListPage() {
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
 
   useEffect(() => {
     chatService.getConversations()
@@ -30,7 +33,7 @@ export function ChatListPage() {
       });
   }, []);
 
-  // Listen for new incoming messages to update unread counts live
+  // Live unread count updates
   useEffect(() => {
     const handler = (_msg: Record<string, unknown>) => {
       const m = _msg.message as { conversationId: string; senderId: string };
@@ -44,6 +47,14 @@ export function ChatListPage() {
     wsClient.addHandler('message', handler);
     return () => wsClient.removeHandler('message', handler);
   }, []);
+
+  async function handleDeleteConversation(conversationId: string) {
+    try {
+      await chatService.deleteConversation(conversationId);
+      setConversations(prev => prev.filter(c => c.id !== conversationId));
+    } catch { /* fail silently */ }
+    setConfirmDeleteId(null);
+  }
 
   const requests = conversations.filter(c => c.isMessageRequest);
   const active = conversations.filter(c => !c.isMessageRequest);
@@ -70,6 +81,7 @@ export function ChatListPage() {
             <h2 className={styles.sectionTitle}>{t('messageRequests')} ({requests.length})</h2>
             {requests.map(conv => (
               <ConversationRow key={conv.id} conversation={conv}
+                onDelete={() => setConfirmDeleteId(conv.id)}
                 onClick={() => {
                   setConversations(prev => prev.map(c => c.id === conv.id ? { ...c, unreadCount: 0 } : c));
                   navigate(`/chat/${conv.id}`);
@@ -88,6 +100,7 @@ export function ChatListPage() {
             ) : (
               active.map(conv => (
                 <ConversationRow key={conv.id} conversation={conv}
+                  onDelete={() => setConfirmDeleteId(conv.id)}
                   onClick={() => {
                     setConversations(prev => prev.map(c => c.id === conv.id ? { ...c, unreadCount: 0 } : c));
                     navigate(`/chat/${conv.id}`);
@@ -97,48 +110,93 @@ export function ChatListPage() {
           </section>
         )}
       </div>
+
+      {/* Delete confirmation */}
+      {confirmDeleteId && (
+        <div className={styles.deleteOverlay} onClick={() => setConfirmDeleteId(null)}>
+          <div className={styles.deleteSheet} onClick={e => e.stopPropagation()}>
+            <div className={styles.deleteSheetHandle} />
+            <h3 className={styles.deleteSheetTitle}>Delete conversation?</h3>
+            <p className={styles.deleteSheetDesc}>
+              This conversation will be removed from your list. The other person can still see it unless they also delete it.
+            </p>
+            <button className={styles.deleteConfirmBtn} onClick={() => handleDeleteConversation(confirmDeleteId)}>
+              <Trash2 size={16} /> Delete
+            </button>
+            <button className={styles.deleteCancelBtn} onClick={() => setConfirmDeleteId(null)}>
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
 
-function ConversationRow({ conversation, onClick }: { conversation: Conversation; onClick: () => void }) {
+function ConversationRow({ conversation, onClick, onDelete }: {
+  conversation: Conversation;
+  onClick: () => void;
+  onDelete: () => void;
+}) {
   const { t } = useTranslation();
   const { participant, lastMessage, unreadCount, isMessageRequest } = conversation;
   const hasUnread = unreadCount > 0;
+  const [showDelete, setShowDelete] = useState(false);
+  const longPressTimer = useRef<ReturnType<typeof setTimeout>>();
+
+  function handleTouchStart() {
+    longPressTimer.current = setTimeout(() => setShowDelete(true), 600);
+  }
+  function handleTouchEnd() {
+    clearTimeout(longPressTimer.current);
+  }
 
   return (
-    <button className={`${styles.row} ${hasUnread ? styles.rowUnread : ''}`} onClick={onClick}>
-      <Avatar
-        src={participant.photos[0]}
-        alt={participant.displayName}
-        size={52}
-        isOnline={participant.isOnline}
-        verification={participant.verification}
-        membership={participant.membership}
-        adminRole={participant.adminRole}
-      />
-      <div className={styles.rowText}>
-        <div className={styles.rowTop}>
-          <span className={`${styles.rowName} ${hasUnread ? styles.rowNameBold : ''}`}>
-            {participant.displayName}
-          </span>
-          {lastMessage && (
-            <span className={styles.rowTime}>
-              {formatDistanceToNowStrict(new Date(lastMessage.sentAt))} ago
+    <div
+      className={`${styles.rowWrap} ${showDelete ? styles.rowWrapSlid : ''}`}
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
+      onTouchCancel={handleTouchEnd}
+    >
+      <button className={`${styles.row} ${hasUnread ? styles.rowUnread : ''}`} onClick={() => { setShowDelete(false); onClick(); }}>
+        <Avatar
+          src={participant.photos[0]}
+          alt={participant.displayName}
+          size={52}
+          isOnline={participant.isOnline}
+          verification={participant.verification}
+          membership={participant.membership}
+          adminRole={participant.adminRole}
+        />
+        <div className={styles.rowText}>
+          <div className={styles.rowTop}>
+            <span className={`${styles.rowName} ${hasUnread ? styles.rowNameBold : ''}`}>
+              {participant.displayName}
             </span>
-          )}
+            {lastMessage && (
+              <span className={styles.rowTime}>
+                {formatDistanceToNowStrict(new Date(lastMessage.sentAt))} ago
+              </span>
+            )}
+          </div>
+          <div className={styles.rowBottom}>
+            <span className={`${styles.rowPreview} ${hasUnread ? styles.rowPreviewBold : ''}`}>
+              {isMessageRequest
+                ? t('wantsToMessage')
+                : lastMessage?.text ?? (lastMessage?.type === 'image' ? '📷 Photo' : t('noMessagesYet'))}
+            </span>
+            {hasUnread && (
+              <span className={styles.unreadBadge}>{unreadCount > 99 ? '99+' : unreadCount}</span>
+            )}
+          </div>
         </div>
-        <div className={styles.rowBottom}>
-          <span className={`${styles.rowPreview} ${hasUnread ? styles.rowPreviewBold : ''}`}>
-            {isMessageRequest
-              ? t('wantsToMessage')
-              : lastMessage?.text ?? (lastMessage?.type === 'image' ? '📷 Photo' : t('noMessagesYet'))}
-          </span>
-          {hasUnread && (
-            <span className={styles.unreadBadge}>{unreadCount > 99 ? '99+' : unreadCount}</span>
-          )}
-        </div>
-      </div>
-    </button>
+      </button>
+      <button className={styles.deleteSlideBtn} onClick={e => { e.stopPropagation(); setShowDelete(false); onDelete(); }}>
+        <Trash2 size={18} />
+      </button>
+    </div>
   );
 }
+
+// Need to import useRef for long-press timer
+import { useRef } from 'react';

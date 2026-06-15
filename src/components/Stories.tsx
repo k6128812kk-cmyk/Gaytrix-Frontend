@@ -10,12 +10,15 @@ import type { Story, MyStory, StoryViewer } from '@/types';
 import styles from './Stories.module.css';
 
 // ==========================================================================
-// Stories — circular avatars with thumbnail preview, full-screen viewer,
-// caption support, unlimited stories per user, tab-bar hiding during view.
+// Stories — circular avatars, full-screen viewer, multi-story per user.
+// Tab bar is hidden whenever a story modal or caption sheet is open.
+// Only the story owner can see view analytics.
 // ==========================================================================
 
-// Context for hiding the tab bar
 const STORY_VIEWING_CLASS = 'story-viewing';
+
+function hideTabBar() { document.body.classList.add(STORY_VIEWING_CLASS); }
+function showTabBar() { document.body.classList.remove(STORY_VIEWING_CLASS); }
 
 export function Stories() {
   const { profile } = useSessionStore();
@@ -26,6 +29,7 @@ export function Stories() {
   const [showMyStory, setShowMyStory] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [showAddSheet, setShowAddSheet] = useState(false);
+  // Caption sheet state
   const [showCaptionInput, setShowCaptionInput] = useState(false);
   const [pendingFile, setPendingFile] = useState<File | null>(null);
   const [pendingPreview, setPendingPreview] = useState<string | null>(null);
@@ -37,7 +41,10 @@ export function Stories() {
   useEffect(() => {
     load();
     window.addEventListener('story-created', load);
-    return () => window.removeEventListener('story-created', load);
+    return () => {
+      window.removeEventListener('story-created', load);
+      showTabBar(); // cleanup on unmount
+    };
   }, []);
 
   async function load() {
@@ -49,18 +56,37 @@ export function Stories() {
     finally { setReady(true); }
   }
 
+  // File selected → open caption sheet (tabbar hidden here too)
   function handleFileSelect(file: File) {
     setShowAddSheet(false);
     setPendingFile(file);
     setPendingPreview(URL.createObjectURL(file));
     setCaption('');
     setShowCaptionInput(true);
+    hideTabBar(); // hide while composing caption
+  }
+
+  function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    handleFileSelect(file);
+  }
+
+  function cancelCaption() {
+    setShowCaptionInput(false);
+    setPendingFile(null);
+    setPendingPreview(null);
+    setCaption('');
+    showTabBar();
+    if (cameraRef.current) cameraRef.current.value = '';
+    if (galleryRef.current) galleryRef.current.value = '';
   }
 
   async function handleUploadWithCaption() {
     if (!pendingFile) return;
     setUploading(true);
     setShowCaptionInput(false);
+    showTabBar(); // restore after caption sheet closes
     try {
       const created = await storyService.createStory(pendingFile, caption);
       setMyStory(created);
@@ -77,15 +103,9 @@ export function Stories() {
     }
   }
 
-  function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    handleFileSelect(file);
-  }
-
   function handlePlusClick() {
     if (myStory) {
-      setShowMyStory(true);
+      openMyStoryViewer();
     } else {
       setShowAddSheet(true);
     }
@@ -93,37 +113,37 @@ export function Stories() {
 
   function openViewer(index: number) {
     setViewerIndex(index);
-    document.body.classList.add(STORY_VIEWING_CLASS);
-  }
-
-  function closeViewer() {
-    setViewerIndex(null);
-    document.body.classList.remove(STORY_VIEWING_CLASS);
-  }
-
-  function closeMyStory() {
-    setShowMyStory(false);
-    document.body.classList.remove(STORY_VIEWING_CLASS);
-  }
-
-  async function handleViewStory(index: number) {
-    openViewer(index);
+    hideTabBar();
     const story = stories[index];
     if (story && !story.viewed) {
       storyService.markViewed(story.id).catch(() => {});
       setStories(prev => prev.map((s, i) => i === index
-        ? { ...s, viewed: true, viewCount: (s.viewCount ?? 0) + 1 } : s));
+        ? { ...s, viewed: true } : s));
     }
+  }
+
+  function closeViewer() {
+    setViewerIndex(null);
+    showTabBar();
+  }
+
+  function openMyStoryViewer() {
+    setShowMyStory(true);
+    hideTabBar();
+  }
+
+  function closeMyStoryViewer() {
+    setShowMyStory(false);
+    showTabBar();
   }
 
   async function handleDeleteMyStory(storyId: string) {
     if (!myStory) return;
     try {
       await storyService.deleteStory(storyId);
-      // Refresh
       await load();
       if (!myStory.allStories || myStory.allStories.length <= 1) {
-        closeMyStory();
+        closeMyStoryViewer();
       }
     } catch { /* fail silently */ }
   }
@@ -160,7 +180,6 @@ export function Stories() {
             <span className={`${styles.ring} ${myStory ? styles.ringMine : styles.ringAdd}`} />
           </button>
           <span className={styles.label}>{uploading ? t('storyUploading') : t('you')}</span>
-          {/* Hidden inputs for camera and gallery */}
           <input ref={cameraRef} type="file" accept="image/*" capture="environment"
             onChange={handleFileChange} className={styles.fileInput} />
           <input ref={galleryRef} type="file" accept="image/*"
@@ -173,7 +192,7 @@ export function Stories() {
           const allViewed = story.stories?.every(s => s.viewed) ?? story.viewed;
           return (
             <div key={story.userId} className={styles.storyWrap}>
-              <button className={styles.avatar} onClick={() => handleViewStory(i)}
+              <button className={styles.avatar} onClick={() => openViewer(i)}
                 aria-label={`${story.displayName}'s story`}>
                 <img
                   src={thumbSrc ?? avatarSrc}
@@ -181,6 +200,7 @@ export function Stories() {
                   className={styles.avatarImg}
                   onError={(e) => { (e.target as HTMLImageElement).src = avatarSrc; }}
                 />
+                {/* Small avatar overlay in bottom-left */}
                 <img
                   src={avatarSrc}
                   alt=""
@@ -188,7 +208,6 @@ export function Stories() {
                   onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
                 />
                 <span className={`${styles.ring} ${allViewed ? styles.ringViewed : styles.ringUnviewed}`} />
-                {/* Story count badge if more than 1 */}
                 {story.stories && story.stories.length > 1 && (
                   <span className={styles.storyCountBadge}>{story.stories.length}</span>
                 )}
@@ -198,7 +217,6 @@ export function Stories() {
           );
         })}
 
-        {/* Show placeholder if no stories at all */}
         {!hasContent && (
           <p className={styles.noStories}>{t('noStoriesYet')}</p>
         )}
@@ -212,21 +230,17 @@ export function Stories() {
             <h3 className={styles.sheetTitle}>{t('addStoryTitle')}</h3>
             <p className={styles.sheetSubtitle}>{t('addStoryOption')}</p>
             <button className={styles.sheetBtn} onClick={() => { setShowAddSheet(false); setTimeout(() => cameraRef.current?.click(), 50); }}>
-              <Camera size={22} />
-              <span>{t('takePhoto')}</span>
+              <Camera size={22} /><span>{t('takePhoto')}</span>
             </button>
             <button className={styles.sheetBtn} onClick={() => { setShowAddSheet(false); setTimeout(() => galleryRef.current?.click(), 50); }}>
-              <ImageIcon size={22} />
-              <span>{t('uploadPhoto')}</span>
+              <ImageIcon size={22} /><span>{t('uploadPhoto')}</span>
             </button>
-            <button className={styles.sheetCancel} onClick={() => setShowAddSheet(false)}>
-              {t('cancel')}
-            </button>
+            <button className={styles.sheetCancel} onClick={() => setShowAddSheet(false)}>{t('cancel')}</button>
           </div>
         </div>
       )}
 
-      {/* Caption input sheet */}
+      {/* Caption sheet — tabbar already hidden when this is open */}
       {showCaptionInput && pendingPreview && (
         <div className={styles.captionSheet}>
           <div className={styles.captionPreviewWrap}>
@@ -242,9 +256,7 @@ export function Stories() {
               autoFocus
             />
             <div className={styles.captionActions}>
-              <button className={styles.captionCancel} onClick={() => { setShowCaptionInput(false); setPendingFile(null); setPendingPreview(null); }}>
-                {t('cancel')}
-              </button>
+              <button className={styles.captionCancel} onClick={cancelCaption}>{t('cancel')}</button>
               <button className={styles.captionShare} onClick={handleUploadWithCaption} disabled={uploading}>
                 {uploading ? t('storyUploading') : 'Share story'}
               </button>
@@ -253,7 +265,7 @@ export function Stories() {
         </div>
       )}
 
-      {/* Viewer for other users' stories */}
+      {/* Story viewer — other users' stories */}
       {viewerIndex !== null && (
         <StoryViewer
           stories={stories}
@@ -261,12 +273,12 @@ export function Stories() {
           onClose={closeViewer}
           onNext={() => {
             const next = viewerIndex + 1;
-            if (next < stories.length) handleViewStory(next);
+            if (next < stories.length) openViewer(next);
             else closeViewer();
           }}
           onPrev={() => {
             const prev = viewerIndex - 1;
-            if (prev >= 0) handleViewStory(prev);
+            if (prev >= 0) openViewer(prev);
           }}
         />
       )}
@@ -277,16 +289,33 @@ export function Stories() {
           myStory={myStory}
           myPhotoSrc={myPhotoSrc}
           displayName={profile?.displayName ?? ''}
-          onClose={closeMyStory}
+          onClose={closeMyStoryViewer}
           onDelete={handleDeleteMyStory}
-          onAddMore={() => { closeMyStory(); setTimeout(() => setShowAddSheet(true), 100); }}
+          onAddMore={() => { closeMyStoryViewer(); setTimeout(() => setShowAddSheet(true), 100); }}
         />
       )}
     </>
   );
 }
 
-// ── Full-screen viewer ─────────────────────────────────────────────────────
+// ── Confirmation dialog ────────────────────────────────────────────────────
+function ConfirmDialog({ message, onConfirm, onCancel }: {
+  message: string; onConfirm: () => void; onCancel: () => void;
+}) {
+  return (
+    <div className={styles.confirmOverlay} onClick={onCancel}>
+      <div className={styles.confirmBox} onClick={e => e.stopPropagation()}>
+        <p className={styles.confirmMessage}>{message}</p>
+        <div className={styles.confirmActions}>
+          <button className={styles.confirmCancel} onClick={onCancel}>Cancel</button>
+          <button className={styles.confirmDelete} onClick={onConfirm}>Delete</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── Full-screen story viewer (other users) ─────────────────────────────────
 function StoryViewer({ stories, index, onClose, onNext, onPrev }: {
   stories: Story[];
   index: number;
@@ -297,7 +326,6 @@ function StoryViewer({ stories, index, onClose, onNext, onPrev }: {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const story = stories[index];
-  // For a user with multiple stories, track which sub-story we're on
   const [subIndex, setSubIndex] = useState(0);
   const [progress, setProgress] = useState(0);
   const [showViewers, setShowViewers] = useState(false);
@@ -309,15 +337,13 @@ function StoryViewer({ stories, index, onClose, onNext, onPrev }: {
   const touchStartY = useRef<number | null>(null);
 
   const subStories = story?.stories || [{ id: story?.id, photoUrl: story?.photoUrl, caption: story?.caption || '', createdAt: story?.createdAt, viewed: story?.viewed }];
-  const currentSubStory = subStories[subIndex] || subStories[0];
+  const currentSub = subStories[subIndex] || subStories[0];
 
-  useEffect(() => {
-    setSubIndex(0);
-  }, [index]);
+  useEffect(() => { setSubIndex(0); }, [index]);
 
   useEffect(() => {
     if (showViewers) {
-      storyService.getViewers(currentSubStory.id).then(setViewers).catch(() => {});
+      storyService.getViewers(currentSub.id).then(setViewers).catch(() => {});
     }
   }, [showViewers, subIndex]);
 
@@ -329,12 +355,8 @@ function StoryViewer({ stories, index, onClose, onNext, onPrev }: {
       setProgress(p => {
         if (p >= 100) {
           clearInterval(timerRef.current);
-          // Go to next sub-story or next user's story
-          if (subIndex < subStories.length - 1) {
-            setSubIndex(prev => prev + 1);
-          } else {
-            onNext();
-          }
+          if (subIndex < subStories.length - 1) setSubIndex(prev => prev + 1);
+          else onNext();
           return 100;
         }
         return p + 1;
@@ -343,26 +365,24 @@ function StoryViewer({ stories, index, onClose, onNext, onPrev }: {
     return () => clearInterval(timerRef.current);
   }, [index, subIndex]);
 
+  function goNextSub() {
+    if (subIndex < subStories.length - 1) setSubIndex(prev => prev + 1);
+    else onNext();
+  }
+  function goPrevSub() {
+    if (subIndex > 0) setSubIndex(prev => prev - 1);
+    else onPrev();
+  }
+
   function handleTouchStart(e: React.TouchEvent) {
     touchStartX.current = e.touches[0].clientX;
     touchStartY.current = e.touches[0].clientY;
   }
-
   function handleTouchEnd(e: React.TouchEvent) {
     if (touchStartX.current === null) return;
     const dx = e.changedTouches[0].clientX - touchStartX.current;
     const dy = Math.abs(e.changedTouches[0].clientY - (touchStartY.current ?? 0));
-    if (Math.abs(dx) > 50 && dy < 80) {
-      if (dx < 0) {
-        // Swipe left: next sub-story or next user
-        if (subIndex < subStories.length - 1) setSubIndex(prev => prev + 1);
-        else onNext();
-      } else {
-        // Swipe right: prev sub-story or prev user
-        if (subIndex > 0) setSubIndex(prev => prev - 1);
-        else onPrev();
-      }
-    }
+    if (Math.abs(dx) > 50 && dy < 80) { dx < 0 ? goNextSub() : goPrevSub(); }
     touchStartX.current = null;
   }
 
@@ -381,10 +401,9 @@ function StoryViewer({ stories, index, onClose, onNext, onPrev }: {
   if (!story) return null;
   const avatarSrc = story.avatar ? assetUrl(story.avatar) : `https://i.pravatar.cc/80?u=${story.userId}`;
 
-  // Total segments = total sub-stories across all adjacent users (simplified: just this user's stories)
   return (
     <div className={styles.viewer} onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
-      {/* Progress bars — one per sub-story */}
+      {/* Progress bars */}
       <div className={styles.progressBar}>
         {subStories.map((_, i) => (
           <div key={i} className={styles.progressSegment}>
@@ -404,38 +423,25 @@ function StoryViewer({ stories, index, onClose, onNext, onPrev }: {
             {story.displayName}
           </div>
           <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.6)' }}>
-            {formatDistanceToNowStrict(new Date(currentSubStory.createdAt))} ago
+            {formatDistanceToNowStrict(new Date(currentSub.createdAt))} ago
           </div>
         </div>
         <button className={styles.viewerClose} onClick={onClose}><X size={20} /></button>
       </div>
 
       {/* Story image */}
-      <img src={assetUrl(currentSubStory.photoUrl)} alt="Story" className={styles.storyImage} />
+      <img src={assetUrl(currentSub.photoUrl)} alt="Story" className={styles.storyImage} />
 
       {/* Caption */}
-      {currentSubStory.caption && (
+      {currentSub.caption && (
         <div className={styles.captionOverlay}>
-          <p className={styles.captionText}>{currentSubStory.caption}</p>
+          <p className={styles.captionText}>{currentSub.caption}</p>
         </div>
       )}
 
-      {/* View count */}
-      {story.viewCount !== undefined && story.viewCount > 0 && (
-        <div className={styles.viewCount}><Eye size={14} /><span>{story.viewCount}</span></div>
-      )}
-
       {/* Tap zones */}
-      <button className={styles.tapLeft} onClick={e => {
-        e.stopPropagation();
-        if (subIndex > 0) setSubIndex(prev => prev - 1);
-        else onPrev();
-      }} />
-      <button className={styles.tapRight} onClick={e => {
-        e.stopPropagation();
-        if (subIndex < subStories.length - 1) setSubIndex(prev => prev + 1);
-        else onNext();
-      }} />
+      <button className={styles.tapLeft} onClick={e => { e.stopPropagation(); goPrevSub(); }} />
+      <button className={styles.tapRight} onClick={e => { e.stopPropagation(); goNextSub(); }} />
 
       {/* Reply bar */}
       <div className={styles.replyBar} onClick={e => e.stopPropagation()}>
@@ -453,7 +459,7 @@ function StoryViewer({ stories, index, onClose, onNext, onPrev }: {
         )}
       </div>
 
-      {/* Viewers sheet */}
+      {/* Viewers sheet — only story owner can see this, but owner sees own stories in MyStoryViewer */}
       {showViewers && (
         <div className={styles.viewerSheet} onClick={() => setShowViewers(false)}>
           <div className={styles.viewerSheetInner} onClick={e => e.stopPropagation()}>
@@ -491,6 +497,7 @@ function MyStoryViewer({ myStory, myPhotoSrc, displayName, onClose, onDelete, on
   const [showViewers, setShowViewers] = useState(false);
   const [progress, setProgress] = useState(0);
   const [subIndex, setSubIndex] = useState(0);
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   const timerRef = useRef<ReturnType<typeof setInterval>>();
 
   const allStories = myStory.allStories || [{ id: myStory.id, photoUrl: myStory.photoUrl, caption: myStory.caption || '', createdAt: myStory.createdAt }];
@@ -507,9 +514,7 @@ function MyStoryViewer({ myStory, myPhotoSrc, displayName, onClose, onDelete, on
       setProgress(p => {
         if (p >= 100) {
           clearInterval(timerRef.current);
-          if (subIndex < allStories.length - 1) {
-            setSubIndex(prev => prev + 1);
-          }
+          if (subIndex < allStories.length - 1) setSubIndex(prev => prev + 1);
           return 100;
         }
         return p + 1;
@@ -523,7 +528,8 @@ function MyStoryViewer({ myStory, myPhotoSrc, displayName, onClose, onDelete, on
       <div className={styles.progressBar}>
         {allStories.map((_, i) => (
           <div key={i} className={styles.progressSegment}>
-            <div className={styles.progressFill} style={{ width: i < subIndex ? '100%' : i === subIndex ? `${progress}%` : '0%' }} />
+            <div className={styles.progressFill}
+              style={{ width: i < subIndex ? '100%' : i === subIndex ? `${progress}%` : '0%' }} />
           </div>
         ))}
       </div>
@@ -536,32 +542,44 @@ function MyStoryViewer({ myStory, myPhotoSrc, displayName, onClose, onDelete, on
             {formatDistanceToNowStrict(new Date(currentStory.createdAt))} ago
           </div>
         </div>
+        {/* Add more stories */}
         <button className={styles.viewerClose} onClick={onAddMore} title="Add another story">
           <Plus size={16} />
         </button>
+        {/* View count — only owner sees this */}
         <button className={styles.viewerClose} onClick={() => setShowViewers(true)} title={t('viewersLabel')}>
           <Eye size={16} /><span style={{ fontSize: 12, marginLeft: 3 }}>{viewers.length}</span>
         </button>
-        <button className={styles.viewerClose} style={{ color: '#e74c3c' }} onClick={() => onDelete(currentStory.id)}
-          title={t('deleteStory')}><Trash2 size={16} /></button>
+        {/* Delete with confirmation */}
+        <button className={styles.viewerClose} style={{ color: '#e74c3c' }}
+          onClick={() => setConfirmDeleteId(currentStory.id)} title={t('deleteStory')}>
+          <Trash2 size={16} />
+        </button>
         <button className={styles.viewerClose} onClick={onClose}><X size={20} /></button>
       </div>
 
       <img src={assetUrl(currentStory.photoUrl)} alt={t('myStory')} className={styles.storyImage} />
 
-      {/* Caption */}
       {currentStory.caption && (
         <div className={styles.captionOverlay}>
           <p className={styles.captionText}>{currentStory.caption}</p>
         </div>
       )}
 
-      {/* Tap zones for navigating own stories */}
       {subIndex > 0 && (
         <button className={styles.tapLeft} onClick={() => setSubIndex(prev => prev - 1)} />
       )}
       {subIndex < allStories.length - 1 && (
         <button className={styles.tapRight} onClick={() => setSubIndex(prev => prev + 1)} />
+      )}
+
+      {/* Delete confirmation dialog */}
+      {confirmDeleteId && (
+        <ConfirmDialog
+          message="Are you sure you want to delete this story?"
+          onConfirm={() => { const id = confirmDeleteId; setConfirmDeleteId(null); onDelete(id); }}
+          onCancel={() => setConfirmDeleteId(null)}
+        />
       )}
 
       {showViewers && (

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Send, Mic, Image as ImageIcon, Check, CheckCheck, X } from 'lucide-react';
+import { Send, Mic, Image as ImageIcon, Check, CheckCheck, X, Trash2 } from 'lucide-react';
 import { format, isToday, isYesterday } from 'date-fns';
 import { PageHeader } from '@/components/PageHeader';
 import { chatService } from '@/api/services';
@@ -28,6 +28,7 @@ export function ConversationPage() {
   const [partnerTyping, setPartnerTyping] = useState(false);
   const [photoPreview, setPhotoPreview] = useState<{ file: File; url: string } | null>(null);
   const [sendingPhoto, setSendingPhoto] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const typingTimer = useRef<ReturnType<typeof setTimeout>>();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -147,6 +148,15 @@ export function ConversationPage() {
     }
   }
 
+  async function handleDeleteConversation() {
+    if (!id) return;
+    try {
+      await chatService.deleteConversation(id);
+      navigate('/chat', { replace: true });
+    } catch { /* fail silently */ }
+    setShowDeleteConfirm(false);
+  }
+
   const participant = conversation?.participant;
   const title = participant?.displayName ?? t('chat');
   const currentUserId = profile?.id ?? '';
@@ -196,7 +206,17 @@ export function ConversationPage() {
 
   return (
     <div className={styles.page}>
-      <PageHeader title={title} showBack customTitleElement={headerTitle} />
+      <PageHeader title={title} showBack customTitleElement={headerTitle}
+        action={
+          <button
+            onClick={() => setShowDeleteConfirm(true)}
+            style={{ background: 'none', border: 'none', padding: 8, cursor: 'pointer', color: 'var(--color-text-muted)' }}
+            aria-label="Delete conversation"
+          >
+            <Trash2 size={18} />
+          </button>
+        }
+      />
 
       <div className={styles.messages} ref={scrollRef}>
         {loading && <div className={styles.loading}>{t('loading')}</div>}
@@ -314,6 +334,40 @@ export function ConversationPage() {
           </button>
         )}
       </div>
+
+      {/* Delete conversation confirmation */}
+      {showDeleteConfirm && (
+        <div style={{
+          position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.5)',
+          display: 'flex', alignItems: 'flex-end', zIndex: 500,
+        }} onClick={() => setShowDeleteConfirm(false)}>
+          <div style={{
+            background: 'var(--color-bg-elevated)', borderRadius: '20px 20px 0 0',
+            padding: '12px 20px 32px', width: '100%',
+          }} onClick={e => e.stopPropagation()}>
+            <div style={{ width: 36, height: 4, background: 'var(--color-border)', borderRadius: 2, margin: '0 auto 16px' }} />
+            <h3 style={{ fontSize: 17, fontWeight: 700, margin: '0 0 8px', color: 'var(--color-text)' }}>Delete conversation?</h3>
+            <p style={{ fontSize: 14, color: 'var(--color-text-muted)', margin: '0 0 20px', lineHeight: 1.5 }}>
+              This conversation will be removed from your list. The other person can still see it unless they also delete it.
+            </p>
+            <button onClick={handleDeleteConversation} style={{
+              width: '100%', padding: 14, borderRadius: 12,
+              background: 'var(--color-danger)', color: '#fff',
+              border: 'none', fontSize: 16, fontWeight: 700, cursor: 'pointer', marginBottom: 10,
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+            }}>
+              <Trash2 size={16} /> Delete
+            </button>
+            <button onClick={() => setShowDeleteConfirm(false)} style={{
+              width: '100%', padding: 14, borderRadius: 12,
+              background: 'var(--color-surface)', color: 'var(--color-text-muted)',
+              border: 'none', fontSize: 16, fontWeight: 600, cursor: 'pointer',
+            }}>
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
