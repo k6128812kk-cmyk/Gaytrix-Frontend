@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import type { ChangeEvent } from 'react';
-import { useNavigate } from 'react-router-dom';
+
 import { Camera, X, Plus, CheckCircle2, Loader2 } from 'lucide-react';
 import { PageHeader } from '@/components/PageHeader';
 import { Chip } from '@/components/Chip';
@@ -66,7 +66,6 @@ const INTEREST_SUGGESTIONS = [
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export function EditProfilePage() {
-  const navigate = useNavigate();
   const { profile, updateProfile } = useSessionStore();
   const { t } = useTranslation();
 

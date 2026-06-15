@@ -6,7 +6,7 @@ import { useSessionStore } from '@/context/sessionStore';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from '@/i18n/useTranslation';
 import { formatDistanceToNowStrict } from 'date-fns';
-import type { Story, MyStory, SingleStory, StoryViewer } from '@/types';
+import type { Story, MyStory, StoryViewer } from '@/types';
 import styles from './Stories.module.css';
 
 // ==========================================================================
@@ -99,11 +99,6 @@ export function Stories() {
   function closeViewer() {
     setViewerIndex(null);
     document.body.classList.remove(STORY_VIEWING_CLASS);
-  }
-
-  function openMyStory() {
-    setShowMyStory(true);
-    document.body.classList.add(STORY_VIEWING_CLASS);
   }
 
   function closeMyStory() {
@@ -387,8 +382,6 @@ function StoryViewer({ stories, index, onClose, onNext, onPrev }: {
   const avatarSrc = story.avatar ? assetUrl(story.avatar) : `https://i.pravatar.cc/80?u=${story.userId}`;
 
   // Total segments = total sub-stories across all adjacent users (simplified: just this user's stories)
-  const totalSegments = subStories.length;
-
   return (
     <div className={styles.viewer} onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
       {/* Progress bars — one per sub-story */}
