@@ -300,3 +300,19 @@
   opacity: 0.4;
   cursor: default;
 }
+
+.muteBtn {
+  background: none;
+  border: none;
+  padding: 8px;
+  cursor: pointer;
+  color: var(--color-text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  flex-shrink: 0;
+}
+.muteBtn:hover {
+  background: var(--color-surface);
+}

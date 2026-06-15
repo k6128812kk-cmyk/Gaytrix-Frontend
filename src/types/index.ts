@@ -173,10 +173,19 @@ export interface GroupMessage {
   sentAt: string;
 }
 
+export interface SingleStory {
+  id: string;
+  photoUrl: string;
+  caption: string;
+  createdAt: string;
+  viewed: boolean;
+}
+
 export interface Story {
   id: string;
   userId: string;
   photoUrl: string;
+  caption: string;
   createdAt: string;
   displayName: string;
   avatar?: string;
@@ -185,6 +194,7 @@ export interface Story {
   adminRole: AdminRole;
   viewed: boolean;
   viewCount?: number;
+  stories: SingleStory[]; // all stories for this user
 }
 
 export interface StoryViewer {
@@ -198,7 +208,9 @@ export interface StoryViewer {
 export interface MyStory {
   id: string;
   photoUrl: string;
+  caption: string;
   createdAt: string;
+  allStories: { id: string; photoUrl: string; caption: string; createdAt: string }[];
 }
 
 export interface CommunityGroup {
@@ -211,9 +223,13 @@ export interface CommunityGroup {
   creatorPhoto?: string;
   memberCount: number;
   isMember: boolean;
+  userRole: 'creator' | 'moderator' | 'member' | 'none';
+  isMuted: boolean;
+  isPrivate: boolean;
   lastMessageAt: string;
   createdAt: string;
   status: 'active' | 'deleted';
+  joinRequestStatus?: string | null;
 }
 
 export interface CommunityGroupMessage {
@@ -222,8 +238,19 @@ export interface CommunityGroupMessage {
   senderId: string;
   senderName: string;
   senderPhoto?: string;
-  text: string;
+  text?: string;
+  mediaUrl?: string;
+  contentType: 'text' | 'image';
   sentAt: string;
+}
+
+export interface GroupJoinRequest {
+  id: string;
+  userId: string;
+  displayName: string;
+  photos: string[];
+  telegramUsername: string;
+  requestedAt: string;
 }
 
 export type GroupSortOption = 'members_desc' | 'members_asc' | 'recent' | 'last_message';

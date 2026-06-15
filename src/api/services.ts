@@ -5,6 +5,7 @@ import type {
   DiscoveryFilters, VerificationRequest,
   UserReport, AdminAction, PlatformStats,
   Story, MyStory, StoryViewer, CommunityGroup, CommunityGroupMessage, GroupSortOption,
+  GroupJoinRequest,
 } from '@/types';
 import {
   currentUser, mockProfiles, mockLocations, mockConversations,
@@ -31,9 +32,7 @@ export const profileService = {
     }
     const form = new FormData();
     form.append('photo', file);
-    const { data } = await api.post<{ url: string }>('/profile/photos', form, {
-      headers: { 'Content-Type': 'multipart/form-data' },
-    });
+    const { data } = await api.post<{ url: string }>('/profile/photos', form);
     // Backend now returns an absolute URL directly
     return data.url;
   },
@@ -46,9 +45,7 @@ export const profileService = {
     if (USE_MOCKS) { await delay(400); return { status: 'pending' }; }
     const form = new FormData();
     form.append('selfie', selfieFile);
-    const { data } = await api.post('/verification/request', form, {
-      headers: { 'Content-Type': 'multipart/form-data' },
-    });
+    const { data } = await api.post('/verification/request', form);
     return data;
   },
   async reportUser(userId: string, reason: string, details?: string): Promise<{ ok: true }> {
@@ -183,8 +180,7 @@ export const chatService = {
     const form = new FormData();
     form.append('photo', file);
     const { data } = await api.post<ChatMessage>(
-      `/messages/conversations/${conversationId}/photo`, form,
-      { headers: { 'Content-Type': 'multipart/form-data' } }
+      `/messages/conversations/${conversationId}/photo`, form
     );
     return data;
   },
@@ -390,22 +386,34 @@ export const groupService = {
     const { data } = await api.get<CommunityGroup>(`/groups/${groupId}`);
     return data;
   },
-  async createGroup(name: string, description: string, photo?: File): Promise<CommunityGroup> {
+  async createGroup(name: string, description: string, photo?: File, isPrivate?: boolean): Promise<CommunityGroup> {
     if (USE_MOCKS) {
       await delay(300);
       return { id: `g_${Date.now()}`, name, description, createdBy: currentUser.id,
         creatorName: currentUser.displayName, memberCount: 1, isMember: true,
+        userRole: 'creator', isMuted: false, isPrivate: isPrivate || false,
         lastMessageAt: new Date().toISOString(), createdAt: new Date().toISOString(), status: 'active' };
     }
     const form = new FormData();
     form.append('name', name);
     form.append('description', description);
     if (photo) form.append('photo', photo);
-    const { data } = await api.post<CommunityGroup>('/groups', form, { headers: { 'Content-Type': 'multipart/form-data' } });
+    if (isPrivate !== undefined) form.append('isPrivate', String(isPrivate));
+    const { data } = await api.post<CommunityGroup>('/groups', form);
     return data;
   },
-  async joinGroup(groupId: string): Promise<{ ok: boolean; memberCount: number }> {
-    if (USE_MOCKS) { await delay(150); return { ok: true, memberCount: 1 }; }
+  async updateGroup(groupId: string, patch: { name?: string; description?: string; isPrivate?: boolean; photo?: File }): Promise<CommunityGroup> {
+    if (USE_MOCKS) { await delay(200); return {} as CommunityGroup; }
+    const form = new FormData();
+    if (patch.name) form.append('name', patch.name);
+    if (patch.description !== undefined) form.append('description', patch.description);
+    if (patch.isPrivate !== undefined) form.append('isPrivate', String(patch.isPrivate));
+    if (patch.photo) form.append('photo', patch.photo);
+    const { data } = await api.patch<CommunityGroup>(`/groups/${groupId}`, form);
+    return data;
+  },
+  async joinGroup(groupId: string): Promise<{ ok: boolean; status: string; memberCount?: number }> {
+    if (USE_MOCKS) { await delay(150); return { ok: true, status: 'joined', memberCount: 1 }; }
     const { data } = await api.post(`/groups/${groupId}/join`);
     return data;
   },
@@ -419,9 +427,9 @@ export const groupService = {
     const { data } = await api.delete(`/groups/${groupId}`);
     return data;
   },
-  async getGroupMembers(groupId: string): Promise<EventAttendee[]> {
+  async getGroupMembers(groupId: string): Promise<(EventAttendee & { groupRole: string })[]> {
     if (USE_MOCKS) { return []; }
-    const { data } = await api.get<EventAttendee[]>(`/groups/${groupId}/members`);
+    const { data } = await api.get<(EventAttendee & { groupRole: string })[]>(`/groups/${groupId}/members`);
     return data;
   },
   async getMessages(groupId: string): Promise<CommunityGroupMessage[]> {
@@ -432,6 +440,41 @@ export const groupService = {
   async sendMessage(groupId: string, text: string): Promise<CommunityGroupMessage> {
     if (USE_MOCKS) { await delay(150); return {} as CommunityGroupMessage; }
     const { data } = await api.post<CommunityGroupMessage>(`/groups/${groupId}/messages`, { text });
+    return data;
+  },
+  async addModerator(groupId: string, userId: string): Promise<{ ok: boolean }> {
+    if (USE_MOCKS) { await delay(150); return { ok: true }; }
+    const { data } = await api.post(`/groups/${groupId}/moderators/${userId}`);
+    return data;
+  },
+  async removeModerator(groupId: string, userId: string): Promise<{ ok: boolean }> {
+    if (USE_MOCKS) { await delay(150); return { ok: true }; }
+    const { data } = await api.delete(`/groups/${groupId}/moderators/${userId}`);
+    return data;
+  },
+  async getJoinRequests(groupId: string): Promise<GroupJoinRequest[]> {
+    if (USE_MOCKS) { return []; }
+    const { data } = await api.get<GroupJoinRequest[]>(`/groups/${groupId}/join-requests`);
+    return data;
+  },
+  async approveJoinRequest(groupId: string, requestId: string): Promise<{ ok: boolean }> {
+    if (USE_MOCKS) { await delay(150); return { ok: true }; }
+    const { data } = await api.post(`/groups/${groupId}/join-requests/${requestId}/approve`);
+    return data;
+  },
+  async rejectJoinRequest(groupId: string, requestId: string): Promise<{ ok: boolean }> {
+    if (USE_MOCKS) { await delay(150); return { ok: true }; }
+    const { data } = await api.post(`/groups/${groupId}/join-requests/${requestId}/reject`);
+    return data;
+  },
+  async muteGroup(groupId: string): Promise<{ ok: boolean; muted: boolean }> {
+    if (USE_MOCKS) { return { ok: true, muted: true }; }
+    const { data } = await api.post(`/groups/${groupId}/mute`);
+    return data;
+  },
+  async unmuteGroup(groupId: string): Promise<{ ok: boolean; muted: boolean }> {
+    if (USE_MOCKS) { return { ok: true, muted: false }; }
+    const { data } = await api.delete(`/groups/${groupId}/mute`);
     return data;
   },
 };
@@ -445,11 +488,12 @@ export const storyService = {
     const { data } = await api.get<{ myStory: MyStory | null; stories: Story[] }>('/stories');
     return data;
   },
-  async createStory(photo: File): Promise<MyStory> {
-    if (USE_MOCKS) { await delay(300); return { id: `s_${Date.now()}`, photoUrl: URL.createObjectURL(photo), createdAt: new Date().toISOString() }; }
+  async createStory(photo: File, caption?: string): Promise<MyStory> {
+    if (USE_MOCKS) { await delay(300); return { id: `s_${Date.now()}`, photoUrl: URL.createObjectURL(photo), caption: caption || '', createdAt: new Date().toISOString(), allStories: [] }; }
     const form = new FormData();
     form.append('photo', photo);
-    const { data } = await api.post<MyStory>('/stories', form, { headers: { 'Content-Type': 'multipart/form-data' } });
+    if (caption) form.append('caption', caption);
+    const { data } = await api.post<MyStory>('/stories', form);
     return data;
   },
   async markViewed(storyId: string): Promise<void> {

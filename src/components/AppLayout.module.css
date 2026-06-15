@@ -24,3 +24,8 @@
   /* Critical: min-height: 0 prevents flex overflow issues */
   min-height: 0;
 }
+
+/* Hide tab bar when story-viewing class is on body */
+:global(body.story-viewing) .layout > :last-child {
+  display: none;
+}

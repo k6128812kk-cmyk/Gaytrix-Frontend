@@ -11,9 +11,10 @@ interface PageHeaderProps {
   title: string;
   showBack?: boolean;
   action?: ReactNode;
+  customTitleElement?: ReactNode; // replaces the title text with a custom element
 }
 
-export function PageHeader({ title, showBack = false, action }: PageHeaderProps) {
+export function PageHeader({ title, showBack = false, action, customTitleElement }: PageHeaderProps) {
   const navigate = useNavigate();
 
   return (
@@ -24,7 +25,7 @@ export function PageHeader({ title, showBack = false, action }: PageHeaderProps)
             <ChevronLeft size={22} />
           </button>
         )}
-        <h1 className={styles.title}>{title}</h1>
+        {customTitleElement ? customTitleElement : <h1 className={styles.title}>{title}</h1>}
       </div>
       {action && <div className={styles.action}>{action}</div>}
     </header>

@@ -181,3 +181,140 @@
   font-size: 12px;
   color: var(--color-text-faint);
 }
+
+.editBtn {
+  background: none;
+  border: none;
+  padding: 8px;
+  cursor: pointer;
+  color: var(--color-text-muted);
+  display: flex;
+  align-items: center;
+  margin-left: auto;
+}
+
+.editPanel {
+  background: var(--color-bg-elevated);
+  border-radius: 14px;
+  padding: 16px;
+  margin: 16px;
+  border: 1px solid var(--color-border);
+}
+.editTitle {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--color-text);
+  margin: 0 0 14px;
+}
+.editLabel {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  display: block;
+  margin-bottom: 6px;
+  margin-top: 12px;
+}
+.editInput, .editTextarea {
+  width: 100%;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  padding: 10px 13px;
+  color: var(--color-text);
+  font-size: 14px;
+  font-family: var(--font-body);
+  outline: none;
+  box-sizing: border-box;
+}
+.editTextarea {
+  resize: none;
+}
+.editCheckLabel {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 14px;
+  font-size: 14px;
+  color: var(--color-text);
+  cursor: pointer;
+}
+.editActions {
+  display: flex;
+  gap: 10px;
+  margin-top: 16px;
+}
+.cancelBtn {
+  flex: 1;
+  padding: 11px;
+  border-radius: 10px;
+  background: var(--color-surface);
+  color: var(--color-text-muted);
+  border: none;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.saveBtn {
+  flex: 2;
+  padding: 11px;
+  border-radius: 10px;
+  background: var(--color-accent);
+  color: #1a1014;
+  border: none;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.saveBtn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.requestRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
+  border-top: 1px solid var(--color-border);
+}
+.approveBtn {
+  background: none;
+  border: none;
+  padding: 6px;
+  cursor: pointer;
+  color: #22c55e;
+  display: flex;
+  align-items: center;
+}
+.rejectBtn {
+  background: none;
+  border: none;
+  padding: 6px;
+  cursor: pointer;
+  color: var(--color-danger);
+  display: flex;
+  align-items: center;
+}
+
+.memberRowWrap {
+  display: flex;
+  align-items: center;
+  border-top: 1px solid var(--color-border);
+}
+.memberRowWrap > .memberRow {
+  flex: 1;
+  border-top: none;
+}
+
+.modToggleBtn {
+  background: none;
+  border: none;
+  padding: 8px 12px;
+  cursor: pointer;
+  color: var(--color-text-muted);
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+.modToggleBtnActive {
+  color: var(--color-accent);
+}

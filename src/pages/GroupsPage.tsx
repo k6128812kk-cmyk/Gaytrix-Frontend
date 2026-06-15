@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, Search, Users, ArrowUpDown, MessageSquare, Trash2, X, Camera } from 'lucide-react';
+import { Plus, Search, Users, ArrowUpDown, MessageSquare, Trash2, X, Camera, Lock, Clock } from 'lucide-react';
 import { formatDistanceToNowStrict } from 'date-fns';
 import { PageHeader } from '@/components/PageHeader';
 import { Button } from '@/components/Button';
@@ -45,16 +45,30 @@ export function GroupsPage() {
   }
 
   async function handleJoin(group: CommunityGroup) {
-    const result = await groupService.joinGroup(group.id);
-    setGroups(prev => prev.map(g =>
-      g.id === group.id ? { ...g, isMember: true, memberCount: result.memberCount } : g
-    ));
+    try {
+      const result = await groupService.joinGroup(group.id);
+      if (result.status === 'joined') {
+        setGroups(prev => prev.map(g =>
+          g.id === group.id ? { ...g, isMember: true, userRole: 'member', memberCount: result.memberCount ?? g.memberCount } : g
+        ));
+        navigate(`/groups/${group.id}`);
+      } else if (result.status === 'request_pending') {
+        // Update local state to show pending state
+        setGroups(prev => prev.map(g =>
+          g.id === group.id ? { ...g, joinRequestStatus: 'pending' } : g
+        ));
+      } else if (result.status === 'already_member') {
+        navigate(`/groups/${group.id}`);
+      }
+    } catch { /* fail silently */ }
   }
 
   async function handleDelete(group: CommunityGroup) {
     if (!confirm(`Delete "${group.name}"?`)) return;
-    await groupService.deleteGroup(group.id);
-    setGroups(prev => prev.filter(g => g.id !== group.id));
+    try {
+      await groupService.deleteGroup(group.id);
+      setGroups(prev => prev.filter(g => g.id !== group.id));
+    } catch { /* fail silently */ }
   }
 
   function canDelete(group: CommunityGroup) {
@@ -124,7 +138,14 @@ export function GroupsPage() {
             canDelete={canDelete(group)}
             onJoin={() => handleJoin(group)}
             onDelete={() => handleDelete(group)}
-            onOpen={() => navigate(`/groups/${group.id}`)}
+            onOpen={() => {
+              // For private groups, only members/admins can open
+              if (group.isPrivate && !group.isMember) {
+                handleJoin(group);
+                return;
+              }
+              navigate(`/groups/${group.id}`);
+            }}
           />
         ))}
       </div>
@@ -132,7 +153,7 @@ export function GroupsPage() {
       {showCreate && (
         <CreateGroupSheet
           onClose={() => setShowCreate(false)}
-          onCreated={group => { setGroups(prev => [group, ...prev]); setShowCreate(false); }}
+          onCreated={group => { setGroups(prev => [group, ...prev]); setShowCreate(false); navigate(`/groups/${group.id}`); }}
         />
       )}
     </div>
@@ -147,7 +168,17 @@ function GroupCard({ group, canDelete, onJoin, onDelete, onOpen }: {
   onOpen: () => void;
 }) {
   const { t } = useTranslation();
+  const [joining, setJoining] = useState(false);
   const photoSrc = group.photoUrl ? assetUrl(group.photoUrl) : null;
+
+  async function handleJoinClick(e: React.MouseEvent) {
+    e.stopPropagation();
+    if (joining) return;
+    setJoining(true);
+    try { await onJoin(); } finally { setJoining(false); }
+  }
+
+  const isPending = group.joinRequestStatus === 'pending';
 
   return (
     <div className={styles.card}>
@@ -158,7 +189,10 @@ function GroupCard({ group, canDelete, onJoin, onDelete, onOpen }: {
           </div>
       }
       <div className={styles.cardBody} onClick={onOpen}>
-        <div className={styles.cardName}>{group.name}</div>
+        <div className={styles.cardName}>
+          {group.isPrivate && <Lock size={11} style={{ marginRight: 4, verticalAlign: 'middle', opacity: 0.6 }} />}
+          {group.name}
+        </div>
         {group.description && <div className={styles.cardDesc}>{group.description}</div>}
         <div className={styles.cardMeta}>
           <span><Users size={12} /> {group.memberCount} {t('members')}</span>
@@ -172,9 +206,13 @@ function GroupCard({ group, canDelete, onJoin, onDelete, onOpen }: {
           <button className={styles.chatBtn} onClick={onOpen} aria-label={t('messageGroup')}>
             <MessageSquare size={18} />
           </button>
+        ) : isPending ? (
+          <span className={styles.pendingBadge}>
+            <Clock size={12} /> Pending
+          </span>
         ) : (
-          <button className={styles.joinBtn} onClick={e => { e.stopPropagation(); onJoin(); }}>
-            {t('join')}
+          <button className={styles.joinBtn} onClick={handleJoinClick} disabled={joining}>
+            {joining ? '…' : (group.isPrivate ? 'Request' : t('join'))}
           </button>
         )}
         {canDelete && (
@@ -196,6 +234,7 @@ function CreateGroupSheet({ onClose, onCreated }: {
   const [description, setDescription] = useState('');
   const [photo, setPhoto] = useState<File | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
+  const [isPrivate, setIsPrivate] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -210,7 +249,7 @@ function CreateGroupSheet({ onClose, onCreated }: {
     if (!name.trim()) return;
     setSubmitting(true); setError(null);
     try {
-      const group = await groupService.createGroup(name.trim(), description.trim(), photo || undefined);
+      const group = await groupService.createGroup(name.trim(), description.trim(), photo || undefined, isPrivate);
       onCreated(group);
     } catch {
       setError(t('couldNotCreateGroup'));
@@ -242,6 +281,11 @@ function CreateGroupSheet({ onClose, onCreated }: {
           <textarea value={description} onChange={e => setDescription(e.target.value)}
             placeholder={t('groupDescription')} rows={3} className={styles.textarea} />
         </div>
+        <label className={styles.privateToggle}>
+          <input type="checkbox" checked={isPrivate} onChange={e => setIsPrivate(e.target.checked)} />
+          <Lock size={14} style={{ marginRight: 6 }} />
+          Private group — members must request to join
+        </label>
         {error && <p className={styles.errorText}>{error}</p>}
         <Button fullWidth disabled={!name.trim() || submitting} onClick={handleSubmit}>
           {submitting ? t('creating') : t('createGroup')}

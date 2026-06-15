@@ -7,6 +7,7 @@ import { Badge } from '@/components/Badge';
 import { Chip } from '@/components/Chip';
 import { Button } from '@/components/Button';
 import { discoveryService, profileService, chatService } from '@/api/services';
+import { assetUrl } from '@/api/client';
 import { useTranslation } from '@/i18n/useTranslation';
 import type { UserProfile } from '@/types';
 import styles from './ProfileDetail.module.css';
@@ -98,7 +99,7 @@ export function ProfileDetailPage() {
   }
 
   const photoSrc = profile.photos[activePhoto]
-    ? (profile.photos[activePhoto].startsWith('http') ? profile.photos[activePhoto] : `/uploads/${profile.photos[activePhoto]}`)
+    ? assetUrl(profile.photos[activePhoto])
     : `https://i.pravatar.cc/600?u=${profile.id}`;
 
   return (
