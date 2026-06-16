@@ -3,6 +3,7 @@ import type { ReactNode } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { AppLayout } from '@/components/AppLayout';
 import { OnboardingPage } from '@/pages/Onboarding';
+import { LanguageSelectionPage } from '@/pages/LanguageSelection';
 import { DiscoverPage } from '@/pages/Discover';
 import { FiltersPage } from '@/pages/Filters';
 import { ProfileDetailPage } from '@/pages/ProfileDetail';
@@ -32,6 +33,17 @@ import { useSessionStore } from '@/context/sessionStore';
 import { profileService } from '@/api/services';
 import { setInitData } from '@/api/client';
 import styles from './App.module.css';
+
+// Language selection is shown exactly once — on first ever launch.
+// After the user picks a language it's stored in localStorage.
+const LANG_SELECTED_KEY = 'k5_lang_selected';
+
+function hasSelectedLanguage(): boolean {
+  try { return localStorage.getItem(LANG_SELECTED_KEY) === '1'; } catch { return false; }
+}
+function markLanguageSelected() {
+  try { localStorage.setItem(LANG_SELECTED_KEY, '1'); } catch {}
+}
 
 // ─── Screens ──────────────────────────────────────────────────────────────────
 
@@ -105,6 +117,8 @@ export default function App() {
   // Show "waking up" hint after 5s of loading
   const [slowLoad, setSlowLoad] = useState(false);
   const slowTimer = useRef<ReturnType<typeof setTimeout>>();
+  // Language selection — shown only on first launch
+  const [showLangSelect, setShowLangSelect] = useState(!hasSelectedLanguage());
 
   useGlobalWs();
 
@@ -121,6 +135,16 @@ export default function App() {
       .then((p) => {
         clearTimeout(slowTimer.current);
         setProfile(p);
+        // Sync language from backend profile (it might have been set via the bot /start flow)
+        // Only apply if we haven't already set one locally (localStorage takes precedence)
+        if (p.languagePreference && !localStorage.getItem('k5_lang')) {
+          const lang = p.languagePreference as 'en' | 'ru' | 'tr';
+          if (['en', 'ru', 'tr'].includes(lang)) {
+            import('@/i18n/useTranslation').then(({ useI18nStore }) => {
+              useI18nStore.getState().setLanguage(lang);
+            }).catch(() => {});
+          }
+        }
       })
       .catch((err) => {
         clearTimeout(slowTimer.current);
@@ -156,6 +180,18 @@ export default function App() {
   }, [isReady, initData]);
 
   // ── Render ─────────────────────────────────────────────────────────────────
+
+  // Language selection always shown first, before everything else
+  if (showLangSelect) {
+    return (
+      <LanguageSelectionPage
+        onSelected={() => {
+          markLanguageSelected();
+          setShowLangSelect(false);
+        }}
+      />
+    );
+  }
 
   if (isLoading) return <LoadingScreen slow={slowLoad} />;
 

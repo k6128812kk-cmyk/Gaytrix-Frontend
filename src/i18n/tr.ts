@@ -81,8 +81,8 @@ export const tr: Partial<Record<TranslationKey, string>> = {
   // Chat
   noConversationsYet: 'Henüz sohbet yok',
   startConversationHint: "Keşfet'ten birinin profili üzerinden sohbet başlatın.",
-  messageRequests: 'Mesaj istekleri',
-  wantsToMessage: 'Size mesaj göndermek istiyor',
+  messageRequests: 'Mesajlar',
+  wantsToMessage: 'Mesaj gönderdi',
   noMessagesYet: 'Henüz mesaj yok. Merhaba deyin!',
   message: 'Mesaj…',
   send: 'Gönder',

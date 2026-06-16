@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { formatDistanceToNowStrict } from 'date-fns';
 import { Trash2 } from 'lucide-react';
@@ -11,9 +11,18 @@ import type { Conversation } from '@/types';
 import styles from './ChatList.module.css';
 
 // ==========================================================================
-// ChatList — list of conversations with real-time unread indicators.
+// ChatList — list of conversations sorted by most recent activity.
+// Real-time updates move active conversations to the top instantly.
 // Long-press or swipe reveals delete option (soft-delete for requester only).
 // ==========================================================================
+
+function sortByRecent(convs: Conversation[]): Conversation[] {
+  return [...convs].sort((a, b) => {
+    const aTime = a.lastMessage?.sentAt ? new Date(a.lastMessage.sentAt).getTime() : 0;
+    const bTime = b.lastMessage?.sentAt ? new Date(b.lastMessage.sentAt).getTime() : 0;
+    return bTime - aTime;
+  });
+}
 
 export function ChatListPage() {
   const navigate = useNavigate();
@@ -25,7 +34,7 @@ export function ChatListPage() {
 
   useEffect(() => {
     chatService.getConversations()
-      .then(data => { setConversations(data); setLoading(false); })
+      .then(data => { setConversations(sortByRecent(data)); setLoading(false); })
       .catch(err => {
         console.error('Failed to load conversations:', err);
         setError(t('failedToLoadConversations'));
@@ -33,16 +42,25 @@ export function ChatListPage() {
       });
   }, []);
 
-  // Live unread count updates
+  // Live updates: update last message, increment unread, move conversation to top
   useEffect(() => {
     const handler = (_msg: Record<string, unknown>) => {
-      const m = _msg.message as { conversationId: string; senderId: string };
+      const m = _msg.message as { conversationId: string; senderId: string; text?: string; sentAt?: string; type?: string };
       if (!m?.conversationId) return;
-      setConversations(prev => prev.map(c => {
-        if (c.id !== m.conversationId) return c;
-        if (m.senderId !== c.participant.id) return c;
-        return { ...c, unreadCount: c.unreadCount + 1, lastMessage: _msg.message as any };
-      }));
+      setConversations(prev => {
+        const updated = prev.map(c => {
+          if (c.id !== m.conversationId) return c;
+          const isIncoming = m.senderId !== undefined && m.senderId !== c.participant?.id ? false : true;
+          const newUnread = isIncoming ? c.unreadCount + 1 : c.unreadCount;
+          return {
+            ...c,
+            unreadCount: newUnread,
+            lastMessage: _msg.message as any,
+          };
+        });
+        // Re-sort after update so the active conversation rises to the top
+        return sortByRecent(updated);
+      });
     };
     wsClient.addHandler('message', handler);
     return () => wsClient.removeHandler('message', handler);
@@ -78,6 +96,7 @@ export function ChatListPage() {
 
         {!loading && !error && requests.length > 0 && (
           <section className={styles.section}>
+            {/* "Messages" replaces "Message Requests" per spec */}
             <h2 className={styles.sectionTitle}>{t('messageRequests')} ({requests.length})</h2>
             {requests.map(conv => (
               <ConversationRow key={conv.id} conversation={conv}
@@ -116,15 +135,15 @@ export function ChatListPage() {
         <div className={styles.deleteOverlay} onClick={() => setConfirmDeleteId(null)}>
           <div className={styles.deleteSheet} onClick={e => e.stopPropagation()}>
             <div className={styles.deleteSheetHandle} />
-            <h3 className={styles.deleteSheetTitle}>Delete conversation?</h3>
+            <h3 className={styles.deleteSheetTitle}>{t('deleteConversation')}?</h3>
             <p className={styles.deleteSheetDesc}>
               This conversation will be removed from your list. The other person can still see it unless they also delete it.
             </p>
             <button className={styles.deleteConfirmBtn} onClick={() => handleDeleteConversation(confirmDeleteId)}>
-              <Trash2 size={16} /> Delete
+              <Trash2 size={16} /> {t('deleteConversation')}
             </button>
             <button className={styles.deleteCancelBtn} onClick={() => setConfirmDeleteId(null)}>
-              Cancel
+              {t('cancel')}
             </button>
           </div>
         </div>
@@ -197,6 +216,3 @@ function ConversationRow({ conversation, onClick, onDelete }: {
     </div>
   );
 }
-
-// Need to import useRef for long-press timer
-import { useRef } from 'react';

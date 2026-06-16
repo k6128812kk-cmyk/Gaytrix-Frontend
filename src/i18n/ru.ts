@@ -81,8 +81,8 @@ export const ru: Partial<Record<TranslationKey, string>> = {
   // Chat
   noConversationsYet: 'Чатов пока нет',
   startConversationHint: 'Начните разговор с чьего-либо профиля в разделе Открыть.',
-  messageRequests: 'Запросы сообщений',
-  wantsToMessage: 'Хочет отправить вам сообщение',
+  messageRequests: 'Сообщения',
+  wantsToMessage: 'Отправил(а) сообщение',
   noMessagesYet: 'Сообщений пока нет. Поздоровайтесь!',
   message: 'Сообщение…',
   send: 'Отправить',

@@ -79,8 +79,8 @@ export const en = {
   // Chat
   noConversationsYet: 'No conversations yet',
   startConversationHint: "Start a conversation from someone's profile in Discover.",
-  messageRequests: 'Message requests',
-  wantsToMessage: 'Wants to send you a message',
+  messageRequests: 'Messages',
+  wantsToMessage: 'Sent a message',
   noMessagesYet: 'No messages yet. Say hello!',
   message: 'Message…',
   send: 'Send',
@@ -352,6 +352,11 @@ export const en = {
   distance: 'Distance',
   joined: 'Joined',
   lastSeen: 'Last seen',
+
+  // Language selection
+  chooseLanguage: 'Choose your language',
+  chooseLanguageSubtitle: 'Select your preferred language for the app. You can change this anytime.',
+  languageContinue: 'Continue',
 
   // Common
   confirm: 'Confirm',
