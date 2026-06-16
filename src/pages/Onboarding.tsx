@@ -44,6 +44,7 @@ export function OnboardingPage() {
 
   const [step, setStep] = useState(0);
   const [photos, setPhotos] = useState<string[]>(profile?.photos ?? []);
+  const [pendingUploads, setPendingUploads] = useState(0);
   const [displayName, setDisplayName] = useState(profile?.displayName ?? '');
   const [age, setAge] = useState(profile?.age?.toString() ?? '');
   const [city, setCity] = useState(profile?.city ?? '');
@@ -64,16 +65,22 @@ export function OnboardingPage() {
     if (!file) return;
     const localUrl = URL.createObjectURL(file);
     setPhotos((prev) => [...prev, localUrl]);
-    profileService.uploadPhoto(file).then((remoteUrl) => {
-      setPhotos((prev) => prev.map((u) => (u === localUrl ? remoteUrl : u)));
-    }).catch(() => {
-      setPhotos((prev) => prev.filter((u) => u !== localUrl));
-    });
+    setPendingUploads((n) => n + 1);
+    profileService.uploadPhoto(file)
+      .then((remoteUrl) => {
+        setPhotos((prev) => prev.map((u) => (u === localUrl ? remoteUrl : u)));
+      })
+      .catch(() => {
+        setPhotos((prev) => prev.filter((u) => u !== localUrl));
+      })
+      .finally(() => {
+        setPendingUploads((n) => n - 1);
+      });
   }
 
   const canAdvance = (() => {
     switch (step) {
-      case 0: return photos.length > 0;
+      case 0: return photos.length > 0 && pendingUploads === 0;
       case 1: return displayName.trim().length > 0 && Number(age) >= 18 && city.trim().length > 0;
       case 2: return lookingFor.length > 0;
       case 3: return bio.trim().length >= 10;
@@ -97,7 +104,10 @@ export function OnboardingPage() {
       // it validates both fields and sets registration_complete = TRUE
       // atomically, making the profile visible in the feed for the first time.
       const updated = await profileService.completeRegistration({
-        photos,
+        // Strip any blob: URLs that didn't finish uploading — should not
+        // happen because canAdvance blocks on pendingUploads === 0,
+        // but this is a safety net for Android race conditions.
+        photos: photos.filter((u) => u.startsWith('http')),
         displayName: displayName.trim(),
         age: Number(age),
         city: city.trim(),
@@ -131,8 +141,17 @@ export function OnboardingPage() {
             <p className={styles.subtitle}>{t('addPhotosDesc')}</p>
             <div className={styles.photoGrid}>
               {photos.map((src, i) => (
-                <div key={i} className={styles.photoSlot}>
-                  <img src={src} alt={`Photo ${i + 1}`} />
+                <div key={i} className={styles.photoSlot} style={{ position: 'relative' }}>
+                  <img src={src} alt={`Photo ${i + 1}`} style={{ opacity: src.startsWith('blob:') ? 0.4 : 1 }} />
+                  {src.startsWith('blob:') && (
+                    <div style={{
+                      position: 'absolute', inset: 0, display: 'flex',
+                      alignItems: 'center', justifyContent: 'center',
+                      fontSize: 11, color: 'var(--color-text-faint)',
+                    }}>
+                      Uploading…
+                    </div>
+                  )}
                 </div>
               ))}
               {photos.length < 6 && (
