@@ -30,16 +30,16 @@ api.interceptors.response.use(
 );
 
 // Helper to build absolute URL for backend-served assets (photos, stories).
-// ALWAYS returns https:// — photos stored before the trust-proxy fix may have
-// been saved with http:// URLs. Android WebView blocks http:// images loaded
-// inside an https:// Mini App (mixed content). iOS ignores this. We force
-// https:// here so all existing photos work on Android without re-uploading.
+// ALWAYS returns https:// — photos uploaded before the Railway proxy fix were
+// stored in the DB with http:// URLs. Android WebView enforces mixed-content
+// blocking (http image on https page). iOS is lenient. Forcing https:// here
+// fixes all existing photos on Android without requiring users to re-upload.
 const BACKEND_BASE = BASE_URL.replace('/v1', '').replace(/\/+$/, '');
 export function assetUrl(src: string): string {
   if (!src) return '';
-  let url = src.startsWith('http')
+  const url = src.startsWith('http')
     ? src
     : `${BACKEND_BASE}${src.startsWith('/') ? '' : '/'}${src}`;
-  // Force https — mixed content (http image on https page) is blocked on Android
+  // Upgrade http:// -> https:// to prevent mixed-content blocking on Android
   return url.replace(/^http:\/\//i, 'https://');
 }
