@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useTranslation, type Language, LANGUAGE_LABELS } from '@/i18n/useTranslation';
+import { useTranslation, type Language } from '@/i18n/useTranslation';
 import styles from './LanguageSelection.module.css';
 
 // ==========================================================================
