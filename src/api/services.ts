@@ -1,11 +1,11 @@
 import { api } from './client';
-import type {
+import {
   UserProfile, MapLocation, MapEvent, EventAttendee, GroupMessage,
   Conversation, ChatMessage,
   DiscoveryFilters, VerificationRequest,
   UserReport, AdminAction, PlatformStats,
   Story, MyStory, StoryViewer, CommunityGroup, CommunityGroupMessage, GroupSortOption,
-  GroupJoinRequest,
+  GroupJoinRequest, RelationshipStatus, LookingFor,
 } from '@/types';
 import {
   currentUser, mockProfiles, mockLocations, mockConversations,
@@ -50,8 +50,8 @@ export const profileService = {
     photos: string[];
     age?: number;
     city?: string;
-    relationshipStatus?: string;
-    lookingFor?: string[];
+    relationshipStatus?: RelationshipStatus;
+    lookingFor?: LookingFor[];
     bio?: string;
   }): Promise<UserProfile> {
     if (USE_MOCKS) {
