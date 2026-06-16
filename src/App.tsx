@@ -35,14 +35,21 @@ import { setInitData } from '@/api/client';
 import styles from './App.module.css';
 
 // Language selection is shown exactly once — on first ever launch.
-// After the user picks a language it's stored in localStorage.
+// After the user picks a language it's stored in localStorage AND synced
+// to the backend. On subsequent sessions the backend's languagePreference
+// is treated as authoritative, so the picker never shows again even if
+// localStorage was cleared (e.g. reinstall / different device).
 const LANG_SELECTED_KEY = 'k5_lang_selected';
+const LANG_KEY = 'k5_lang';
 
 function hasSelectedLanguage(): boolean {
   try { return localStorage.getItem(LANG_SELECTED_KEY) === '1'; } catch { return false; }
 }
-function markLanguageSelected() {
-  try { localStorage.setItem(LANG_SELECTED_KEY, '1'); } catch {}
+function markLanguageSelected(lang?: string) {
+  try {
+    localStorage.setItem(LANG_SELECTED_KEY, '1');
+    if (lang) localStorage.setItem(LANG_KEY, lang);
+  } catch {}
 }
 
 // ─── Screens ──────────────────────────────────────────────────────────────────
@@ -135,15 +142,17 @@ export default function App() {
       .then((p) => {
         clearTimeout(slowTimer.current);
         setProfile(p);
-        // Sync language from backend profile (it might have been set via the bot /start flow)
-        // Only apply if we haven't already set one locally (localStorage takes precedence)
-        if (p.languagePreference && !localStorage.getItem('k5_lang')) {
-          const lang = p.languagePreference as 'en' | 'ru' | 'tr';
-          if (['en', 'ru', 'tr'].includes(lang)) {
-            import('@/i18n/useTranslation').then(({ useI18nStore }) => {
-              useI18nStore.getState().setLanguage(lang);
-            }).catch(() => {});
-          }
+        // Sync language from backend profile — it may have been set via the
+        // Telegram bot /start flow on any device. This is the authoritative source.
+        const serverLang = p.languagePreference as 'en' | 'ru' | 'tr' | undefined;
+        if (serverLang && ['en', 'ru', 'tr'].includes(serverLang)) {
+          // Persist both keys so the picker never shows again, and the UI
+          // language matches what the user chose during /start.
+          markLanguageSelected(serverLang);
+          setShowLangSelect(false);
+          import('@/i18n/useTranslation').then(({ useI18nStore }) => {
+            useI18nStore.getState().setLanguage(serverLang);
+          }).catch(() => {});
         }
       })
       .catch((err) => {
@@ -185,8 +194,8 @@ export default function App() {
   if (showLangSelect) {
     return (
       <LanguageSelectionPage
-        onSelected={() => {
-          markLanguageSelected();
+        onSelected={(lang) => {
+          markLanguageSelected(lang);
           setShowLangSelect(false);
         }}
       />

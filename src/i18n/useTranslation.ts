@@ -20,9 +20,12 @@ export const LANGUAGE_LABELS: Record<Language, string> = {
 };
 
 function detectLanguage(): Language {
+  // If the user has explicitly chosen a language (stored in k5_lang), always
+  // honour it — this covers both the mini-app picker and the bot /start flow.
   const saved = localStorage.getItem('k5_lang');
   if (saved === 'tr' || saved === 'ru' || saved === 'en') return saved;
-  // Auto-detect from Telegram/browser
+  // No explicit choice yet — auto-detect from Telegram/browser so the picker
+  // pre-selects a sensible default before the user confirms.
   const tgLang = window.Telegram?.WebApp?.initDataUnsafe?.user?.language_code;
   if (tgLang === 'tr') return 'tr';
   if (tgLang === 'ru') return 'ru';

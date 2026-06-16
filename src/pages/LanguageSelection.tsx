@@ -9,7 +9,7 @@ import styles from './LanguageSelection.module.css';
 // ==========================================================================
 
 interface Props {
-  onSelected: () => void;
+  onSelected: (lang: Language) => void;
 }
 
 const LANGUAGE_OPTIONS: { code: Language; label: string; native: string; flag: string }[] = [
@@ -28,7 +28,7 @@ export function LanguageSelectionPage({ onSelected }: Props) {
     setLanguage(selected); // saves to localStorage and syncs to backend
     // Small delay to let the backend save before proceeding
     await new Promise(r => setTimeout(r, 300));
-    onSelected();
+    onSelected(selected);
   }
 
   return (
