@@ -7,6 +7,7 @@ import { useSessionStore } from '@/context/sessionStore';
 import { wsClient, useGlobalWs } from '@/hooks/useGlobalWs';
 import type { GroupMessage } from '@/types';
 import styles from './Conversation.module.css';
+import { useTranslation } from '@/i18n/useTranslation';
 
 // ==========================================================================
 // EventChat — group chat for a map event.

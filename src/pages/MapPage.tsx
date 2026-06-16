@@ -29,6 +29,17 @@ type ViewMode = 'locations' | 'events';
 export function MapPage() {
   const navigate = useNavigate();
   const { profile, isModerator } = useSessionStore();
+  const { t } = useTranslation();
+  const CATEGORY_LABELS: Record<string, string> = {
+    social_meetup: t('catSocialMeetup'),
+    community_gathering: t('catCommunityGathering'),
+    cafe: t('catCafe'),
+    bar: t('catBar'),
+    event_venue: t('catEventVenue'),
+    outdoor_spot: t('catOutdoorSpot'),
+    cruising_area: t('catCruisingArea'),
+    other: t('catOther'),
+  };
   const mapRef = useRef<HTMLDivElement>(null);
   const leafletMap = useRef<any>(null);
   const markersRef = useRef<any[]>([]);

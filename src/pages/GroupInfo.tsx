@@ -27,7 +27,8 @@ type MemberWithRole = {
 export function GroupInfoPage() {
   const { groupId } = useParams<{ groupId: string }>();
   const navigate = useNavigate();
-  const { profile } = useSessionStore();
+  const { t } = useTranslation();
+    const { profile } = useSessionStore();
   const [group, setGroup] = useState<CommunityGroup | null>(null);
   const [members, setMembers] = useState<MemberWithRole[]>([]);
   const [joinRequests, setJoinRequests] = useState<GroupJoinRequest[]>([]);

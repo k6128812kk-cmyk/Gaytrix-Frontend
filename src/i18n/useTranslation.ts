@@ -45,10 +45,9 @@ export const useI18nStore = create<I18nState>((set, get) => ({
     localStorage.setItem('k5_lang', lang);
     set({ language: lang });
     // Sync to backend so push notifications arrive in the correct language
-    try {
-      const { profileService } = require('@/api/services');
+    import('@/api/services').then(({ profileService }) => {
       profileService.updateMe({ languagePreference: lang }).catch(() => {});
-    } catch { /* non-fatal */ }
+    }).catch(() => { /* non-fatal */ });
   },
 
   t: (key: TranslationKey): string => {

@@ -13,7 +13,8 @@ import styles from './Admin.module.css';
 // ==========================================================================
 
 export function AdminModerators() {
-  const [moderators, setModerators] = useState<UserProfile[]>([]);
+  const { t } = useTranslation();
+    const [moderators, setModerators] = useState<UserProfile[]>([]);
   const [allUsers, setAllUsers] = useState<UserProfile[]>([]);
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);

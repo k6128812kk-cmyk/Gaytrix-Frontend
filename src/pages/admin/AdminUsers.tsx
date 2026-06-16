@@ -26,6 +26,7 @@ interface ConfirmAction {
 
 export function AdminUsers() {
   const { profile: adminProfile } = useSessionStore();
+  const { t } = useTranslation();
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');

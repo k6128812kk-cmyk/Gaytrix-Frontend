@@ -21,6 +21,7 @@ import styles from './Admin.module.css';
 export function AdminDashboard() {
   const navigate = useNavigate();
   const { profile } = useSessionStore();
+  const { t } = useTranslation();
   const [stats, setStats] = useState<PlatformStats | null>(null);
   const [announcement, setAnnouncement] = useState('');
   const [sending, setSending] = useState(false);
