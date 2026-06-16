@@ -39,17 +39,17 @@ export function VerificationPage() {
         {profile.verification === 'verified' && (
           <StatusBanner icon={ShieldCheck} tone="gold"
             title={t('verificationVerified')}
-            description="Your profile shows a verification badge and gets priority placement in discovery." />
+            description={t('verifiedDesc')} />
         )}
         {profile.verification === 'pending' && (
           <StatusBanner icon={Clock} tone="neutral"
             title={t('verificationPending')}
-            description="Our team is reviewing your selfie. This usually takes 24-48 hours." />
+            description={t('pendingDesc')} />
         )}
         {profile.verification === 'rejected' && (
           <StatusBanner icon={XCircle} tone="danger"
             title={t('verificationRejected')}
-            description="Your last submission didn't meet our requirements. You can try again below." />
+            description={t('rejectedDesc')} />
         )}
 
         {(profile.verification === 'none' || profile.verification === 'rejected') && (
@@ -67,7 +67,7 @@ export function VerificationPage() {
             <section className={styles.uploadSection}>
               <label className={styles.uploadBox}>
                 {selfiePreview ? (
-                  <img src={selfiePreview} alt="Selfie preview" className={styles.preview} />
+                  <img src={selfiePreview} alt={t('selfiePreview')} className={styles.preview} />
                 ) : (
                   <><Camera size={28} /><span>Take or upload a selfie</span></>
                 )}

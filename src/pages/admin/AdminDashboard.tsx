@@ -7,6 +7,7 @@ import {
 import { PageHeader } from '@/components/PageHeader';
 import { Button } from '@/components/Button';
 import { adminService } from '@/api/services';
+import { useTranslation } from '@/i18n/useTranslation';
 import { useSessionStore } from '@/context/sessionStore';
 import type { PlatformStats } from '@/types';
 import styles from './Admin.module.css';
@@ -44,7 +45,7 @@ export function AdminDashboard() {
   return (
     <div className={styles.page}>
       <PageHeader
-        title="Admin Panel"
+        title={t('adminPanel')}
         showBack
         action={
           <div className={styles.adminBadge}>
@@ -57,14 +58,14 @@ export function AdminDashboard() {
         {/* Stats grid */}
         {stats && (
           <section className={styles.statsGrid}>
-            <StatCard icon={Users} label="Total users" value={stats.totalUsers} color="cyan" />
-            <StatCard icon={TrendingUp} label="Active today" value={stats.activeToday} color="cyan" />
-            <StatCard icon={ShieldCheck} label="Verified" value={stats.verifiedUsers} color="gold" />
-            <StatCard icon={Crown} label="Premium" value={stats.premiumUsers} color="coral" />
-            <StatCard icon={Clock} label="Pending verifications" value={stats.pendingVerifications} color="gold" alert={stats.pendingVerifications > 0} />
-            <StatCard icon={AlertTriangle} label="Pending reports" value={stats.pendingReports} color="danger" alert={stats.pendingReports > 0} />
-            <StatCard icon={UserX} label="Banned users" value={stats.bannedUsers} color="danger" />
-            <StatCard icon={Star} label="New this week" value={stats.newUsersThisWeek} color="cyan" />
+            <StatCard icon={Users} label={t('totalUsers')} value={stats.totalUsers} color="cyan" />
+            <StatCard icon={TrendingUp} label={t('activeToday')} value={stats.activeToday} color="cyan" />
+            <StatCard icon={ShieldCheck} label={t('verified')} value={stats.verifiedUsers} color="gold" />
+            <StatCard icon={Crown} label={t('premium')} value={stats.premiumUsers} color="coral" />
+            <StatCard icon={Clock} label={t('pendingVerifications')} value={stats.pendingVerifications} color="gold" alert={stats.pendingVerifications > 0} />
+            <StatCard icon={AlertTriangle} label={t('pendingReports')} value={stats.pendingReports} color="danger" alert={stats.pendingReports > 0} />
+            <StatCard icon={UserX} label={t('bannedUsers')} value={stats.bannedUsers} color="danger" />
+            <StatCard icon={Star} label={t('newThisWeek')} value={stats.newUsersThisWeek} color="cyan" />
           </section>
         )}
 
@@ -72,14 +73,14 @@ export function AdminDashboard() {
         <section className={styles.section}>
           <h2 className={styles.sectionTitle}>Manage</h2>
           <nav className={styles.menuList}>
-            <NavItem icon={Users} label="All users" sublabel="Search, filter, manage accounts" to="/admin/users" />
-            <NavItem icon={ShieldCheck} label="Verification queue" sublabel="Review selfie submissions" to="/admin/verification"
+            <NavItem icon={Users} label={t('allUsers')} sublabel={t('searchUsersPlaceholder')} to="/admin/users" />
+            <NavItem icon={ShieldCheck} label={t('verificationQueue')} sublabel={t('verificationQueueTitle')} to="/admin/verification"
               badge={stats?.pendingVerifications} />
-            <NavItem icon={AlertTriangle} label="Reports" sublabel="Review user reports" to="/admin/reports"
+            <NavItem icon={AlertTriangle} label={t('reports')} sublabel={t('reportsTitle')} to="/admin/reports"
               badge={stats?.pendingReports} />
-            <NavItem icon={Clock} label="Audit log" sublabel="All admin actions" to="/admin/audit" />
+            <NavItem icon={Clock} label={t('auditLog')} sublabel={t('auditLogTitle')} to="/admin/audit" />
             {isAdminRole && (
-              <NavItem icon={ShieldCheck} label="Moderators" sublabel="Manage moderator team" to="/admin/moderators" />
+              <NavItem icon={ShieldCheck} label={t('moderators')} sublabel={t('moderatorsTitle')} to="/admin/moderators" />
             )}
           </nav>
         </section>
@@ -92,7 +93,7 @@ export function AdminDashboard() {
             <textarea
               value={announcement}
               onChange={(e) => setAnnouncement(e.target.value)}
-              placeholder="Write a platform-wide announcement... (sent to all users via the Telegram bot)"
+              placeholder={t('writeAnnouncement')}
               rows={4}
               className={styles.announcementInput}
               maxLength={1000}
@@ -101,7 +102,7 @@ export function AdminDashboard() {
               <span className={styles.charCount}>{announcement.length}/1000</span>
               <Button onClick={handleAnnouncement} disabled={!announcement.trim() || sending}>
                 <Megaphone size={16} />
-                {sending ? 'Sending...' : sent ? 'Sent ✓' : 'Send to all users'}
+                {sending ? t('sending2') : sent ? t('sent') : t('sendToAllUsers')}
               </Button>
             </div>
           </div>

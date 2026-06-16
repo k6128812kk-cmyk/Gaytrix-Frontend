@@ -75,17 +75,42 @@ export function ProfilePage() {
           <MenuItem icon={Settings} label={t('editProfileMenu')} onClick={() => navigate('/profile/edit')} />
           <MenuItem icon={Eye} label={t('privacySettings')} onClick={() => navigate('/profile/privacy')} />
 
-          {/* Language selector */}
-          <div style={{ display: 'flex', alignItems: 'center', padding: '12px 16px', borderBottom: '1px solid var(--color-border)', gap: 12 }}>
-            <Globe size={18} style={{ color: 'var(--color-text-muted)', flexShrink: 0 }} />
-            <span style={{ flex: 1, fontSize: 15, color: 'var(--color-text)' }}>{t('language')}</span>
+          {/* Language selector — styled to match MenuItem */}
+          <div style={{
+            display: 'flex', alignItems: 'center',
+            padding: '13px 16px',
+            borderBottom: '1px solid var(--color-border)',
+            gap: 12, background: 'var(--color-surface)',
+          }}>
+            <span style={{
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              width: 34, height: 34, borderRadius: '50%',
+              background: 'var(--color-surface-raised)',
+              color: 'var(--color-text-muted)', flexShrink: 0,
+            }}>
+              <Globe size={18} />
+            </span>
+            <span style={{ flex: 1 }}>
+              <span style={{ display: 'block', fontSize: 15, fontWeight: 500, color: 'var(--color-text)' }}>
+                {t('language')}
+              </span>
+              <span style={{ display: 'block', fontSize: 12, color: 'var(--color-text-muted)', marginTop: 1 }}>
+                {LANGUAGE_LABELS[language]}
+              </span>
+            </span>
             <select
               value={language}
               onChange={e => setLanguage(e.target.value as Language)}
               style={{
-                background: 'var(--color-surface)', border: '1px solid var(--color-border)',
-                borderRadius: 'var(--radius-md)', color: 'var(--color-text)',
-                padding: '4px 8px', fontSize: 13, cursor: 'pointer',
+                background: 'var(--color-surface-raised)',
+                border: '1px solid var(--color-border)',
+                borderRadius: 'var(--radius-md)',
+                color: 'var(--color-text)',
+                padding: '6px 10px',
+                fontSize: 13,
+                fontWeight: 500,
+                cursor: 'pointer',
+                minWidth: 110,
               }}
             >
               {(Object.entries(LANGUAGE_LABELS) as [Language, string][]).map(([code, label]) => (
@@ -101,7 +126,7 @@ export function ProfilePage() {
             <MenuItem
               icon={ShieldAlert}
               label={isAdmin() ? `👑 ${t('adminPanel')}` : `🛡 ${t('moderatorPanel')}`}
-              sublabel="Manage users, reports, verification"
+              sublabel={t('adminPanelSublabel')}
               onClick={() => navigate('/admin')}
               accent
             />

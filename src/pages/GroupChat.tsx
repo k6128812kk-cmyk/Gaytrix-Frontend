@@ -176,8 +176,8 @@ export function GroupChatPage() {
         <button
           className={styles.muteBtn}
           onClick={handleToggleMute}
-          title={isMuted ? 'Unmute notifications' : 'Mute notifications'}
-          aria-label={isMuted ? 'Unmute notifications' : 'Mute notifications'}
+          title={isMuted ? t('unmuteNotifications') : t('muteNotifications')}
+          aria-label={isMuted ? t('unmuteNotifications') : t('muteNotifications')}
         >
           {isMuted ? <BellOff size={18} /> : <Bell size={18} />}
         </button>
@@ -229,7 +229,7 @@ export function GroupChatPage() {
                     <button
                       className={styles.deleteMsgBtn}
                       onClick={() => setConfirmDeleteMsgId(msg.id)}
-                      title="Delete message"
+                      title={t('deleteMessage')}
                     >
                       <Trash2 size={12} />
                     </button>

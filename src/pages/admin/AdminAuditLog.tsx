@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { PageHeader } from '@/components/PageHeader';
+import { useTranslation } from '@/i18n/useTranslation';
 import { adminService } from '@/api/services';
 import type { AdminAction } from '@/types';
 import { formatDistanceToNowStrict } from 'date-fns';
@@ -29,6 +30,7 @@ function actionColor(action: AdminAction['action']) {
 }
 
 export function AdminAuditLog() {
+  const { t } = useTranslation();
   const [log, setLog] = useState<AdminAction[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -41,7 +43,7 @@ export function AdminAuditLog() {
 
   return (
     <div className={styles.page}>
-      <PageHeader title="Audit log" showBack />
+      <PageHeader title={t('auditLogTitle')} showBack />
 
       <div className={styles.content}>
         {loading && <div className={styles.empty}>Loading...</div>}

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Users, Settings, Shield, ShieldOff, CheckCircle, XCircle, Lock, UserMinus } from 'lucide-react';
+import { useTranslation } from '@/i18n/useTranslation';
 import { groupService } from '@/api/services';
 import { assetUrl } from '@/api/client';
 import { useSessionStore } from '@/context/sessionStore';
@@ -136,12 +137,12 @@ export function GroupInfoPage() {
   return (
     <div className={styles.page}>
       <div className={styles.header}>
-        <button className={styles.backBtn} onClick={() => navigate(-1)} aria-label="Back">
+        <button className={styles.backBtn} onClick={() => navigate(-1)} aria-label={t('back')}>
           <ArrowLeft size={20} />
         </button>
         <span className={styles.headerTitle}>Group Info</span>
         {isCreator && (
-          <button className={styles.editBtn} onClick={() => setShowEdit(s => !s)} aria-label="Edit group">
+          <button className={styles.editBtn} onClick={() => setShowEdit(s => !s)} aria-label={t('editGroup')}>
             <Settings size={18} />
           </button>
         )}
@@ -160,7 +161,7 @@ export function GroupInfoPage() {
                 className={styles.editInput}
                 value={editName}
                 onChange={e => setEditName(e.target.value)}
-                placeholder="Group name"
+                placeholder={t('groupNamePlaceholder')}
               />
               <label className={styles.editLabel}>Description</label>
               <textarea
@@ -168,7 +169,7 @@ export function GroupInfoPage() {
                 value={editDesc}
                 onChange={e => setEditDesc(e.target.value)}
                 rows={3}
-                placeholder="Description"
+                placeholder={t('groupDescPlaceholder')}
               />
               <label className={styles.editCheckLabel}>
                 <input
@@ -182,7 +183,7 @@ export function GroupInfoPage() {
               <div className={styles.editActions}>
                 <button className={styles.cancelBtn} onClick={() => setShowEdit(false)}>Cancel</button>
                 <button className={styles.saveBtn} onClick={handleSaveEdit} disabled={saving}>
-                  {saving ? 'Saving…' : 'Save changes'}
+                  {saving ? t('saving') : t('saveGroupChanges')}
                 </button>
               </div>
             </div>
@@ -221,7 +222,7 @@ export function GroupInfoPage() {
                       className={styles.approveBtn}
                       onClick={() => handleApproveRequest(req.id)}
                       disabled={actionLoading === req.id}
-                      title="Approve"
+                      title={t('approve')}
                     >
                       <CheckCircle size={18} />
                     </button>
@@ -229,7 +230,7 @@ export function GroupInfoPage() {
                       className={styles.rejectBtn}
                       onClick={() => handleRejectRequest(req.id)}
                       disabled={actionLoading === req.id}
-                      title="Reject"
+                      title={t('reject')}
                     >
                       <XCircle size={18} />
                     </button>
@@ -277,7 +278,7 @@ export function GroupInfoPage() {
                       className={`${styles.modToggleBtn} ${member.groupRole === 'moderator' ? styles.modToggleBtnActive : ''}`}
                       onClick={() => handleToggleMod(member)}
                       disabled={actionLoading === member.id}
-                      title={member.groupRole === 'moderator' ? 'Remove moderator' : 'Make moderator'}
+                      title={member.groupRole === 'moderator' ? t('removeModerator') : t('makeModerator')}
                     >
                       {member.groupRole === 'moderator' ? <ShieldOff size={15} /> : <Shield size={15} />}
                     </button>
@@ -289,7 +290,7 @@ export function GroupInfoPage() {
                       className={styles.kickBtn}
                       onClick={() => handleKickMember(member.id, member.displayName)}
                       disabled={actionLoading === member.id}
-                      title="Remove from group"
+                      title={t('removeFromGroup')}
                     >
                       <UserMinus size={15} />
                     </button>

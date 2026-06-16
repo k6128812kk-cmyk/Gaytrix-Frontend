@@ -3,6 +3,7 @@ import { ShieldCheck, UserMinus, UserPlus, Search } from 'lucide-react';
 import { PageHeader } from '@/components/PageHeader';
 import { Avatar } from '@/components/Avatar';
 import { Button } from '@/components/Button';
+import { useTranslation } from '@/i18n/useTranslation';
 import { adminService } from '@/api/services';
 import type { UserProfile } from '@/types';
 import styles from './Admin.module.css';
@@ -63,7 +64,7 @@ export function AdminModerators() {
 
   return (
     <div className={styles.page}>
-      <PageHeader title="Moderators" showBack />
+      <PageHeader title={t('moderatorsTitle')} showBack />
 
       <div className={styles.content}>
         <div className={styles.tabs}>
@@ -87,7 +88,7 @@ export function AdminModerators() {
             {!loading && moderators.length === 0 && (
               <div className={styles.empty}>
                 <ShieldCheck size={40} />
-                <p>No moderators yet. Add moderators from the "Add moderator" tab.</p>
+                <p>{t('noModeratorsYet')}</p>
               </div>
             )}
             {moderators.map(mod => (
@@ -125,7 +126,7 @@ export function AdminModerators() {
                 value={search}
                 onChange={e => setSearch(e.target.value)}
                 onKeyDown={e => e.key === 'Enter' && handleSearch()}
-                placeholder="Search by username or name..."
+                placeholder={t('searchModeratorPlaceholder')}
                 className={styles.searchInput}
               />
               <Button size="sm" onClick={handleSearch}>

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { AlertTriangle, CheckCircle2, Ban } from 'lucide-react';
 import { PageHeader } from '@/components/PageHeader';
+import { useTranslation } from '@/i18n/useTranslation';
 import { adminService } from '@/api/services';
 import type { UserReport } from '@/types';
 import { formatDistanceToNowStrict } from 'date-fns';
@@ -12,6 +13,7 @@ import styles from './Admin.module.css';
 // ==========================================================================
 
 export function AdminReports() {
+  const { t } = useTranslation();
   const [reports, setReports] = useState<UserReport[]>([]);
   const [loading, setLoading] = useState(true);
   const [acting, setActing] = useState<string | null>(null);
@@ -40,7 +42,7 @@ export function AdminReports() {
 
   return (
     <div className={styles.page}>
-      <PageHeader title="Reports" showBack />
+      <PageHeader title={t('reportsTitle')} showBack />
 
       <div className={styles.content}>
         {loading && <div className={styles.empty}>Loading reports...</div>}

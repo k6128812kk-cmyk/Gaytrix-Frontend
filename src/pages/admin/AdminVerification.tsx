@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { CheckCircle2, XCircle, Lock } from 'lucide-react';
 import { PageHeader } from '@/components/PageHeader';
 import { Button } from '@/components/Button';
+import { useTranslation } from '@/i18n/useTranslation';
 import { adminService } from '@/api/services';
 import { assetUrl } from '@/api/client';
 import type { VerificationRequest } from '@/types';
@@ -17,6 +18,7 @@ import styles from './Admin.module.css';
 // ==========================================================================
 
 export function AdminVerification() {
+  const { t } = useTranslation();
   const [queue, setQueue] = useState<VerificationRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [acting, setActing] = useState<string | null>(null);
@@ -49,7 +51,7 @@ export function AdminVerification() {
 
   return (
     <div className={styles.page}>
-      <PageHeader title="Verification queue" showBack />
+      <PageHeader title={t('verificationQueueTitle')} showBack />
 
       <div className={styles.content}>
         <div className={styles.section}>
@@ -78,7 +80,7 @@ export function AdminVerification() {
                 {req.selfieUrl ? (
                   <img
                     src={assetUrl(req.selfieUrl)}
-                    alt="Verification selfie"
+                    alt={t('verificationSelfie')}
                     className={styles.selfieImage}
                     onError={(e) => {
                       const img = e.target as HTMLImageElement;
@@ -117,7 +119,7 @@ export function AdminVerification() {
                     <input
                       value={rejectReason}
                       onChange={e => setRejectReason(e.target.value)}
-                      placeholder="Reason for rejection..."
+                      placeholder={t('reasonForRejection')}
                       className={styles.confirmInput}
                     />
                     <div className={styles.verificationActions}>

@@ -211,7 +211,7 @@ export function ConversationPage() {
           <button
             onClick={() => setShowDeleteConfirm(true)}
             style={{ background: 'none', border: 'none', padding: 8, cursor: 'pointer', color: 'var(--color-text-muted)' }}
-            aria-label="Delete conversation"
+            aria-label={t('deleteConversation')}
           >
             <Trash2 size={18} />
           </button>
@@ -224,7 +224,7 @@ export function ConversationPage() {
         {!loading && messages.length === 0 && (
           <div className={styles.requestNotice}>
             <p>{conversation?.isMessageRequest
-              ? <><strong>{title}</strong> {t('wantsToMessage')}. Reply to start.</>
+              ? <><strong>{title}</strong> {t('wantsToMessage')}. {t('replyToStart')}</>
               : t('noMessagesYet')
             }</p>
           </div>
@@ -266,7 +266,7 @@ export function ConversationPage() {
                 {msg.type === 'image' && msg.mediaUrl && (
                   <img
                     src={msg.mediaUrl}
-                    alt="Shared photo"
+                    alt={t('sharedPhoto')}
                     className={styles.mediaImage}
                     style={{ maxWidth: 220, borderRadius: 12, display: 'block' }}
                   />

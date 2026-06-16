@@ -3,6 +3,7 @@ import { Search, ShieldCheck, Ban, Clock, UserX, RotateCcw, Crown, ShieldOff } f
 import { PageHeader } from '@/components/PageHeader';
 import { Chip } from '@/components/Chip';
 import { Button } from '@/components/Button';
+import { useTranslation } from '@/i18n/useTranslation';
 import { adminService } from '@/api/services';
 import { useSessionStore } from '@/context/sessionStore';
 import type { UserProfile } from '@/types';
@@ -99,7 +100,7 @@ export function AdminUsers() {
 
   return (
     <div className={styles.page}>
-      <PageHeader title="Users" showBack />
+      <PageHeader title={t('usersTitle')} showBack />
 
       <div className={styles.content}>
         <div className={styles.searchBar}>
@@ -108,7 +109,7 @@ export function AdminUsers() {
             <input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search name or @username..."
+              placeholder={t('searchUsersPlaceholder')}
               className={styles.searchInput}
               style={{ paddingLeft: 36 }}
             />
@@ -180,52 +181,52 @@ export function AdminUsers() {
                     <button
                       className={`${styles.iconBtn} ${styles.iconBtnSuccess}`}
                       onClick={() => { setConfirm({ type: 'unsuspend', user }); setReason('Admin review completed'); }}
-                      aria-label="Unsuspend user" title="Unsuspend"
+                      aria-label={t('unsuspendUser')} title={t('unsuspend')}
                     ><RotateCcw size={16} /></button>
                   ) : user.accountStatus === 'active' ? (
                     <button
                       className={styles.iconBtn}
                       onClick={() => setConfirm({ type: 'suspend', user })}
-                      aria-label="Suspend 7 days" title="Suspend 7d"
+                      aria-label={t('suspendUser')} title={t('suspend7d')}
                     ><Clock size={16} /></button>
                   ) : null}
                   {user.membership === 'premium' ? (
                     <button
                       className={styles.iconBtn}
                       onClick={() => setConfirm({ type: 'revoke_premium', user })}
-                      aria-label="Revoke Premium" title="Revoke Premium"
+                      aria-label={t('revokePremiumUser')} title={t('revokePremium')}
                     ><Crown size={16} /></button>
                   ) : (
                     <button
                       className={`${styles.iconBtn} ${styles.iconBtnGold}`}
                       onClick={() => setConfirm({ type: 'grant_premium', user })}
-                      aria-label="Grant Premium" title="Grant Premium"
+                      aria-label={t('grantPremiumUser')} title={t('grantPremium')}
                     ><Crown size={16} /></button>
                   )}
                   {user.verification === 'verified' ? (
                     <button
                       className={styles.iconBtn}
                       onClick={() => setConfirm({ type: 'remove_verification', user })}
-                      aria-label="Remove verified badge" title="Remove badge"
+                      aria-label={t('removeVerifiedBadge')} title={t('removeBadge')}
                     ><ShieldOff size={16} /></button>
                   ) : (
                     <button
                       className={`${styles.iconBtn} ${styles.iconBtnSuccess}`}
                       onClick={() => setConfirm({ type: 'grant_verification', user })}
-                      aria-label="Grant verified badge" title="Grant badge"
+                      aria-label={t('grantVerifiedBadge')} title={t('grantBadge')}
                     ><ShieldCheck size={16} /></button>
                   )}
                   {user.accountStatus !== 'banned' && (
                     <button
                       className={`${styles.iconBtn} ${styles.iconBtnDanger}`}
                       onClick={() => setConfirm({ type: 'ban', user })}
-                      aria-label="Ban user" title="Ban"
+                      aria-label={t('banUser')} title={t('ban')}
                     ><Ban size={16} /></button>
                   )}
                   <button
                     className={`${styles.iconBtn} ${styles.iconBtnDanger}`}
                     onClick={() => setConfirm({ type: 'remove', user })}
-                    aria-label="Remove account" title="Remove"
+                    aria-label={t('removeAccount')} title={t('remove')}
                   ><UserX size={16} /></button>
                 </div>
               )}
@@ -256,7 +257,7 @@ export function AdminUsers() {
               <input
                 value={reason}
                 onChange={e => setReason(e.target.value)}
-                placeholder="Reason (required)..."
+                placeholder={t('reasonPlaceholder')}
                 className={styles.confirmInput}
               />
             )}

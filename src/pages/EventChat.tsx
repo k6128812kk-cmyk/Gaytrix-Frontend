@@ -21,6 +21,7 @@ export function EventChatPage() {
   const [draft, setDraft] = useState('');
   const [loading, setLoading] = useState(true);
   const [groupName] = useState('Event Chat');
+  const { t } = useTranslation();
   const scrollRef = useRef<HTMLDivElement>(null);
 
   // Use global WS
@@ -68,7 +69,7 @@ export function EventChatPage() {
     <div className={styles.page}>
       {/* Header */}
       <div className={styles.header}>
-        <button className={styles.backButton} onClick={() => navigate(-1)} aria-label="Back">
+        <button className={styles.backButton} onClick={() => navigate(-1)} aria-label={t('back')}>
           <ArrowLeft size={20} />
         </button>
         <div className={styles.headerInfo}>
@@ -111,7 +112,7 @@ export function EventChatPage() {
           value={draft}
           onChange={e => setDraft(e.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder="Message the group..."
+          placeholder={t('typeAMessage')}
           rows={1}
           className={styles.input}
         />
@@ -119,7 +120,7 @@ export function EventChatPage() {
           className={styles.sendButton}
           onClick={handleSend}
           disabled={!draft.trim()}
-          aria-label="Send"
+          aria-label={t('send')}
         >
           <Send size={18} />
         </button>

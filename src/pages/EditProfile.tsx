@@ -17,46 +17,7 @@ const LANGUAGE_SUGGESTIONS = [
   'Italian', 'Portuguese', 'Russian', 'Japanese', 'Korean',
 ];
 
-const LOOKING_FOR_OPTIONS: { value: LookingFor; label: string }[] = [
-  { value: 'friends',      label: 'Friends'      },
-  { value: 'dating',       label: 'Dating'       },
-  { value: 'relationship', label: 'Relationship' },
-  { value: 'networking',   label: 'Networking'   },
-  { value: 'community',    label: 'Community'    },
-  { value: 'chat',         label: 'Just chat'    },
-];
-
-const GENDER_OPTIONS: { value: GenderIdentity; label: string }[] = [
-  { value: 'male',       label: 'Male'       },
-  { value: 'female',     label: 'Female'     },
-  { value: 'non_binary', label: 'Non-binary' },
-  { value: 'other',      label: 'Other'      },
-];
-
-const INTERESTED_IN_OPTIONS: { value: InterestedIn; label: string }[] = [
-  { value: 'men',      label: 'Men'      },
-  { value: 'women',    label: 'Women'    },
-  { value: 'everyone', label: 'Everyone' },
-];
-
-const ORIENTATION_OPTIONS: { value: Orientation; label: string }[] = [
-  { value: 'gay',       label: 'Gay'       },
-  { value: 'lesbian',   label: 'Lesbian'   },
-  { value: 'bisexual',  label: 'Bisexual'  },
-  { value: 'straight',  label: 'Straight'  },
-  { value: 'pansexual', label: 'Pansexual' },
-  { value: 'asexual',   label: 'Asexual'   },
-  { value: 'other',     label: 'Other'     },
-];
-
-const RELATIONSHIP_STATUS_OPTIONS: { value: RelationshipStatus; label: string }[] = [
-  { value: 'single',            label: 'Single'             },
-  { value: 'in_relationship',   label: 'In a relationship'  },
-  { value: 'married',           label: 'Married'            },
-  { value: 'open_relationship', label: 'Open relationship'  },
-  { value: 'complicated',       label: "It's complicated"   },
-  { value: 'prefer_not_to_say', label: 'Prefer not to say'  },
-];
+// Option arrays are built inside the component using t() for live language switching
 
 const INTEREST_SUGGESTIONS = [
   'Music', 'Coffee', 'Hiking', 'Travel', 'Tech', 'Books',
@@ -68,6 +29,44 @@ const INTEREST_SUGGESTIONS = [
 export function EditProfilePage() {
   const { profile, updateProfile } = useSessionStore();
   const { t } = useTranslation();
+
+  // ── Translated option arrays (rebuilt on language change) ─────────────────
+  const LOOKING_FOR_OPTIONS: { value: LookingFor; label: string }[] = [
+    { value: 'friends',      label: t('friends')      },
+    { value: 'dating',       label: t('dating')       },
+    { value: 'relationship', label: t('relationship') },
+    { value: 'networking',   label: t('networking')   },
+    { value: 'community',    label: t('community')    },
+    { value: 'chat',         label: t('justChat')     },
+  ];
+  const GENDER_OPTIONS: { value: GenderIdentity; label: string }[] = [
+    { value: 'male',       label: t('male')      },
+    { value: 'female',     label: t('female')    },
+    { value: 'non_binary', label: t('nonBinary') },
+    { value: 'other',      label: t('filterOther') },
+  ];
+  const INTERESTED_IN_OPTIONS: { value: InterestedIn; label: string }[] = [
+    { value: 'men',      label: t('men')      },
+    { value: 'women',    label: t('women')    },
+    { value: 'everyone', label: t('everyone') },
+  ];
+  const ORIENTATION_OPTIONS: { value: Orientation; label: string }[] = [
+    { value: 'gay',       label: t('gay')       },
+    { value: 'lesbian',   label: t('lesbian')   },
+    { value: 'bisexual',  label: t('bisexual')  },
+    { value: 'straight',  label: t('straight')  },
+    { value: 'pansexual', label: t('pansexual') },
+    { value: 'asexual',   label: t('asexual')   },
+    { value: 'other',     label: t('filterOther') },
+  ];
+  const RELATIONSHIP_STATUS_OPTIONS: { value: RelationshipStatus; label: string }[] = [
+    { value: 'single',            label: t('single')          },
+    { value: 'in_relationship',   label: t('inRelationship')  },
+    { value: 'married',           label: t('married')         },
+    { value: 'open_relationship', label: t('openRelationship') },
+    { value: 'complicated',       label: t('complicated')     },
+    { value: 'prefer_not_to_say', label: t('preferNotToSay') },
+  ];
 
   // ── Form state ──────────────────────────────────────────────────────────────
   const [photos, setPhotos]                         = useState<string[]>(profile?.photos ?? []);
@@ -220,15 +219,15 @@ export function EditProfilePage() {
   const statusNode =
     saveStatus === 'saving' ? (
       <span className={styles.saveStatus}>
-        <Loader2 size={14} className={styles.spin} /> Saving…
+        <Loader2 size={14} className={styles.spin} /> {t('saving')}
       </span>
     ) : saveStatus === 'saved' ? (
       <span className={`${styles.saveStatus} ${styles.saveStatusSaved}`}>
-        <CheckCircle2 size={14} /> Saved
+        <CheckCircle2 size={14} /> {t('savedCheck')}
       </span>
     ) : saveStatus === 'error' ? (
       <span className={`${styles.saveStatus} ${styles.saveStatusError}`}>
-        Not saved
+        {t('somethingWentWrong')}
       </span>
     ) : null;
 
@@ -248,12 +247,12 @@ export function EditProfilePage() {
 
         {/* ── Photos ── */}
         <section className={styles.section}>
-          <label className={styles.label}>Photos</label>
+          <label className={styles.label}>{t('photos')}</label>
           <div className={styles.photoGrid}>
             {photos.map((src, i) => (
               <div key={i} className={styles.photoSlot}>
                 <img src={src} alt={`Photo ${i + 1}`} />
-                <button className={styles.removePhoto} onClick={() => removePhoto(i)} aria-label="Remove photo">
+                <button className={styles.removePhoto} onClick={() => removePhoto(i)} aria-label={t('removePhoto')}>
                   <X size={14} />
                 </button>
               </div>
@@ -299,7 +298,7 @@ export function EditProfilePage() {
           />
           {ageError && (
             <p className={`${styles.fieldHint} ${styles.hintError}`}>
-              Must be 18 or older
+              {t('somethingWentWrong')}
             </p>
           )}
         </section>

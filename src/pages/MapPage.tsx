@@ -5,21 +5,13 @@ import { format } from 'date-fns';
 import { PageHeader } from '@/components/PageHeader';
 import { Chip } from '@/components/Chip';
 import { Button } from '@/components/Button';
+import { useTranslation } from '@/i18n/useTranslation';
 import { mapService, eventService } from '@/api/services';
 import { useSessionStore } from '@/context/sessionStore';
 import type { MapLocation, MapEvent, LocationCategory } from '@/types';
 import styles from './MapPage.module.css';
 
-const CATEGORY_LABELS: Record<LocationCategory, string> = {
-  social_meetup: 'Social meetup',
-  community_gathering: 'Community gathering',
-  cafe: 'Café',
-  bar: 'Bar',
-  event_venue: 'Event venue',
-  outdoor_spot: 'Outdoor spot',
-  cruising_area: 'Cruising area',
-  other: 'Other',
-};
+// CATEGORY_LABELS built inside component
 
 const CATEGORY_COLORS: Record<LocationCategory, string> = {
   social_meetup: '#ff6e7f',
@@ -75,7 +67,7 @@ export function MapPage() {
       map.on('locationfound', (e: any) => {
         L.circleMarker(e.latlng, {
           radius: 10, fillColor: '#4fb8ff', color: '#fff', weight: 2, fillOpacity: 0.9,
-        }).addTo(map).bindPopup('You are here');
+        }).addTo(map).bindPopup(t('youAreHere'));
       });
       setMapReady(true);
     };
@@ -193,7 +185,7 @@ export function MapPage() {
 
   return (
     <div className={styles.page}>
-      <PageHeader title="Map" />
+      <PageHeader title={t('map')} />
 
       {/* View mode toggle */}
       <div className={styles.modeToggle}>
@@ -237,7 +229,7 @@ export function MapPage() {
         <button
           className={styles.addButton}
           onClick={() => { setAddMode(viewMode === 'events' ? 'event' : 'location'); setShowAddSheet(true); }}
-          aria-label={viewMode === 'events' ? 'Create event' : 'Add location'}
+          aria-label={viewMode === 'events' ? t('createEvent') : t('addLocation')}
           style={{ position: 'absolute', zIndex: 1000 }}
         >
           <Plus size={22} />
@@ -363,7 +355,7 @@ function EventDetailSheet({
             <Button variant="secondary" onClick={onLeave}>Leave event</Button>
           ) : (
             <Button onClick={onJoin}>
-              {event.maxAttendees && event.attendeeCount >= event.maxAttendees ? 'Event full' : 'Join event'}
+              {event.maxAttendees && event.attendeeCount >= event.maxAttendees ? t('eventFull') : t('joinEvent')}
             </Button>
           )
         )}
@@ -426,7 +418,7 @@ function AddEventSheet({
       });
       onSubmit(ev);
     } catch (e: any) {
-      setError('Could not create event. Please try again.');
+      setError(t('couldNotCreateEvent'));
       setSubmitting(false);
     }
   }
@@ -460,7 +452,7 @@ function AddEventSheet({
       <div className={styles.formField}>
         <label>Description *</label>
         <textarea value={description} onChange={e => setDescription(e.target.value)}
-          placeholder="What's this event about?" rows={3} className={styles.formTextarea} />
+          placeholder={t('eventAboutPlaceholder')} rows={3} className={styles.formTextarea} />
       </div>
 
       <div className={styles.formRow}>
@@ -479,7 +471,7 @@ function AddEventSheet({
       <div className={styles.formField}>
         <label>Max attendees (optional)</label>
         <input type="number" value={maxAttendees} onChange={e => setMaxAttendees(e.target.value)}
-          placeholder="Leave empty for unlimited" className={styles.formInput} min="2" />
+          placeholder={t('unlimitedAttendees')} className={styles.formInput} min="2" />
       </div>
 
       <div className={styles.formField}>
@@ -492,7 +484,7 @@ function AddEventSheet({
             <button onClick={() => setPickingLocation(true)}
               style={{ fontSize: 12, color: 'var(--color-accent)', background: 'none', padding: '4px 8px',
                 border: '1px solid var(--color-accent)', borderRadius: 'var(--radius-pill)', cursor: 'pointer' }}>
-              {pickingLocation ? 'Tap the map...' : 'Change'}
+              {pickingLocation ? t('tapTheMap') : t('change')}
             </button>
           </div>
         ) : (
@@ -511,7 +503,7 @@ function AddEventSheet({
       </p>
 
       <Button fullWidth disabled={!canSubmit || submitting} onClick={handleSubmit}>
-        {submitting ? 'Creating...' : 'Create event'}
+        {submitting ? t('creating2') : t('createEvent')}
       </Button>
     </div>
   );
@@ -551,7 +543,7 @@ function AddLocationSheet({
     try {
       const loc = await mapService.createLocation({ name: name.trim(), description: description.trim(), category, lat, lng, createdBy: '' });
       onSubmit(loc);
-    } catch { setError('Could not submit. Please try again.'); setSubmitting(false); }
+    } catch { setError(t('couldNotSubmit')); setSubmitting(false); }
   }
 
   return (
@@ -574,7 +566,7 @@ function AddLocationSheet({
       </div>
       <div className={styles.formField}>
         <label>Description</label>
-        <textarea value={description} onChange={e => setDescription(e.target.value)} placeholder="What makes this spot worth knowing?" rows={3} className={styles.formTextarea} />
+        <textarea value={description} onChange={e => setDescription(e.target.value)} placeholder={t('locationDescPlaceholder')} rows={3} className={styles.formTextarea} />
       </div>
       <div className={styles.formField}>
         <label>Location</label>
@@ -585,7 +577,7 @@ function AddLocationSheet({
             </span>
             <button onClick={() => setPickingLocation(true)}
               style={{ fontSize: 12, color: 'var(--color-accent)', background: 'none', padding: '4px 8px', border: '1px solid var(--color-accent)', borderRadius: 'var(--radius-pill)', cursor: 'pointer' }}>
-              {pickingLocation ? 'Tap the map...' : 'Change'}
+              {pickingLocation ? t('tapTheMap') : t('change')}
             </button>
           </div>
         ) : (
@@ -598,7 +590,7 @@ function AddLocationSheet({
       {error && <p style={{ fontSize: 13, color: '#e74c3c', margin: 0 }}>{error}</p>}
       <p className={styles.formNote}>New locations are reviewed before appearing publicly.</p>
       <Button fullWidth disabled={!name.trim() || !description.trim() || lat === null || lng === null || submitting} onClick={handleSubmit}>
-        {submitting ? 'Submitting...' : 'Submit for review'}
+        {submitting ? t('submitting') : t('submitForReview')}
       </Button>
     </div>
   );

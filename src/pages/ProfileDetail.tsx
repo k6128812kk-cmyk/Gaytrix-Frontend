@@ -12,16 +12,9 @@ import { useTranslation } from '@/i18n/useTranslation';
 import type { UserProfile } from '@/types';
 import styles from './ProfileDetail.module.css';
 
-const RELATIONSHIP_LABELS: Record<string, string> = {
-  single: 'Single', in_relationship: 'In a relationship', married: 'Married',
-  open_relationship: 'Open relationship', complicated: "It's complicated",
-  prefer_not_to_say: 'Prefer not to say',
-};
+// RELATIONSHIP_LABELS built inside component
 
-const LOOKING_FOR_LABELS: Record<string, string> = {
-  friends: 'Friends', dating: 'Dating', relationship: 'Relationship',
-  networking: 'Networking', community: 'Community', chat: 'Chat',
-};
+// LOOKING_FOR_LABELS built inside component
 
 type ReportReason = 'Spam / fake profile' | 'Inappropriate content' | 'Harassment' | 'Underage' | 'Other';
 const REPORT_REASONS: ReportReason[] = [
@@ -32,6 +25,15 @@ export function ProfileDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { t } = useTranslation();
+  const RELATIONSHIP_LABELS: Record<string, string> = {
+    single: t('single'), in_relationship: t('inRelationship'), married: t('married'),
+    open_relationship: t('openRelationship'), complicated: t('complicated'),
+    prefer_not_to_say: t('preferNotToSay'),
+  };
+  const LOOKING_FOR_LABELS: Record<string, string> = {
+    friends: t('friends'), dating: t('dating'), relationship: t('relationship'),
+    networking: t('networking'), community: t('community'), chat: t('justChat'),
+  };
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [notFound, setNotFound] = useState(false);
   const [activePhoto, setActivePhoto] = useState(0);
@@ -107,7 +109,7 @@ export function ProfileDetailPage() {
       <div className={styles.page}>
         <PageHeader title={t('profile')} showBack />
         <div style={{ padding: 'var(--space-6)', textAlign: 'center', color: 'var(--color-text-faint)' }}>
-          {blocked ? 'User blocked. Taking you back...' : 'Profile not available.'}
+          {blocked ? t('userBlocked') : t('profileNotAvailable')}
         </div>
       </div>
     );
@@ -167,13 +169,13 @@ export function ProfileDetailPage() {
             </div>
             {/* Left tap zone / arrow */}
             {activePhoto > 0 && (
-              <button className={styles.galleryNavPrev} onClick={goPrevPhoto} aria-label="Previous photo">
+              <button className={styles.galleryNavPrev} onClick={goPrevPhoto} aria-label={t('previousPhoto')}>
                 <ChevronLeft size={22} />
               </button>
             )}
             {/* Right tap zone / arrow */}
             {activePhoto < profile.photos.length - 1 && (
-              <button className={styles.galleryNavNext} onClick={goNextPhoto} aria-label="Next photo">
+              <button className={styles.galleryNavNext} onClick={goNextPhoto} aria-label={t('nextPhoto')}>
                 <ChevronRight size={22} />
               </button>
             )}
@@ -315,13 +317,13 @@ export function ProfileDetailPage() {
               />
             )}
             <Button fullWidth onClick={submitReport} disabled={!reportReason || reporting}>
-              {reporting ? t('saving') : 'Submit report'}
+              {reporting ? t('saving') : t('submitReport')}
             </Button>
             <button
               style={{ color: 'var(--color-danger)', fontWeight: 600, fontSize: 14, textAlign: 'center', width: '100%', padding: 8 }}
               onClick={handleBlock}
             >
-              {t('block')} this user
+              {t('blockThisUser')}
             </button>
           </div>
         </div>

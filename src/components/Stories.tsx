@@ -250,7 +250,7 @@ export function Stories() {
             <input
               value={caption}
               onChange={e => setCaption(e.target.value)}
-              placeholder="Add a caption… (optional)"
+              placeholder={t('captionPlaceholder')}
               className={styles.captionInput}
               maxLength={500}
               autoFocus
@@ -576,7 +576,7 @@ function MyStoryViewer({ myStory, myPhotoSrc, displayName, onClose, onDelete, on
       {/* Delete confirmation dialog */}
       {confirmDeleteId && (
         <ConfirmDialog
-          message="Are you sure you want to delete this story?"
+          message={t('confirmDeleteStory')}
           onConfirm={() => { const id = confirmDeleteId; setConfirmDeleteId(null); onDelete(id); }}
           onCancel={() => setConfirmDeleteId(null)}
         />
