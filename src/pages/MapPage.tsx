@@ -26,11 +26,9 @@ const CATEGORY_COLORS: Record<LocationCategory, string> = {
 
 type ViewMode = 'locations' | 'events';
 
-export function MapPage() {
-  const navigate = useNavigate();
-  const { profile, isModerator } = useSessionStore();
+function useCategoryLabels() {
   const { t } = useTranslation();
-  const CATEGORY_LABELS: Record<string, string> = {
+  return {
     social_meetup: t('catSocialMeetup'),
     community_gathering: t('catCommunityGathering'),
     cafe: t('catCafe'),
@@ -39,7 +37,14 @@ export function MapPage() {
     outdoor_spot: t('catOutdoorSpot'),
     cruising_area: t('catCruisingArea'),
     other: t('catOther'),
-  };
+  } as Record<string, string>;
+}
+
+export function MapPage() {
+  const navigate = useNavigate();
+  const { profile, isModerator } = useSessionStore();
+  const { t } = useTranslation();
+  const CATEGORY_LABELS = useCategoryLabels();
   const mapRef = useRef<HTMLDivElement>(null);
   const leafletMap = useRef<any>(null);
   const markersRef = useRef<any[]>([]);
@@ -283,6 +288,7 @@ export function MapPage() {
             onJoin={() => handleJoinEvent(selectedEvent)}
             onLeave={() => handleLeaveEvent(selectedEvent)}
             onDelete={() => handleDeleteEvent(selectedEvent)}
+            categoryLabels={CATEGORY_LABELS}
             onOpenChat={() => {
               if (selectedEvent.groupConversationId) {
                 navigate(`/event-chat/${selectedEvent.groupConversationId}`);
@@ -300,12 +306,14 @@ export function MapPage() {
               onClose={() => setShowAddSheet(false)}
               onSubmit={handleEventAdded}
               leafletMap={leafletMap.current}
+              categoryLabels={CATEGORY_LABELS}
             />
           ) : (
             <AddLocationSheet
               onClose={() => setShowAddSheet(false)}
               onSubmit={handleLocationAdded}
               leafletMap={leafletMap.current}
+              categoryLabels={CATEGORY_LABELS}
             />
           )}
         </div>
@@ -318,12 +326,15 @@ export function MapPage() {
 // Event detail sheet
 // --------------------------------------------------------------------------
 function EventDetailSheet({
-  event, canDelete, onClose, onJoin, onLeave, onDelete, onOpenChat,
+  event, canDelete, onClose, onJoin, onLeave, onDelete, onOpenChat, categoryLabels,
 }: {
   event: MapEvent; canDelete: boolean;
   onClose: () => void; onJoin: () => void; onLeave: () => void;
   onDelete: () => void; onOpenChat: () => void;
+  categoryLabels: Record<string, string>;
 }) {
+  const { t } = useTranslation();
+  const CATEGORY_LABELS = categoryLabels;
   const isPast = event.endsAt ? new Date(event.endsAt) < new Date() : false;
 
   return (
@@ -389,8 +400,10 @@ function EventDetailSheet({
 // Add event sheet
 // --------------------------------------------------------------------------
 function AddEventSheet({
-  onClose, onSubmit, leafletMap,
-}: { onClose: () => void; onSubmit: (ev: MapEvent) => void; leafletMap: any }) {
+  onClose, onSubmit, leafletMap, categoryLabels,
+}: { onClose: () => void; onSubmit: (ev: MapEvent) => void; leafletMap: any; categoryLabels: Record<string, string> }) {
+  const { t } = useTranslation();
+  const CATEGORY_LABELS = categoryLabels;
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [category, setCategory] = useState<LocationCategory>('social_meetup');
@@ -524,8 +537,10 @@ function AddEventSheet({
 // Add location sheet (unchanged)
 // --------------------------------------------------------------------------
 function AddLocationSheet({
-  onClose, onSubmit, leafletMap,
-}: { onClose: () => void; onSubmit: (loc: MapLocation) => void; leafletMap: any }) {
+  onClose, onSubmit, leafletMap, categoryLabels,
+}: { onClose: () => void; onSubmit: (loc: MapLocation) => void; leafletMap: any; categoryLabels: Record<string, string> }) {
+  const { t } = useTranslation();
+  const CATEGORY_LABELS = categoryLabels;
   const [name, setName] = useState('');
   const [category, setCategory] = useState<LocationCategory>('social_meetup');
   const [description, setDescription] = useState('');

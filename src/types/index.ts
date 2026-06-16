@@ -53,6 +53,7 @@ export interface UserProfile {
   genderIdentity?: GenderIdentity;
   interestedIn?: InterestedIn;
   orientation?: Orientation;
+  languagePreference?: string;
 }
 
 export interface PrivacySettings {
