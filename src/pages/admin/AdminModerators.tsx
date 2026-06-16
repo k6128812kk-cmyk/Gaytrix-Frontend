@@ -5,6 +5,7 @@ import { Avatar } from '@/components/Avatar';
 import { Button } from '@/components/Button';
 import { useTranslation } from '@/i18n/useTranslation';
 import { adminService } from '@/api/services';
+import { assetUrl } from '@/api/client';
 import type { UserProfile } from '@/types';
 import styles from './Admin.module.css';
 
@@ -95,7 +96,7 @@ export function AdminModerators() {
             {moderators.map(mod => (
               <div key={mod.id} className={styles.userRow}>
                 <Avatar
-                  src={mod.photos[0] ?? ''}
+                  src={mod.photos[0] ? assetUrl(mod.photos[0]) : ''}
                   alt={mod.displayName}
                   size={44}
                   adminRole={mod.adminRole}
@@ -142,7 +143,7 @@ export function AdminModerators() {
             {allUsers.map(user => (
               <div key={user.id} className={styles.userRow}>
                 <Avatar
-                  src={user.photos[0] ?? ''}
+                  src={user.photos[0] ? assetUrl(user.photos[0]) : ''}
                   alt={user.displayName}
                   size={44}
                   verification={user.verification}

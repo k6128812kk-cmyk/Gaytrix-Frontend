@@ -190,7 +190,7 @@ export function ProfileDetailPage() {
 
       <div className={styles.content}>
         <div className={styles.headerRow}>
-          <Avatar src={profile.photos[0]} alt=""
+          <Avatar src={profile.photos[0] ? assetUrl(profile.photos[0]) : ''} alt=""
             size={48} isOnline={profile.isOnline} verification={profile.verification} membership={profile.membership} />
           <div className={styles.headerText}>
             <h2 className={styles.name}>{profile.displayName}, {profile.age}</h2>

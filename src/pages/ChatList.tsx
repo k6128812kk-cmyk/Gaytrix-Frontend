@@ -9,6 +9,7 @@ import { wsClient } from '@/hooks/useGlobalWs';
 import { useTranslation } from '@/i18n/useTranslation';
 import type { Conversation } from '@/types';
 import styles from './ChatList.module.css';
+import { assetUrl } from '@/api/client';
 
 // ==========================================================================
 // ChatList — list of conversations sorted by most recent activity.
@@ -179,7 +180,7 @@ function ConversationRow({ conversation, onClick, onDelete }: {
     >
       <button className={`${styles.row} ${hasUnread ? styles.rowUnread : ''}`} onClick={() => { setShowDelete(false); onClick(); }}>
         <Avatar
-          src={participant.photos[0]}
+          src={participant.photos[0] ? assetUrl(participant.photos[0]) : ''}
           alt={participant.displayName}
           size={52}
           isOnline={participant.isOnline}

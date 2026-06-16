@@ -2,6 +2,7 @@ import { MapPin } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import type { UserProfile } from '@/types';
 import { Avatar } from './Avatar';
+import { assetUrl } from '@/api/client';
 import { Badge } from './Badge';
 import styles from './ProfileCard.module.css';
 
@@ -16,7 +17,7 @@ interface ProfileCardProps {
 
 export function ProfileCard({ profile }: ProfileCardProps) {
   const navigate = useNavigate();
-  const photoSrc = profile.photos[0] || '/avatar-placeholder.svg';
+  const photoSrc = profile.photos[0] ? assetUrl(profile.photos[0]) : '/avatar-placeholder.svg';
 
   return (
     <article className={styles.card} onClick={() => navigate(`/u/${profile.id}`)}>

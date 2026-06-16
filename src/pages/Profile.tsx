@@ -6,6 +6,7 @@ import {
 import { PageHeader } from '@/components/PageHeader';
 import { Avatar } from '@/components/Avatar';
 import { Badge } from '@/components/Badge';
+import { assetUrl } from '@/api/client';
 import { useSessionStore } from '@/context/sessionStore';
 import { useTranslation, LANGUAGE_LABELS, type Language } from '@/i18n/useTranslation';
 import styles from './Profile.module.css';
@@ -36,7 +37,7 @@ export function ProfilePage() {
       <div className={styles.content}>
         <button className={styles.profileSummary} onClick={() => navigate('/profile/edit')}>
           <Avatar
-            src={profile.photos[0] ?? ''}
+            src={profile.photos[0] ? assetUrl(profile.photos[0]) : ''}
             alt={profile.displayName}
             size={64}
             isOnline={profile.isOnline}

@@ -5,6 +5,7 @@ import { Chip } from '@/components/Chip';
 import { Button } from '@/components/Button';
 import { useTranslation } from '@/i18n/useTranslation';
 import { adminService } from '@/api/services';
+import { assetUrl } from '@/api/client';
 import { useSessionStore } from '@/context/sessionStore';
 import type { UserProfile } from '@/types';
 import { formatDistanceToNowStrict } from 'date-fns';
@@ -143,7 +144,7 @@ export function AdminUsers() {
             <div key={user.id} className={styles.userCard}>
               <div className={styles.userCardTop}>
                 <img
-                  src={user.photos[0] ?? '/avatar-placeholder.svg'}
+                  src={user.photos[0] ? assetUrl(user.photos[0]) : '/avatar-placeholder.svg'}
                   alt={user.displayName}
                   className={styles.userAvatar}
                 />

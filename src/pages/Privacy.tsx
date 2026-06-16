@@ -4,6 +4,7 @@ import { PageHeader } from '@/components/PageHeader';
 import { useSessionStore } from '@/context/sessionStore';
 import { useTranslation } from '@/i18n/useTranslation';
 import { profileService } from '@/api/services';
+import { assetUrl } from '@/api/client';
 import { api } from '@/api/client';
 import type { PrivacySettings } from '@/types';
 import styles from './Privacy.module.css';
@@ -107,7 +108,7 @@ export function PrivacyPage() {
               padding: '10px 16px', borderTop: '1px solid var(--color-border)',
             }}>
               <img
-                src={user.photos?.[0] ?? '/avatar-placeholder.svg'}
+                src={user.photos?.[0] ? assetUrl(user.photos[0]) : '/avatar-placeholder.svg'}
                 alt={user.displayName}
                 style={{ width: 38, height: 38, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }}
               />
