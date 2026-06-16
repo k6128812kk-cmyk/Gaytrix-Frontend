@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { MapPin, MessageCircle, Flag, Ban, Globe2, Briefcase, X } from 'lucide-react';
+import { MapPin, MessageCircle, Flag, Ban, Globe2, Briefcase, X, ChevronLeft, ChevronRight } from 'lucide-react';
 import { PageHeader } from '@/components/PageHeader';
 import { Avatar } from '@/components/Avatar';
 import { Badge } from '@/components/Badge';
@@ -42,6 +42,25 @@ export function ProfileDetailPage() {
   const [reported, setReported] = useState(false);
   const [blocked, setBlocked] = useState(false);
   const [startingChat, setStartingChat] = useState(false);
+  const touchStartX = useRef<number | null>(null);
+
+  function goNextPhoto() {
+    if (!profile) return;
+    setActivePhoto(i => (i + 1) % profile.photos.length);
+  }
+  function goPrevPhoto() {
+    if (!profile) return;
+    setActivePhoto(i => (i - 1 + profile.photos.length) % profile.photos.length);
+  }
+  function handleGalleryTouchStart(e: React.TouchEvent) {
+    touchStartX.current = e.touches[0].clientX;
+  }
+  function handleGalleryTouchEnd(e: React.TouchEvent) {
+    if (touchStartX.current === null || !profile || profile.photos.length <= 1) return;
+    const dx = e.changedTouches[0].clientX - touchStartX.current;
+    if (Math.abs(dx) > 40) { dx < 0 ? goNextPhoto() : goPrevPhoto(); }
+    touchStartX.current = null;
+  }
 
   useEffect(() => {
     if (!id) return;
@@ -131,15 +150,38 @@ export function ProfileDetailPage() {
         </div>
       )}
 
-      <div className={styles.gallery}>
+      <div
+        className={styles.gallery}
+        onTouchStart={handleGalleryTouchStart}
+        onTouchEnd={handleGalleryTouchEnd}
+      >
         <img src={photoSrc} alt={profile.displayName} className={styles.photo} />
         {profile.photos.length > 1 && (
-          <div className={styles.photoDots}>
-            {profile.photos.map((_, i) => (
-              <button key={i} className={`${styles.dot} ${i === activePhoto ? styles.dotActive : ''}`}
-                onClick={() => setActivePhoto(i)} />
-            ))}
-          </div>
+          <>
+            {/* Progress indicator bar at top */}
+            <div className={styles.photoDots}>
+              {profile.photos.map((_, i) => (
+                <button key={i} className={`${styles.dot} ${i === activePhoto ? styles.dotActive : ''}`}
+                  onClick={() => setActivePhoto(i)} />
+              ))}
+            </div>
+            {/* Left tap zone / arrow */}
+            {activePhoto > 0 && (
+              <button className={styles.galleryNavPrev} onClick={goPrevPhoto} aria-label="Previous photo">
+                <ChevronLeft size={22} />
+              </button>
+            )}
+            {/* Right tap zone / arrow */}
+            {activePhoto < profile.photos.length - 1 && (
+              <button className={styles.galleryNavNext} onClick={goNextPhoto} aria-label="Next photo">
+                <ChevronRight size={22} />
+              </button>
+            )}
+            {/* Photo counter badge */}
+            <div className={styles.photoCounter}>
+              {activePhoto + 1} / {profile.photos.length}
+            </div>
+          </>
         )}
         <div className={styles.galleryGradient} />
       </div>

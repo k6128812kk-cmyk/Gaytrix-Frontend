@@ -62,6 +62,23 @@ export function GroupChatPage() {
     return () => wsClient.removeHandler('community_group_message', handler);
   }, [groupId]);
 
+  // Real-time group message deletion — admin/creator deletes a message and
+  // every member sees it disappear immediately without needing to reload.
+  useEffect(() => {
+    const handler = (msg: Record<string, unknown>) => {
+      if (msg.groupId !== groupId) return;
+      const deletedId = msg.messageId as string;
+      if (!deletedId) return;
+      setMessages(prev => prev.map(m =>
+        m.id === deletedId
+          ? { ...m, contentType: 'deleted' as const, text: undefined, mediaUrl: undefined }
+          : m
+      ));
+    };
+    wsClient.addHandler('group_message_deleted', handler);
+    return () => wsClient.removeHandler('group_message_deleted', handler);
+  }, [groupId]);
+
   async function handleToggleMute() {
     if (!groupId) return;
     try {

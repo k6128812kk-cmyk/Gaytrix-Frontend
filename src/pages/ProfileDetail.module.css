@@ -81,6 +81,47 @@
   background: var(--color-text);
 }
 
+/* Gallery prev/next navigation buttons */
+.galleryNavPrev,
+.galleryNavNext {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.45);
+  border: none;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 5;
+  -webkit-tap-highlight-color: transparent;
+  backdrop-filter: blur(4px);
+}
+.galleryNavPrev { left: 10px; }
+.galleryNavNext { right: 10px; }
+.galleryNavPrev:active,
+.galleryNavNext:active { opacity: 0.7; }
+
+/* Photo counter badge */
+.photoCounter {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  background: rgba(0, 0, 0, 0.55);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 3px 9px;
+  border-radius: var(--radius-pill);
+  z-index: 5;
+  backdrop-filter: blur(4px);
+  pointer-events: none;
+}
+
 .content {
   flex: 1;
   padding: var(--space-4);

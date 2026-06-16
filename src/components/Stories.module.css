@@ -27,43 +27,48 @@
   padding: 0;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
-  overflow: hidden; /* clips child images to the circle */
+  /* No overflow:hidden here — that was hiding the photo under the ring.
+     The ring is absolutely positioned with pointer-events:none so it
+     overlaps the image visually without hiding it. */
 }
 
 .avatarImg {
-  width: 56px;
-  height: 56px;
+  width: 54px;
+  height: 54px;
   border-radius: 50%;
   object-fit: cover;
   object-position: center;
   display: block;
-  margin: 3px;
+  /* Centre the image inside the 62px button, leaving 4px each side for
+     the gradient ring (3px ring + 1px gap) */
+  margin: 4px;
+  /* A thin dark border makes the photo crisp against the gradient ring */
   border: 2px solid var(--color-bg);
+  box-sizing: border-box;
 }
 
 .ring {
   position: absolute;
+  /* Match the outer button size exactly */
   inset: 0;
   border-radius: 50%;
-  border: 2.5px solid transparent;
+  /* 3px gradient border drawn as a box-shadow ring so it sits outside
+     the photo without a white gap eating into the visible area */
   pointer-events: none;
+  z-index: 3;
 }
 
 .ringUnviewed {
-  background: linear-gradient(var(--color-bg), var(--color-bg)) padding-box,
-              linear-gradient(135deg, #ff6e7f, #c084fc) border-box;
+  box-shadow: 0 0 0 2.5px #ff6e7f, 0 0 0 4px #c084fc;
 }
 .ringViewed {
-  background: linear-gradient(var(--color-bg), var(--color-bg)) padding-box,
-              linear-gradient(135deg, #555, #333) border-box;
+  box-shadow: 0 0 0 2.5px #555;
 }
 .ringMine {
-  background: linear-gradient(var(--color-bg), var(--color-bg)) padding-box,
-              linear-gradient(135deg, #5ee6d0, #4fb8ff) border-box;
+  box-shadow: 0 0 0 2.5px #5ee6d0, 0 0 0 4px #4fb8ff;
 }
 .ringAdd {
-  background: linear-gradient(var(--color-bg), var(--color-bg)) padding-box,
-              linear-gradient(135deg, #666, #444) border-box;
+  box-shadow: 0 0 0 2.5px #555;
   opacity: 0.6;
 }
 
@@ -332,16 +337,21 @@
   flex-shrink: 0;
 }
 
-/* Thumbnail overlay on story circles */
+/* Small avatar overlay in bottom-left of story circle (person's own avatar) */
 .avatarOverlay {
   position: absolute;
-  bottom: 3px;
-  left: 3px;
-  width: 18px;
-  height: 18px;
+  bottom: 2px;
+  left: 2px;
+  width: 20px;
+  height: 20px;
   border-radius: 50%;
   object-fit: cover;
-  border: 1.5px solid var(--color-bg);
+  object-position: center;
+  border: 2px solid var(--color-bg);
+  /* Must clip itself since the parent no longer has overflow:hidden */
+  overflow: hidden;
+  /* Ensure it sits on top of the story thumbnail */
+  z-index: 2;
 }
 
 /* Reply bar at bottom of viewer */
