@@ -41,6 +41,26 @@ export const profileService = {
     const { data } = await api.patch<UserProfile>('/profile/me', patch);
     return data;
   },
+  // Atomically saves the final onboarding payload and marks
+  // registration_complete = TRUE on the backend. This is the ONLY
+  // call that makes the profile visible in the feed and to other users.
+  // Intermediate onboarding steps must NOT call updateMe() — only this.
+  async completeRegistration(payload: {
+    displayName: string;
+    photos: string[];
+    age?: number;
+    city?: string;
+    relationshipStatus?: string;
+    lookingFor?: string[];
+    bio?: string;
+  }): Promise<UserProfile> {
+    if (USE_MOCKS) {
+      await delay(300);
+      return { ...currentUser, ...payload, registrationComplete: true };
+    }
+    const { data } = await api.post<UserProfile>('/profile/complete-registration', payload);
+    return data;
+  },
   async requestVerification(selfieFile: File): Promise<{ status: 'pending' }> {
     if (USE_MOCKS) { await delay(400); return { status: 'pending' }; }
     const form = new FormData();

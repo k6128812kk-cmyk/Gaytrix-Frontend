@@ -54,6 +54,7 @@ export interface UserProfile {
   interestedIn?: InterestedIn;
   orientation?: Orientation;
   languagePreference?: string;
+  registrationComplete?: boolean;
 }
 
 export interface PrivacySettings {

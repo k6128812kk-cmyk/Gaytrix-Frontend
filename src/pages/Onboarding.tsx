@@ -90,7 +90,13 @@ export function OnboardingPage() {
 
     setSaving(true);
     try {
-      const updated = await profileService.updateMe({
+      // completeRegistration is the ONLY call that writes to the backend
+      // during onboarding. Intermediate steps are pure local state —
+      // nothing is persisted until the user completes ALL required steps
+      // (name + at least one photo). The backend enforces this too:
+      // it validates both fields and sets registration_complete = TRUE
+      // atomically, making the profile visible in the feed for the first time.
+      const updated = await profileService.completeRegistration({
         photos,
         displayName: displayName.trim(),
         age: Number(age),

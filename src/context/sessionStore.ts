@@ -15,11 +15,18 @@ import type { UserProfile } from '@/types';
 
 const ONBOARDING_KEY = 'k5_onboarding_done';
 
-// A profile is "complete enough" to skip onboarding if the user has set
-// at least a display name. Bio and photos are encouraged but not required
-// to exit the loading screen — onboarding will prompt for them.
+// A profile is "complete enough" to skip onboarding only when:
+//   1. The backend has set registration_complete = TRUE (name + photo
+//      were both submitted via completeRegistration)
+//   2. The user has a non-empty displayName as a belt-and-suspenders check
+//
+// We intentionally DO NOT fall back to just checking displayName —
+// that would let a partially-filled profile (created by authMiddleware's
+// INSERT) bypass onboarding and appear in the feed.
 function profileLooksComplete(profile: UserProfile): boolean {
-  return profile.displayName != null && profile.displayName.trim().length > 0;
+  return Boolean(profile.registrationComplete) &&
+    profile.displayName != null &&
+    profile.displayName.trim().length > 0;
 }
 
 function loadOnboardingFlag(): boolean {
