@@ -126,7 +126,7 @@ function MiniCard({ profile }: { profile: UserProfile }) {
   const { t } = useTranslation();
   const src = profile.photos[0]
     ? (profile.photos[0].startsWith('http') ? profile.photos[0] : assetUrl(profile.photos[0]))
-    : '/avatar-placeholder.svg';
+    : "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='50' fill='%231a0f14'/%3E%3Ccircle cx='50' cy='38' r='16' fill='%23c8a96e'/%3E%3Cellipse cx='50' cy='80' rx='26' ry='18' fill='%23c8a96e'/%3E%3C/svg%3E";
 
   return (
     <button className={styles.miniCard} onClick={() => navigate(`/u/${profile.id}`)}>
@@ -146,7 +146,7 @@ function GridCard({ profile }: { profile: UserProfile }) {
   const navigate = useNavigate();
   const src = profile.photos[0]
     ? (profile.photos[0].startsWith('http') ? profile.photos[0] : assetUrl(profile.photos[0]))
-    : '/avatar-placeholder.svg';
+    : "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='50' fill='%231a0f14'/%3E%3Ccircle cx='50' cy='38' r='16' fill='%23c8a96e'/%3E%3Cellipse cx='50' cy='80' rx='26' ry='18' fill='%23c8a96e'/%3E%3C/svg%3E";
 
   return (
     <button className={styles.gridCard} onClick={() => navigate(`/u/${profile.id}`)}>

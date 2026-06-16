@@ -108,7 +108,7 @@ export function PrivacyPage() {
               padding: '10px 16px', borderTop: '1px solid var(--color-border)',
             }}>
               <img
-                src={user.photos?.[0] ? assetUrl(user.photos[0]) : '/avatar-placeholder.svg'}
+                src={user.photos?.[0] ? assetUrl(user.photos[0]) : "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='50' fill='%231a0f14'/%3E%3Ccircle cx='50' cy='38' r='16' fill='%23c8a96e'/%3E%3Cellipse cx='50' cy='80' rx='26' ry='18' fill='%23c8a96e'/%3E%3C/svg%3E"}
                 alt={user.displayName}
                 style={{ width: 38, height: 38, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }}
               />

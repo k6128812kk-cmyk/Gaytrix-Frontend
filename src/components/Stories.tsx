@@ -152,7 +152,7 @@ export function Stories() {
 
   const myPhotoSrc = profile?.photos?.[0]
     ? assetUrl(profile.photos[0])
-    : '/avatar-placeholder.svg';
+    : "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='50' fill='%231a0f14'/%3E%3Ccircle cx='50' cy='38' r='16' fill='%23c8a96e'/%3E%3Cellipse cx='50' cy='80' rx='26' ry='18' fill='%23c8a96e'/%3E%3C/svg%3E";
   const myStoryThumb = myStory ? assetUrl(myStory.photoUrl) : null;
 
   const hasContent = stories.length > 0 || myStory !== null;
@@ -188,7 +188,7 @@ export function Stories() {
 
         {stories.map((story, i) => {
           const thumbSrc = story.photoUrl ? assetUrl(story.photoUrl) : null;
-          const avatarSrc = story.avatar ? assetUrl(story.avatar) : '/avatar-placeholder.svg';
+          const avatarSrc = story.avatar ? assetUrl(story.avatar) : "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='50' fill='%231a0f14'/%3E%3Ccircle cx='50' cy='38' r='16' fill='%23c8a96e'/%3E%3Cellipse cx='50' cy='80' rx='26' ry='18' fill='%23c8a96e'/%3E%3C/svg%3E";
           const allViewed = story.stories?.every(s => s.viewed) ?? story.viewed;
           return (
             <div key={story.userId} className={styles.storyWrap}>
@@ -399,7 +399,7 @@ function StoryViewer({ stories, index, onClose, onNext, onPrev }: {
   }
 
   if (!story) return null;
-  const avatarSrc = story.avatar ? assetUrl(story.avatar) : '/avatar-placeholder.svg';
+  const avatarSrc = story.avatar ? assetUrl(story.avatar) : "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='50' fill='%231a0f14'/%3E%3Ccircle cx='50' cy='38' r='16' fill='%23c8a96e'/%3E%3Cellipse cx='50' cy='80' rx='26' ry='18' fill='%23c8a96e'/%3E%3C/svg%3E";
 
   return (
     <div className={styles.viewer} onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
@@ -469,7 +469,7 @@ function StoryViewer({ stories, index, onClose, onNext, onPrev }: {
             </div>
             {viewers.map(v => (
               <div key={v.id} className={styles.viewerRow}>
-                <img src={v.avatar ? assetUrl(v.avatar) : '/avatar-placeholder.svg'}
+                <img src={v.avatar ? assetUrl(v.avatar) : "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='50' fill='%231a0f14'/%3E%3Ccircle cx='50' cy='38' r='16' fill='%23c8a96e'/%3E%3Cellipse cx='50' cy='80' rx='26' ry='18' fill='%23c8a96e'/%3E%3C/svg%3E"}
                   className={styles.viewerRowAvatar} alt={v.displayName} />
                 <div>
                   <div style={{ fontWeight: 600, fontSize: 14 }}>{v.displayName}</div>
@@ -591,7 +591,7 @@ function MyStoryViewer({ myStory, myPhotoSrc, displayName, onClose, onDelete, on
             </div>
             {viewers.map(v => (
               <div key={v.id} className={styles.viewerRow}>
-                <img src={v.avatar ? assetUrl(v.avatar) : '/avatar-placeholder.svg'}
+                <img src={v.avatar ? assetUrl(v.avatar) : "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='50' fill='%231a0f14'/%3E%3Ccircle cx='50' cy='38' r='16' fill='%23c8a96e'/%3E%3Cellipse cx='50' cy='80' rx='26' ry='18' fill='%23c8a96e'/%3E%3C/svg%3E"}
                   className={styles.viewerRowAvatar} alt={v.displayName} />
                 <div>
                   <div style={{ fontWeight: 600, fontSize: 14 }}>{v.displayName}</div>
