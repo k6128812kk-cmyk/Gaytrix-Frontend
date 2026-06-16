@@ -121,7 +121,7 @@ export function ProfileDetailPage() {
 
   const photoSrc = profile.photos[activePhoto]
     ? assetUrl(profile.photos[activePhoto])
-    : `https://i.pravatar.cc/600?u=${profile.id}`;
+    : '/avatar-placeholder.svg';
 
   return (
     <div className={styles.page}>

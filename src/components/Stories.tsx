@@ -152,7 +152,7 @@ export function Stories() {
 
   const myPhotoSrc = profile?.photos?.[0]
     ? assetUrl(profile.photos[0])
-    : `https://i.pravatar.cc/80?u=${profile?.id}`;
+    : '/avatar-placeholder.svg';
   const myStoryThumb = myStory ? assetUrl(myStory.photoUrl) : null;
 
   const hasContent = stories.length > 0 || myStory !== null;
@@ -188,7 +188,7 @@ export function Stories() {
 
         {stories.map((story, i) => {
           const thumbSrc = story.photoUrl ? assetUrl(story.photoUrl) : null;
-          const avatarSrc = story.avatar ? assetUrl(story.avatar) : `https://i.pravatar.cc/80?u=${story.userId}`;
+          const avatarSrc = story.avatar ? assetUrl(story.avatar) : '/avatar-placeholder.svg';
           const allViewed = story.stories?.every(s => s.viewed) ?? story.viewed;
           return (
             <div key={story.userId} className={styles.storyWrap}>
@@ -399,7 +399,7 @@ function StoryViewer({ stories, index, onClose, onNext, onPrev }: {
   }
 
   if (!story) return null;
-  const avatarSrc = story.avatar ? assetUrl(story.avatar) : `https://i.pravatar.cc/80?u=${story.userId}`;
+  const avatarSrc = story.avatar ? assetUrl(story.avatar) : '/avatar-placeholder.svg';
 
   return (
     <div className={styles.viewer} onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
@@ -469,7 +469,7 @@ function StoryViewer({ stories, index, onClose, onNext, onPrev }: {
             </div>
             {viewers.map(v => (
               <div key={v.id} className={styles.viewerRow}>
-                <img src={v.avatar ? assetUrl(v.avatar) : `https://i.pravatar.cc/40?u=${v.id}`}
+                <img src={v.avatar ? assetUrl(v.avatar) : '/avatar-placeholder.svg'}
                   className={styles.viewerRowAvatar} alt={v.displayName} />
                 <div>
                   <div style={{ fontWeight: 600, fontSize: 14 }}>{v.displayName}</div>
@@ -591,7 +591,7 @@ function MyStoryViewer({ myStory, myPhotoSrc, displayName, onClose, onDelete, on
             </div>
             {viewers.map(v => (
               <div key={v.id} className={styles.viewerRow}>
-                <img src={v.avatar ? assetUrl(v.avatar) : `https://i.pravatar.cc/40?u=${v.id}`}
+                <img src={v.avatar ? assetUrl(v.avatar) : '/avatar-placeholder.svg'}
                   className={styles.viewerRowAvatar} alt={v.displayName} />
                 <div>
                   <div style={{ fontWeight: 600, fontSize: 14 }}>{v.displayName}</div>

@@ -16,7 +16,7 @@ interface ProfileCardProps {
 
 export function ProfileCard({ profile }: ProfileCardProps) {
   const navigate = useNavigate();
-  const photoSrc = profile.photos[0] || `https://i.pravatar.cc/400?u=${profile.id}`;
+  const photoSrc = profile.photos[0] || '/avatar-placeholder.svg';
 
   return (
     <article className={styles.card} onClick={() => navigate(`/u/${profile.id}`)}>

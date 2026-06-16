@@ -143,7 +143,7 @@ export function AdminUsers() {
             <div key={user.id} className={styles.userCard}>
               <div className={styles.userCardTop}>
                 <img
-                  src={user.photos[0] ?? 'https://i.pravatar.cc/100'}
+                  src={user.photos[0] ?? '/avatar-placeholder.svg'}
                   alt={user.displayName}
                   className={styles.userAvatar}
                 />

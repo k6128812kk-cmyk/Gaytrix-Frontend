@@ -33,7 +33,7 @@ export function Avatar({
   const badgeSize = Math.max(14, size * 0.26);
 
   // Resolve relative paths to the backend URL
-  const resolvedSrc = src ? assetUrl(src) : `https://i.pravatar.cc/${size}?u=${alt}`;
+  const resolvedSrc = src ? assetUrl(src) : '/avatar-placeholder.svg';
 
   return (
     <div className={styles.wrapper} style={{ width: size, height: size }}>
@@ -44,7 +44,7 @@ export function Avatar({
             alt={alt}
             className={styles.image}
             onError={(e) => {
-              (e.target as HTMLImageElement).src = `https://i.pravatar.cc/${size}?u=${encodeURIComponent(alt)}`;
+              (e.target as HTMLImageElement).src = '/avatar-placeholder.svg';
             }}
           />
         </div>

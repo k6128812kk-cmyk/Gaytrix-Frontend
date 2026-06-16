@@ -107,7 +107,7 @@ export function PrivacyPage() {
               padding: '10px 16px', borderTop: '1px solid var(--color-border)',
             }}>
               <img
-                src={user.photos?.[0] ?? `https://i.pravatar.cc/100?u=${user.id}`}
+                src={user.photos?.[0] ?? '/avatar-placeholder.svg'}
                 alt={user.displayName}
                 style={{ width: 38, height: 38, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }}
               />

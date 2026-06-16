@@ -126,7 +126,7 @@ function MiniCard({ profile }: { profile: UserProfile }) {
   const { t } = useTranslation();
   const src = profile.photos[0]
     ? (profile.photos[0].startsWith('http') ? profile.photos[0] : assetUrl(profile.photos[0]))
-    : `https://i.pravatar.cc/200?u=${profile.id}`;
+    : '/avatar-placeholder.svg';
 
   return (
     <button className={styles.miniCard} onClick={() => navigate(`/u/${profile.id}`)}>
@@ -146,7 +146,7 @@ function GridCard({ profile }: { profile: UserProfile }) {
   const navigate = useNavigate();
   const src = profile.photos[0]
     ? (profile.photos[0].startsWith('http') ? profile.photos[0] : assetUrl(profile.photos[0]))
-    : `https://i.pravatar.cc/300?u=${profile.id}`;
+    : '/avatar-placeholder.svg';
 
   return (
     <button className={styles.gridCard} onClick={() => navigate(`/u/${profile.id}`)}>
